@@ -3,32 +3,34 @@ import logo from "../../assets/scanMenuLogo.png";
 
 const Navbar = () => {
   return (
-    <nav className="w-full bg-white shadow-md sticky top-0 z-50">
+    <nav className=" m-auto w-full bg-white shadow-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-3">
         {/* Logo Section */}
-        <div className="flex items-center gap-2 cursor-pointer">
-          <img src={logo} alt="ScanMyMenu Logo" width={48} height={48} />
-          <h1 className="text-2xl font-bold text-orange-600 tracking-tight">
-            Scan<span className="text-gray-800">MyMenu</span>
-          </h1>
-        </div>
+        <a href="/">
+          <div className="flex items-center gap-2 cursor-pointer">
+            <img src={logo} alt="ScanMyMenu Logo" width={48} height={48} />
+            <h1 className="text-2xl font-bold text-orange-600 tracking-tight">
+              Scan<span className="text-gray-800">MyMenu</span>
+            </h1>
+          </div>
+        </a>
 
         {/* Nav Links */}
         <div className="hidden md:flex items-center gap-8 text-gray-700 font-medium">
           <a
-            href="#about"
+            href="/about"
             className="hover:text-orange-600 transition duration-200"
           >
             About
           </a>
           <a
-            href="#login"
+            href="/login"
             className="hover:text-orange-600 transition duration-200"
           >
             Login
           </a>
           <a
-            href="#signup"
+            href="/signup"
             className="bg-orange-600 text-white px-4 py-2 rounded-full hover:bg-orange-700 transition duration-300"
           >
             Sign Up

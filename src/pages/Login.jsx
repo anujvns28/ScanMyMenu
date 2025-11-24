@@ -1,9 +1,9 @@
 import React from "react";
+import { FcGoogle } from "react-icons/fc";
 
 const Login = () => {
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-b from-white via-blue-50/40 to-white px-4">
-
       {/* Card */}
       <div className="w-full max-w-md bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-blue-50 px-8 py-10">
         {/* Title */}
@@ -78,14 +78,10 @@ const Login = () => {
         {/* Google Login */}
         <button
           type="button"
-          className="w-full flex items-center justify-center gap-3 py-3 bg-orange-600 text-white font-semibold rounded-xl 
-          border border-orange-700 hover:bg-orange-700 hover:shadow-lg transition-all duration-300"
+          className="w-full flex items-center justify-center gap-3 py-3 bg-blue-600 text-white font-semibold rounded-xl 
+           hover:bg-orange-700 hover:shadow-lg transition-all duration-300"
         >
-          <img
-            src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"
-            alt="google logo"
-            className="w-6 h-6 bg-white p-1 rounded"
-          />
+          <FcGoogle />
           Continue with Google
         </button>
 

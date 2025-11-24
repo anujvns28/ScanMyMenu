@@ -7,6 +7,7 @@ import Footer from "./components/common/Footer";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import About from "./pages/About";
+import MobilePremiumMenu from "./pages/Menu";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/about" element={<About />} />
+          <Route path="/menu" element={<MobilePremiumMenu />} />
         </Routes>
       </div>
 

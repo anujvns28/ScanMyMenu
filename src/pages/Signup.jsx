@@ -1,12 +1,11 @@
 import React from "react";
+import { FcGoogle } from "react-icons/fc";
 
 const Signup = () => {
   return (
     <div className="h-screen my-14 md:min-h-screen w-full flex items-center justify-center  to-white px-4">
-
       {/* Card */}
       <div className="w-full max-w-md bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-blue-50 px-8 py-10">
-
         {/* Title */}
         <div className="mb-8 text-center">
           <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">
@@ -19,10 +18,11 @@ const Signup = () => {
 
         {/* Form */}
         <form className="space-y-5">
-
           {/* Name */}
           <div className="space-y-1">
-            <label className="text-gray-800 text-sm font-medium">Full Name</label>
+            <label className="text-gray-800 text-sm font-medium">
+              Full Name
+            </label>
             <input
               type="text"
               placeholder="Your name"
@@ -44,7 +44,9 @@ const Signup = () => {
 
           {/* Password */}
           <div className="space-y-1">
-            <label className="text-gray-800 text-sm font-medium">Password</label>
+            <label className="text-gray-800 text-sm font-medium">
+              Password
+            </label>
             <input
               type="password"
               placeholder="Create a strong password"
@@ -55,7 +57,9 @@ const Signup = () => {
 
           {/* Confirm Password */}
           <div className="space-y-1">
-            <label className="text-gray-800 text-sm font-medium">Confirm Password</label>
+            <label className="text-gray-800 text-sm font-medium">
+              Confirm Password
+            </label>
             <input
               type="password"
               placeholder="Re-enter your password"
@@ -84,14 +88,10 @@ const Signup = () => {
         {/* Google Signup */}
         <button
           type="button"
-          className="w-full flex items-center justify-center gap-3 py-3 bg-orange-600 text-white 
-          font-semibold rounded-xl border  hover:bg-gray-200 hover:shadow-lg transition-all duration-300"
+          className="w-full flex items-center justify-center gap-3 py-3 bg-blue-600 text-white 
+          font-semibold rounded-xl border  hover:bg-blue-400 hover:shadow-lg transition-all duration-300"
         >
-          <img
-            src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"
-            alt="google logo"
-            className="w-6 h-6 bg-white p-1 rounded"
-          />
+          <FcGoogle />
           Sign Up with Google
         </button>
 
@@ -105,7 +105,6 @@ const Signup = () => {
             Login
           </button>
         </p>
-
       </div>
     </div>
   );

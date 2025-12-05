@@ -1,7 +1,21 @@
-import React from "react";
+import React, { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
+import { useNavigate } from "react-router-dom";
 
 const Signup = () => {
+  const navigate = useNavigate();
+  const [name, setName] = useState();
+  const [password, setPassword] = useState();
+  const [cnfPassword, setCnfPassword] = useState();
+  const [email, setEmail] = useState();
+
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    const data = { name, password, cnfPassword, email };
+
+    console.log(data);
+  };
+
   return (
     <div className="h-screen my-14 md:min-h-screen w-full flex items-center justify-center  to-white px-4">
       {/* Card */}
@@ -17,7 +31,7 @@ const Signup = () => {
         </div>
 
         {/* Form */}
-        <form className="space-y-5">
+        <form onSubmit={handleSignup} className="space-y-5">
           {/* Name */}
           <div className="space-y-1">
             <label className="text-gray-800 text-sm font-medium">
@@ -25,7 +39,9 @@ const Signup = () => {
             </label>
             <input
               type="text"
+              onChange={(e) => setName(e.target.value)}
               placeholder="Your name"
+              required
               className="mt-1 w-full px-4 py-3 rounded-xl bg-gray-50 text-gray-900 placeholder-gray-400 
               border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition"
             />
@@ -36,6 +52,8 @@ const Signup = () => {
             <label className="text-gray-800 text-sm font-medium">Email</label>
             <input
               type="email"
+              onChange={(e) => setEmail(e.target.value)}
+              required
               placeholder="you@example.com"
               className="mt-1 w-full px-4 py-3 rounded-xl bg-gray-50 text-gray-900 placeholder-gray-400 
               border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition"
@@ -49,6 +67,8 @@ const Signup = () => {
             </label>
             <input
               type="password"
+              onChange={(e) => setPassword(e.target.value)}
+              required
               placeholder="Create a strong password"
               className="mt-1 w-full px-4 py-3 rounded-xl bg-gray-50 text-gray-900 placeholder-gray-400 
               border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition"
@@ -62,6 +82,8 @@ const Signup = () => {
             </label>
             <input
               type="password"
+              onChange={(e) => setCnfPassword(e.target.value)}
+              required
               placeholder="Re-enter your password"
               className="mt-1 w-full px-4 py-3 rounded-xl bg-gray-50 text-gray-900 placeholder-gray-400 
               border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition"
@@ -71,7 +93,7 @@ const Signup = () => {
           {/* Signup Button */}
           <button
             type="submit"
-            className="mt-4 w-full py-3 bg-orange-600 text-white font-semibold rounded-xl shadow-lg 
+            className="mt-4 w-full cursor-pointer py-3 bg-orange-600 text-white font-semibold rounded-xl shadow-lg 
             hover:bg-orange-700 hover:scale-[1.02] active:scale-95 transition-all duration-200"
           >
             Create Account
@@ -87,8 +109,7 @@ const Signup = () => {
 
         {/* Google Signup */}
         <button
-          type="button"
-          className="w-full flex items-center justify-center gap-3 py-3 bg-blue-600 text-white 
+          className="w-full cursor-pointer flex items-center justify-center gap-3 py-3 bg-blue-600 text-white 
           font-semibold rounded-xl border  hover:bg-blue-400 hover:shadow-lg transition-all duration-300"
         >
           <FcGoogle />
@@ -99,8 +120,8 @@ const Signup = () => {
         <p className="text-center text-sm text-gray-600 mt-6">
           Already have an account?{" "}
           <button
-            type="button"
-            className="text-orange-600 font-semibold hover:underline"
+            onClick={() => navigate("/login")}
+            className="text-orange-600 cursor-pointer font-semibold hover:underline"
           >
             Login
           </button>

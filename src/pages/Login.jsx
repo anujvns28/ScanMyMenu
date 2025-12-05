@@ -1,7 +1,22 @@
-import React from "react";
+import React, { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
+import { useNavigate } from "react-router-dom";
+import { login } from "../service/operations/auth";
 
 const Login = () => {
+  const navigate = useNavigate();
+  const [email, setEmail] = useState();
+  const [password, setPassword] = useState();
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    const result = await login({ email, password });
+
+    if (result) {
+      console.log(result, "this is result");
+    }
+  };
+
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-b from-white via-blue-50/40 to-white px-4">
       {/* Card */}
@@ -17,11 +32,13 @@ const Login = () => {
         </div>
 
         {/* Form */}
-        <form className="space-y-5">
+        <form className="space-y-5" onSubmit={handleLogin}>
           <div className="space-y-1">
             <label className="text-gray-800 text-sm font-medium">Email</label>
             <input
+              onChange={(e) => setEmail(e.target.value)}
               type="email"
+              required
               placeholder="you@example.com"
               className="mt-1 w-full px-4 py-3 rounded-xl bg-gray-50 text-gray-900 placeholder-gray-400 border border-gray-300 
               focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
@@ -33,7 +50,9 @@ const Login = () => {
               Password
             </label>
             <input
+              onChange={(e) => setPassword(e.target.value)}
               type="password"
+              required
               placeholder="Enter your password"
               className="mt-1 w-full px-4 py-3 rounded-xl bg-gray-50 text-gray-900 placeholder-gray-400 border border-gray-300 
               focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
@@ -52,7 +71,7 @@ const Login = () => {
 
             <button
               type="button"
-              className="text-blue-600 hover:text-blue-700 font-medium"
+              className="text-blue-600 hover:text-blue-700 font-medium cursor-pointer"
             >
               Forgot Password?
             </button>
@@ -61,7 +80,7 @@ const Login = () => {
           {/* Login Button */}
           <button
             type="submit"
-            className="mt-4 w-full py-3 bg-orange-600 text-white font-semibold rounded-xl shadow-lg 
+            className="mt-4 w-full cursor-pointer py-3 bg-orange-600 text-white font-semibold rounded-xl shadow-lg 
             hover:bg-orange-700 hover:scale-[1.02] active:scale-95 transition-all duration-200"
           >
             Login
@@ -77,8 +96,7 @@ const Login = () => {
 
         {/* Google Login */}
         <button
-          type="button"
-          className="w-full flex items-center justify-center gap-3 py-3 bg-blue-600 text-white font-semibold rounded-xl 
+          className="w-full cursor-pointer flex items-center justify-center gap-3 py-3 bg-blue-600 text-white font-semibold rounded-xl 
            hover:bg-orange-700 hover:shadow-lg transition-all duration-300"
         >
           <FcGoogle />
@@ -89,8 +107,8 @@ const Login = () => {
         <p className="text-center text-sm text-gray-600 mt-6">
           Don&apos;t have an account?{" "}
           <button
-            type="button"
-            className="text-blue-600 font-semibold hover:underline"
+            onClick={() => navigate("/signup")}
+            className="text-blue-600 font-semibold hover:underline cursor-pointer"
           >
             Sign Up
           </button>

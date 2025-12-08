@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { useNavigate } from "react-router-dom";
+import { signup } from "../service/operations/auth";
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -11,9 +12,12 @@ const Signup = () => {
 
   const handleSignup = async (e) => {
     e.preventDefault();
-    const data = { name, password, cnfPassword, email };
+    const data = { name, password, confirmPassword: cnfPassword, email };
 
-    console.log(data);
+    const result = await signup(data);
+    if (result) {
+      console.log("signup done");
+    }
   };
 
   return (

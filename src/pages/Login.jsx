@@ -17,6 +17,10 @@ const Login = () => {
     }
   };
 
+  const googleLogin = () => {
+    window.location.href = "http://localhost:4000/auth/google";
+  };
+
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-b from-white via-blue-50/40 to-white px-4">
       {/* Card */}
@@ -98,6 +102,7 @@ const Login = () => {
         <button
           className="w-full cursor-pointer flex items-center justify-center gap-3 py-3 bg-blue-600 text-white font-semibold rounded-xl 
            hover:bg-orange-700 hover:shadow-lg transition-all duration-300"
+          onClick={googleLogin}
         >
           <FcGoogle />
           Continue with Google

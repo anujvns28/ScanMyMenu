@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { useNavigate } from "react-router-dom";
 import { signup } from "../service/operations/auth";
+import { useDispatch, useSelector } from "react-redux";
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -9,16 +10,30 @@ const Signup = () => {
   const [password, setPassword] = useState();
   const [cnfPassword, setCnfPassword] = useState();
   const [email, setEmail] = useState();
+  const { authLoading } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
 
   const handleSignup = async (e) => {
     e.preventDefault();
     const data = { name, password, confirmPassword: cnfPassword, email };
 
-    const result = await signup(data);
+    const result = await signup(data, dispatch, navigate);
     if (result) {
       console.log("signup done");
     }
   };
+
+  const googleSignup = () => {
+    window.location.href = "http://localhost:4000/auth/google";
+  };
+
+  if (authLoading) {
+    return (
+      <div className="h-screen w-screen flex items-center text-black justify-center">
+        <div className="custom-loader"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen my-14 md:min-h-screen w-full flex items-center justify-center  to-white px-4">
@@ -115,6 +130,7 @@ const Signup = () => {
         <button
           className="w-full cursor-pointer flex items-center justify-center gap-3 py-3 bg-blue-600 text-white 
           font-semibold rounded-xl border  hover:bg-blue-400 hover:shadow-lg transition-all duration-300"
+          onClick={googleSignup}
         >
           <FcGoogle />
           Sign Up with Google

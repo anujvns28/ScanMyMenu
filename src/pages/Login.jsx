@@ -2,24 +2,34 @@ import React, { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { useNavigate } from "react-router-dom";
 import { login } from "../service/operations/auth";
+import { useDispatch, useSelector } from "react-redux";
+import { setAuthLoading } from "../redux/slices/auth";
 
 const Login = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
+  const { authLoading } = useSelector((state) => state.auth);
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    const result = await login({ email, password });
-
-    if (result) {
-      console.log(result, "this is result");
-    }
+    const result = await login({ email, password }, navigate, dispatch);
   };
 
   const googleLogin = () => {
     window.location.href = "http://localhost:4000/auth/google";
   };
+
+  console.log("authloading", authLoading);
+
+  if (authLoading) {
+    return (
+      <div className="h-screen w-screen flex items-center text-black justify-center">
+        <div className="custom-loader"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-b from-white via-blue-50/40 to-white px-4">

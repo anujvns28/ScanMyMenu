@@ -8,6 +8,13 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import About from "./pages/About";
 import MobilePremiumMenu from "./pages/Menu";
+import AdminDashboardPage from "./pages/AdminDashboard";
+import Shops from "./components/core/Admin/Shops";
+import Categories from "./components/core/Admin/Categories";
+import AdminDashboard from "./components/core/Admin/Dashboard";
+import AdminReviews from "./components/core/Admin/Review";
+import AdminTags from "./components/core/Admin/Tags";
+import AdminSupport from "./components/core/Admin/Issues";
 import Dashboard from "./pages/Dashboard";
 
 function App() {
@@ -23,6 +30,15 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/menu" element={<MobilePremiumMenu />} />
           <Route path="/dashbord" element={<Dashboard />} />
+
+          <Route path="/admin" element={<AdminDashboardPage />}>
+            <Route index element={<AdminDashboard />} />
+            <Route path="shops" element={<Shops />} />
+            <Route path="categories" element={<Categories />} />
+            <Route path="reviews" element={<AdminReviews />} />
+            <Route path="tags" element={<AdminTags />} />
+            <Route path="issues" element={<AdminSupport />} />
+          </Route>
         </Routes>
       </div>
 

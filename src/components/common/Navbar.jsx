@@ -45,11 +45,6 @@ const Navbar = () => {
                 <a href="/dashboard" className="hover:text-orange-600">
                   Dashboard
                 </a>
-
-                {/* Logout */}
-                <button className="text-red-500 font-semibold hover:text-red-600">
-                  Logout
-                </button>
               </>
             )}
           </div>

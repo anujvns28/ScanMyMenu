@@ -83,23 +83,26 @@ export const toggleCategoryStatus = async(data,token,dispatch) =>{
 
 export const fetchAllCategory = async(token,dispatch) =>{
     dispatch(setUserLoading(true));
-    try{
-        const response = await axios({
-            method:"POST",
-            url:GET_ALL_CATEGORIES_API,
-            data:data,
-            withCredentials:true,
-            headers:{
-                Authorization : `Bearer ${token}`,
-                "Content-Type" : "multipart/form-data"
-            }
-        })
+    let result;
+    try {
+      const response = await axios({
+        method: "POST",
+        url: GET_ALL_CATEGORIES_API,
+        withCredentials: true,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
-        if(response){
-            console.log("fetch all category api response",response);
-        }
-    }catch(err){
-        console.log("fetch all category api resonse",err)
+      if (response) {
+        console.log("fetch all category api response", response);
+        result = response.data;
+      }
+    } catch (err) {
+      console.log("fetch all category api resonse", err);
     }
-    dispatch(setUserLoading(false))
+    dispatch(setUserLoading(false));
+    return result;
+    
 }

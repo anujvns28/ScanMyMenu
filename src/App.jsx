@@ -16,6 +16,14 @@ import AdminReviews from "./components/core/Admin/Review";
 import AdminTags from "./components/core/Admin/Tags";
 import AdminSupport from "./components/core/Admin/Issues";
 import Dashboard from "./pages/Dashboard";
+import ShopDashboardPage from "./pages/ShopDashboard";
+import ShopDashboard from "./components/core/shop/Dashboard";
+import More from "./components/core/shop/More";
+import MenuManagement from "./components/core/shop/MenuManagement";
+import Review from "./components/core/shop/Review";
+import Offers from "./components/core/shop/Offers";
+import Support from "./components/core/shop/Support";
+import ShopProfile from "./components/core/shop/ShopProfile";
 
 function App() {
   return (
@@ -38,6 +46,16 @@ function App() {
             <Route path="reviews" element={<AdminReviews />} />
             <Route path="tags" element={<AdminTags />} />
             <Route path="issues" element={<AdminSupport />} />
+          </Route>
+
+          <Route path="/shop" element={<ShopDashboardPage />}>
+            <Route index element={<ShopProfile />} />
+            <Route path="menu" element={<MenuManagement />} />
+            <Route path="reviews" element={<Review />} />
+            <Route path="offers" element={<Offers />} />
+            <Route path="support" element={<Support />} />
+            <Route path="dashboard" element={<ShopDashboard />} />
+            <Route path="more" element={<More />} />
           </Route>
         </Routes>
       </div>

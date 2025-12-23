@@ -13,3 +13,10 @@ export const categoryEndPoints = {
   GET_ALL_CATEGORIES_API: BASE_URL + "/category/getAllCategories",
   TOGGLE_CATEGORY_STATUS_API: BASE_URL + "/category/toggleCategoryStatus",
 };
+
+export const tagEndPoints = {
+  CREATE_TAG_API: BASE_URL + "/tag/createTag",
+  UPDATE_TAG_API: BASE_URL + "/tag/updateTag",
+  GET_ALL_TAG_API: BASE_URL + "/tag/getAllTag",
+  TOGGLE_TAG_STATUS_API: BASE_URL + "/tag/toggleTagStatus",
+};

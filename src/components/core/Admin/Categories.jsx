@@ -14,8 +14,8 @@ const AdminCategories = () => {
   const [errors, setErrors] = useState({});
   const [preview, setPreview] = useState(null);
   const [image, setImg] = useState();
-  const [name, setName] = useState();
-  const [description, setDescription] = useState();
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
   const [categories, setCategories] = useState([]);
   const [currCategory, setCurrCategory] = useState();
   const [modalData, setModalData] = useState();

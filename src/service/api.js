@@ -20,3 +20,11 @@ export const tagEndPoints = {
   GET_ALL_TAG_API: BASE_URL + "/tag/getAllTag",
   TOGGLE_TAG_STATUS_API: BASE_URL + "/tag/toggleTagStatus",
 };
+
+export const shopEndPoints = {
+  GET_MY_SHOP_API: BASE_URL + "/shop/my-shop",
+  UPDATE_SHOP_PROFILE_API: BASE_URL + "/shop/profile",
+  UPDATE_CONTACT_INFO_API: BASE_URL + "/shop/contact",
+  UPDATE_SHOP_ADDRESS_API: BASE_URL + "/shop/address",
+  UPDATE_SHOP_TIMING_API: BASE_URL + "/shop/timing",
+};

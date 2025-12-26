@@ -36,15 +36,15 @@ export const ProgressBar = ({ progress }) => {
 };
 
 const ShopDashboard = () => {
-  const { shop } = useSelector((state) => state.shop);
+  const { shopDetails } = useSelector((state) => state.shop);
 
   return (
     <div className="min-h-screen w-full bg-gray-100 pb-16">
       <TopNav />
 
-      {shop?.progress > 0 && shop?.progress < 100 && (
+      {shopDetails?.progress > 0 && shopDetails?.progress < 100 && (
         <div className="px-4 mt-2">
-          <ProgressBar progress={shop.progress} />
+          <ProgressBar progress={shopDetails.progress} />
         </div>
       )}
 

@@ -1,172 +1,175 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { fetchAllActiveCategory } from "../../../service/operations/category";
+import { useDispatch, useSelector } from "react-redux";
 
 const Menu = () => {
   const [openCategory, setOpenCategory] = useState(null);
+  const [showCreateShop, setShowCreateShop] = useState(false);
+  const [activeCategories, setActiveCategories] = useState();
 
+  const myShop = null; // {} karke test karo
+  const dispatch = useDispatch();
+  const { shopDetails } = useSelector((state) => state.shop);
+
+  const fetchCategoriesHandler = async () => {
+    const result = await fetchAllActiveCategory(dispatch);
+    if (result) {
+      setActiveCategories(result?.data);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategoriesHandler();
+  }, []);
   return (
     <div className="min-h-screen bg-gray-100 p-4 space-y-6">
-
       {/* ===== HEADER ===== */}
       <div>
-        <h1 className="text-lg font-bold text-gray-800">
-          Menu Management
-        </h1>
+        <h1 className="text-lg font-bold text-gray-800">Menu Management</h1>
         <p className="text-sm text-gray-500">
           Manage categories, tags & products
         </p>
       </div>
 
-      {/* ===== CATEGORIES (SWIGGY STYLE) ===== */}
+      {/* ===== CATEGORIES ===== */}
       <div className="bg-white rounded-xl p-4 shadow space-y-4">
         <div className="flex justify-between items-center">
-          <h2 className="font-semibold text-gray-700">
-            📂 Categories
-          </h2>
-          <button className="text-sm font-medium text-blue-600">
-            ➕ Add Category
-          </button>
+          <h2 className="font-semibold text-gray-700">📂 Categories</h2>
+          {shopDetails?.status?.isProfileComplete && (
+            <button
+              className="text-sm font-medium text-blue-600"
+              onClick={() => {
+                if (!myShop) setShowCreateShop(true);
+                else alert("Open Add Category");
+              }}
+            >
+              {" "}
+              ➕ Add Category{" "}
+            </button>
+          )}
         </div>
 
-        <div className="flex gap-4 overflow-x-auto pb-2">
-          <CategoryItem
-            name="Chicken"
-            image="https://images.unsplash.com/photo-1604908177522-429a0b9a3f6c"
-            onClick={() =>
-              setOpenCategory({
-                name: "Chicken",
-                image:
-                  "https://images.unsplash.com/photo-1604908177522-429a0b9a3f6c",
-                description:
-                  "Delicious non-veg chicken dishes prepared with authentic spices.",
-                tags: ["Non-Veg", "Spicy"],
-              })
-            }
-          />
+        {activeCategories ? (
+          <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+            {activeCategories.map((category, i) => {
+              return (
+                <button
+                  key={i}
+                  onClick={() => setOpenCategory(category)}
+                  className="flex flex-col items-center min-w-[90px] focus:outline-none"
+                >
+                  <div className="w-20 h-20 rounded-full overflow-hidden shadow ">
+                    <img
+                      src={category.image}
+                      alt={category.name}
+                      className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+                    />
+                  </div>
 
-          <CategoryItem
-            name="Veg"
-            image="https://images.unsplash.com/photo-1546069901-ba9599a7e63c"
-            onClick={() =>
-              setOpenCategory({
-                name: "Veg",
-                image:
-                  "https://images.unsplash.com/photo-1546069901-ba9599a7e63c",
-                description:
-                  "Pure vegetarian dishes made with fresh vegetables.",
-                tags: ["Veg", "Healthy"],
-              })
-            }
-          />
-
-          <CategoryItem
-            name="Noodles"
-            image="https://images.unsplash.com/photo-1585032226651-759b368d7246"
-            onClick={() =>
-              setOpenCategory({
-                name: "Noodles",
-                image:
-                  "https://images.unsplash.com/photo-1585032226651-759b368d7246",
-                description:
-                  "Chinese style noodles with rich flavours.",
-                tags: ["Chinese"],
-              })
-            }
-          />
-        </div>
+                  <p className="mt-2 text-xs font-medium text-gray-700 text-center line-clamp-2">
+                    {category.name}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="flex overflow-x-auto pb-2 scrollbar-hide">
+            {[1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className="flex flex-col items-center min-w-[90px] animate-pulse"
+              >
+                <div className="w-20 h-20 bg-gray-200 rounded-full" />
+                <div className="h-5  bg-gray-200 rounded w-16 mt-2" />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* ===== PRODUCTS (DEMO) ===== */}
-      
+      {/* ===== PRODUCT SECTION ===== */}
+      {!myShop ? (
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="bg-white rounded-xl shadow p-4 animate-pulse"
+            >
+              <div className="h-32 bg-gray-200 rounded-lg mb-4"></div>
 
-      {/* ===== PRODUCT LIST ===== */}
-      <ProductCard
-        image="https://images.unsplash.com/photo-1604908177522-429a0b9a3f6c"
-        name="Chicken Biryani"
-        price="₹180"
-        rating="4.8"
-        reviews="210"
-        stock="In Stock"
-        tags={["Best Seller", "Spicy"]}
-        special
-      />
+              <div className="space-y-3">
+                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                <div className="h-3 bg-gray-200 rounded w-1/2"></div>
 
-      <ProductCard
-        image="https://images.unsplash.com/photo-1551183053-bf91a1d81141"
-        name="Butter Chicken"
-        price="₹220"
-        rating="4.6"
-        reviews="160"
-        stock="Low Stock"
-        tags={["Creamy"]}
-      />
+                <div className="flex justify-between">
+                  <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+                  <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+                </div>
 
-      <ProductCard
-        image="https://images.unsplash.com/photo-1600628422019-64c8e0eaa1c5"
-        name="Chicken Noodles"
-        price="₹150"
-        rating="3.9"
-        reviews="58"
-        stock="Out of Stock"
-        tags={["Chinese"]}
-      />
+                <div className="flex gap-2">
+                  <div className="h-6 w-16 bg-gray-200 rounded-full"></div>
+                  <div className="h-6 w-16 bg-gray-200 rounded-full"></div>
+                </div>
 
-      {/* ===== CATEGORY DETAILS + TAGS (BOTTOM SHEET) ===== */}
+                {!shopDetails?.status?.isProfileComplete && (
+                  <button
+                    onClick={() => setShowCreateShop(true)}
+                    className="w-full text-sm text-blue-600 mt-2"
+                  >
+                    + Add your first product
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <>
+          <div className="bg-white rounded-xl shadow p-4">Product</div>
+        </>
+      )}
+
+      {/* ===== CATEGORY DETAILS ===== */}
       {openCategory && (
         <div className="fixed inset-0 z-50 flex items-end bg-black/40">
-          <div className="bg-white w-full rounded-t-2xl p-5 pb-24 space-y-5">
-
-            {/* drag indicator */}
+          <div className="bg-white w-full rounded-t-2xl p-5 space-y-5">
             <div className="w-10 h-1 bg-gray-300 rounded mx-auto" />
 
-            {/* image */}
             <img
               src={openCategory.image}
               alt={openCategory.name}
               className="w-full h-40 object-cover rounded-xl"
             />
 
-            {/* details */}
             <div>
-              <h3 className="text-lg font-bold">
-                {openCategory.name}
-              </h3>
+              <h3 className="text-lg font-bold">{openCategory.name}</h3>
               <p className="text-sm text-gray-600">
                 {openCategory.description}
               </p>
             </div>
 
-            {/* TAGS SECTION */}
-            <div className="space-y-2">
-              <h4 className="font-semibold text-gray-700">
-                🏷️ Category Tags
-              </h4>
+            <div className="flex gap-2 flex-wrap">
+              {openCategory?.tags?.map((tag, i) => (
+                <span
+                  key={i}
+                  className="bg-gray-100 px-3 py-1 rounded-full text-sm"
+                >
+                  {tag}
+                </span>
+              ))}
 
-              <div className="flex gap-2 flex-wrap">
-                {openCategory.tags.map((tag, i) => (
-                  <span
-                    key={i}
-                    className="flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-full text-sm"
-                  >
-                    {tag}
-                    <button className="text-red-500 text-xs">✕</button>
-                  </span>
-                ))}
-
-                <button className="px-3 py-1 border border-dashed rounded-full text-sm text-blue-600">
-                  ➕ Add Tag
-                </button>
-              </div>
+              <button
+                onClick={() => setShowCreateShop(true)}
+                className="px-3 py-1 border border-dashed rounded-full text-sm text-blue-600"
+              >
+                ➕ Add Tag
+              </button>
             </div>
 
-            {/* ACTION */}
-            <button className="w-full bg-red-100 text-red-600 rounded-xl py-2 font-medium">
-              Disable Category
-            </button>
-
-            {/* CLOSE */}
             <button
               onClick={() => setOpenCategory(null)}
-              className="w-full text-center text-sm text-gray-500"
+              className="w-full text-sm text-gray-500 mb-14"
             >
               Close
             </button>
@@ -174,18 +177,43 @@ const Menu = () => {
         </div>
       )}
 
+      {/* ===== CREATE SHOP CTA ===== */}
+      {showCreateShop && (
+        <div className="fixed inset-0 z-50 flex items-end bg-black/40 mb-14">
+          <div className="bg-white w-full rounded-t-2xl p-6 space-y-5">
+            <div className="w-10 h-1 bg-gray-300 rounded mx-auto" />
+
+            <h3 className="text-lg font-bold text-center">
+              Create your shop first
+            </h3>
+
+            <p className="text-sm text-gray-500 text-center">
+              To start building your digital menu, create your shop.
+            </p>
+
+            <button className="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold">
+              Create My Shop
+            </button>
+
+            <button
+              onClick={() => setShowCreateShop(false)}
+              className="w-full text-sm text-gray-500"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
 export default Menu;
 
+/* ===== COMPONENTS ===== */
 
 const CategoryItem = ({ name, image, onClick }) => (
-  <button
-    onClick={onClick}
-    className="flex flex-col items-center min-w-[90px]"
-  >
+  <button onClick={onClick} className="flex flex-col items-center min-w-[90px]">
     <img
       src={image}
       alt={name}
@@ -194,84 +222,3 @@ const CategoryItem = ({ name, image, onClick }) => (
     <p className="mt-2 text-xs font-medium">{name}</p>
   </button>
 );
-
-const ProductCard = ({
-  image,
-  name,
-  price,
-  rating,
-  reviews,
-  stock,
-  tags,
-  special,
-}) => (
-  <div className="bg-white rounded-xl shadow overflow-hidden">
-
-    {/* IMAGE */}
-    <img
-      src={image}
-      alt={name}
-      className="w-full h-40 object-cover"
-    />
-
-    {/* CONTENT */}
-    <div className="p-4 space-y-3">
-
-      {/* TITLE + EDIT */}
-      <div className="flex justify-between items-start">
-        <div>
-          <p className="font-semibold text-gray-800">
-            {name}
-          </p>
-          <p className="text-sm text-gray-500">
-            ⭐ {rating} ({reviews} reviews)
-          </p>
-        </div>
-
-        <button className="text-sm text-blue-600 font-medium">
-          Edit
-        </button>
-      </div>
-
-      {/* PRICE + STOCK */}
-      <div className="flex justify-between text-sm">
-        <span className="font-medium">{price}</span>
-        <span
-          className={
-            stock === "In Stock"
-              ? "text-green-600"
-              : stock === "Low Stock"
-              ? "text-yellow-500"
-              : "text-red-500"
-          }
-        >
-          {stock}
-        </span>
-      </div>
-
-      {/* TAGS */}
-      <div className="flex gap-2 flex-wrap">
-        {tags.map((tag, i) => (
-          <span
-            key={i}
-            className="px-2 py-1 bg-gray-100 rounded-full text-xs"
-          >
-            {tag}
-          </span>
-        ))}
-
-        <button className="px-2 py-1 border border-dashed rounded-full text-xs text-blue-600">
-          + Tag
-        </button>
-
-        {special && (
-          <span className="px-2 py-1 bg-red-100 text-red-600 rounded-full text-xs">
-            Today’s Special
-          </span>
-        )}
-      </div>
-
-    </div>
-  </div>
-);
-

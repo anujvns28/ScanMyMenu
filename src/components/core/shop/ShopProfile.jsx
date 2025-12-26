@@ -14,7 +14,7 @@ import { useNavigate } from "react-router-dom";
 const ShopProfile = () => {
   const [editSection, setEditSection] = useState(null);
   const [shop, setShop] = useState({});
-  const [currentStep, setCurrentStep] = useState(0);
+  const [currentStep, setCurrentStep] = useState("");
   const edit = ["shop", "basic", "address", "timing"];
   const [preview, setPreview] = useState("");
   const [errors, setErrors] = useState({});
@@ -131,8 +131,12 @@ const ShopProfile = () => {
       }
       setCurrentStep(Number(result?.data?.status.creationStep) + 1);
       setEditSection(edit[Number(result?.data?.status.creationStep)]);
+    } else {
+      setCurrentStep(0);
     }
   };
+
+  console.log(shop);
 
   useEffect(() => {
     fetchShopHandler();

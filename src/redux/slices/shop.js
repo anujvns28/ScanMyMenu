@@ -1,19 +1,17 @@
 import { createSlice } from '@reduxjs/toolkit'
 
 const initialState = {
-  shop: localStorage.getItem("shop")
-    ? JSON.parse(localStorage.getItem("shop"))
+  shopDetails: localStorage.getItem("shopDetails")
+    ? JSON.parse(localStorage.getItem("shopDetails"))
     : null,
-  
 };
 
 export const shopSlice = createSlice({
-  name: "shop",
+  name: "shopDetails",
   initialState,
   reducers: {
-   
     setShopSlice: (state, action) => {
-      state.shop = action.payload;
+      state.shopDetails = action.payload;
     },
   },
 });

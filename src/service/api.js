@@ -12,6 +12,7 @@ export const categoryEndPoints = {
   UPDATE_CATEGORY_API: BASE_URL + "/category/updateCategory",
   GET_ALL_CATEGORIES_API: BASE_URL + "/category/getAllCategories",
   TOGGLE_CATEGORY_STATUS_API: BASE_URL + "/category/toggleCategoryStatus",
+  GET_ALL_ACTIVE_CATEGORIES_API: BASE_URL + "/category/getActiveCategories",
 };
 
 export const tagEndPoints = {

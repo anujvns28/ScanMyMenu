@@ -1,22 +1,38 @@
 import { useEffect, useState } from "react";
-import { fetchAllActiveCategory } from "../../../service/operations/category";
+import {
+  fetchAllActiveCategory,
+  getShopCategories,
+} from "../../../service/operations/category";
 import { useDispatch, useSelector } from "react-redux";
+import AddCategorySheet from "../menuManagementHelper/AddCategorySheet";
+import { useNavigate } from "react-router-dom";
 
 const Menu = () => {
   const [openCategory, setOpenCategory] = useState(null);
   const [showCreateShop, setShowCreateShop] = useState(false);
   const [activeCategories, setActiveCategories] = useState();
+  const [showAddCategorySheet, setShowAddCategorySheet] = useState(false);
 
   const myShop = null; // {} karke test karo
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { shopDetails } = useSelector((state) => state.shop);
 
   const fetchCategoriesHandler = async () => {
     const result = await fetchAllActiveCategory(dispatch);
     if (result) {
-      setActiveCategories(result?.data);
+      if (!shopDetails) {
+        setActiveCategories(result?.data);
+      } else {
+        const result = await getShopCategories(shopDetails._id, dispatch);
+        if (result) {
+          setActiveCategories(result?.data);
+        }
+      }
     }
   };
+
+  console.log(activeCategories);
 
   useEffect(() => {
     fetchCategoriesHandler();
@@ -30,7 +46,6 @@ const Menu = () => {
           Manage categories, tags & products
         </p>
       </div>
-
       {/* ===== CATEGORIES ===== */}
       <div className="bg-white rounded-xl p-4 shadow space-y-4">
         <div className="flex justify-between items-center">
@@ -38,10 +53,7 @@ const Menu = () => {
           {shopDetails?.status?.isProfileComplete && (
             <button
               className="text-sm font-medium text-blue-600"
-              onClick={() => {
-                if (!myShop) setShowCreateShop(true);
-                else alert("Open Add Category");
-              }}
+              onClick={() => setShowAddCategorySheet(true)}
             >
               {" "}
               ➕ Add Category{" "}
@@ -60,14 +72,14 @@ const Menu = () => {
                 >
                   <div className="w-20 h-20 rounded-full overflow-hidden shadow ">
                     <img
-                      src={category.image}
+                      src={category.image || category?.category?.image}
                       alt={category.name}
                       className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
                     />
                   </div>
 
                   <p className="mt-2 text-xs font-medium text-gray-700 text-center line-clamp-2">
-                    {category.name}
+                    {category.name || category?.category?.name}
                   </p>
                 </button>
               );
@@ -87,7 +99,6 @@ const Menu = () => {
           </div>
         )}
       </div>
-
       {/* ===== PRODUCT SECTION ===== */}
       {!myShop ? (
         <div className="space-y-4">
@@ -129,7 +140,6 @@ const Menu = () => {
           <div className="bg-white rounded-xl shadow p-4">Product</div>
         </>
       )}
-
       {/* ===== CATEGORY DETAILS ===== */}
       {openCategory && (
         <div className="fixed inset-0 z-50 flex items-end bg-black/40">
@@ -176,7 +186,6 @@ const Menu = () => {
           </div>
         </div>
       )}
-
       {/* ===== CREATE SHOP CTA ===== */}
       {showCreateShop && (
         <div className="fixed inset-0 z-50 flex items-end bg-black/40 mb-14">
@@ -191,7 +200,10 @@ const Menu = () => {
               To start building your digital menu, create your shop.
             </p>
 
-            <button className="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold">
+            <button
+              onClick={() => navigate("/shop")}
+              className="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold"
+            >
               Create My Shop
             </button>
 
@@ -204,6 +216,13 @@ const Menu = () => {
           </div>
         </div>
       )}
+
+      <AddCategorySheet
+        open={showAddCategorySheet}
+        onClose={() => setShowAddCategorySheet(false)}
+        shopCategories={activeCategories}
+        onAddCategories={() => alert("add selected")}
+      />
     </div>
   );
 };

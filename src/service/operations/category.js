@@ -1,6 +1,6 @@
 import axios from "axios";
 import { setUserLoading } from "../../redux/slices/auth";
-import { categoryEndPoints } from "../api";
+import { categoryEndPoints, shopCategoryEndPoints } from "../api";
 
 const {
   CREATE_CATEGORY_API,
@@ -9,6 +9,14 @@ const {
   UPDATE_CATEGORY_API,
   GET_ALL_ACTIVE_CATEGORIES_API,
 } = categoryEndPoints;
+
+const {
+  GET_SHOP_CATEGORIES_API,
+  GET_SINGLE_SHOP_CATEGORY_API,
+  PICK_CATEGORIES_API,
+  REMOVE_SHOP_CATEGORY_API,
+  TOGGLE_SHOP_CATEGORY_API,
+} = shopCategoryEndPoints;
 
 export const createCategory = async (data, token, dispatch) => {
   dispatch(setUserLoading(true));
@@ -124,4 +132,131 @@ export const fetchAllActiveCategory = async (dispatch) => {
   dispatch(setUserLoading(false));
   return result;
 };
+
+export const pickCategoriesForShop = async (data, dispatch, token) => {
+  dispatch(setUserLoading(true));
+  let result = null;
+
+  try {
+    const response = await axios({
+      method: "POST",
+      url: PICK_CATEGORIES_API,
+      data: data,
+      withCredentials: true,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (response) {
+      console.log("pick categories response", response);
+      result = response.data;
+    }
+  } catch (err) {
+    console.log("pick categories error", err);
+  }
+
+  dispatch(setUserLoading(false));
+  return result;
+};
+
+export const getShopCategories = async (shopId, dispatch) => {
+  dispatch(setUserLoading(true));
+  let result = null;
+
+  try {
+    const response = await axios({
+      method: "POST",
+      url: GET_SHOP_CATEGORIES_API,
+      data: { shopId },
+      withCredentials: true,
+    });
+
+    if (response) {
+      console.log("get shop categories", response);
+      result = response.data;
+    }
+  } catch (err) {
+    console.log("get shop categories error", err);
+  }
+
+  dispatch(setUserLoading(false));
+  return result;
+};
+
+export const getSingleShopCategory = async (shopCategoryId, dispatch) => {
+  dispatch(setUserLoading(true));
+  let result = null;
+
+  try {
+    const response = await axios({
+      method: "POST",
+      url: GET_SINGLE_SHOP_CATEGORY_API,
+      data: { shopCategoryId },
+      withCredentials: true,
+    });
+
+    if (response) {
+      console.log("single shop category", response);
+      result = response.data;
+    }
+  } catch (err) {
+    console.log("single shop category error", err);
+  }
+
+  dispatch(setUserLoading(false));
+  return result;
+};
+
+export const removeShopCategory = async (data, dispatch) => {
+  dispatch(setUserLoading(true));
+  let result = null;
+
+  try {
+    const response = await axios({
+      method: "DELETE",
+      url: REMOVE_SHOP_CATEGORY_API,
+      data: data,
+      withCredentials: true,
+    });
+
+    if (response) {
+      console.log("remove shop category", response);
+      result = response.data;
+    }
+  } catch (err) {
+    console.log("remove shop category error", err);
+  }
+
+  dispatch(setUserLoading(false));
+  return result;
+};
+
+export const toggleShopCategory = async (data, dispatch) => {
+  dispatch(setUserLoading(true));
+  let result = null;
+
+  try {
+    const response = await axios({
+      method: "PUT",
+      url: TOGGLE_SHOP_CATEGORY_API,
+      data: data,
+      withCredentials: true,
+    });
+
+    if (response) {
+      console.log("toggle shop category", response);
+      result = response.data;
+    }
+  } catch (err) {
+    console.log("toggle shop category error", err);
+  }
+
+  dispatch(setUserLoading(false));
+  return result;
+};
+
+
+
+
 

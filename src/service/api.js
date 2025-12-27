@@ -29,3 +29,11 @@ export const shopEndPoints = {
   UPDATE_SHOP_ADDRESS_API: BASE_URL + "/shop/address",
   UPDATE_SHOP_TIMING_API: BASE_URL + "/shop/timing",
 };
+
+export const shopCategoryEndPoints = {
+  PICK_CATEGORIES_API: BASE_URL + "/shop-category/pickCategories",
+  GET_SHOP_CATEGORIES_API: BASE_URL + "/shop-category/getCategories",
+  GET_SINGLE_SHOP_CATEGORY_API: BASE_URL + "/shop-category/shopCategoryDetails",
+  REMOVE_SHOP_CATEGORY_API: BASE_URL + "/shop-category/remove",
+  TOGGLE_SHOP_CATEGORY_API: BASE_URL + "/shop-category/toggleCategory",
+};

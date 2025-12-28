@@ -1,20 +1,20 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchAllActiveCategory, pickCategoriesForShop } from "../../../service/operations/category";
+import LoaderComponent from "../../common/LoaderComponent";
 
 const AddCategorySheet = ({
   open,
   onClose,
-  shopCategories,
+  shopCategories = [],
   onAddCategories,
+  selected,
+  setSelected,
 }) => {
-  const [selected, setSelected] = useState([]);
-  const [search, setSearch] = useState("");
   const [adminCategories, setAdminCategories] = useState();
   const dispatch = useDispatch();
-  const {shopDetails} = useSelector((state)=>state.shop);
-  const {token} = useSelector((state)=>state.auth)
-  
+  const { shopDetails } = useSelector((state) => state.shop);
+  const { token, userLoading } = useSelector((state) => state.auth);
 
   const toggleSelect = (cat) => {
     setSelected((prev) =>
@@ -24,18 +24,16 @@ const AddCategorySheet = ({
     );
   };
 
-  const picakCategoriesHandler = async() =>{
-    const categoriesId = selected.map((cat) => cat._id);
-    const data = {categories:categoriesId,shopId:shopDetails._id};
-    console.log(data);
-    const result = await pickCategoriesForShop(data,dispatch,token);
-
-  }
-
   const fetchAdminCategoriesHandler = async () => {
+    const shopCatId = shopCategories.map((shopCat) => shopCat.category._id);
+    console.log(shopCatId, "this is shop category");
     const result = await fetchAllActiveCategory(dispatch);
     if (result) {
       setAdminCategories(result?.data);
+      const notPickedCategory = result?.data.filter(
+        (cat) => !shopCatId.includes(cat._id)
+      );
+      setAdminCategories(notPickedCategory);
     }
   };
 
@@ -111,7 +109,7 @@ const AddCategorySheet = ({
         <div className="flex-1 overflow-y-auto space-y-3">
           {!adminCategories ? (
             <div className="flex flex-col gap-1">
-              {[1,2,3,4,5].map((_, i) => (
+              {[1, 2, 3, 4, 5].map((_, i) => (
                 <div
                   key={i}
                   className="flex items-center justify-between p-4 rounded-2xl bg-gray-100 animate-pulse"
@@ -128,7 +126,7 @@ const AddCategorySheet = ({
               ))}
             </div>
           ) : (
-            <div className="flex-1 overflow-y-auto space-y-3">
+            <div className="flex-1 overflow-y-auto space-y-3 mb-2">
               {adminCategories?.map((cat) => {
                 const isSelected = selected.find((c) => c._id === cat._id);
                 return (
@@ -173,7 +171,7 @@ const AddCategorySheet = ({
         <div className="border-t pt-4 space-y-2 mb-16">
           <button
             disabled={selected.length === 0}
-            onClick={picakCategoriesHandler}
+            onClick={onAddCategories}
             className={`w-full py-3 rounded-xl font-semibold
               ${
                 selected.length > 0
@@ -185,6 +183,8 @@ const AddCategorySheet = ({
           </button>
         </div>
       </div>
+
+      {userLoading && <LoaderComponent />}
     </div>
   );
 };

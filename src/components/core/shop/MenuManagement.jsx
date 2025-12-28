@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   fetchAllActiveCategory,
   getShopCategories,
+  pickCategoriesForShop,
 } from "../../../service/operations/category";
 import { useDispatch, useSelector } from "react-redux";
 import AddCategorySheet from "../menuManagementHelper/AddCategorySheet";
@@ -10,29 +11,42 @@ import { useNavigate } from "react-router-dom";
 const Menu = () => {
   const [openCategory, setOpenCategory] = useState(null);
   const [showCreateShop, setShowCreateShop] = useState(false);
-  const [activeCategories, setActiveCategories] = useState();
-  const [showAddCategorySheet, setShowAddCategorySheet] = useState(false);
+  const [shopCategories, setShopCategories] = useState();
 
-  const myShop = null; // {} karke test karo
+  const [showAddCategorySheet, setShowAddCategorySheet] = useState(false);
+  const [selected, setSelected] = useState([]);
+  const [showAddTagSheet, setShowAddTagSheet] = useState(false);
+
+  const tags = ["Spicy", "Best Seller", "New", "Chef Special"];
+
+  const myShop = null;
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { shopDetails } = useSelector((state) => state.shop);
+  const { token } = useSelector((state) => state.auth);
 
   const fetchCategoriesHandler = async () => {
-    const result = await fetchAllActiveCategory(dispatch);
-    if (result) {
-      if (!shopDetails) {
-        setActiveCategories(result?.data);
-      } else {
-        const result = await getShopCategories(shopDetails._id, dispatch);
-        if (result) {
-          setActiveCategories(result?.data);
-        }
+    if (!shopDetails) {
+      const result = await fetchAllActiveCategory(dispatch);
+      setShopCategories(result?.data);
+    } else {
+      const result = await getShopCategories(shopDetails._id, dispatch);
+      if (result) {
+        setShopCategories(result?.data);
       }
     }
   };
 
-  console.log(activeCategories);
+  const picakCategoriesHandler = async () => {
+    const categoriesId = selected.map((cat) => cat._id);
+    const data = { categories: categoriesId, shopId: shopDetails._id };
+    const result = await pickCategoriesForShop(data, dispatch, token);
+    if (result) {
+      setShopCategories((prev) => [...prev, ...result?.data]);
+    }
+    setShowAddCategorySheet(false);
+    setSelected([]);
+  };
 
   useEffect(() => {
     fetchCategoriesHandler();
@@ -61,25 +75,25 @@ const Menu = () => {
           )}
         </div>
 
-        {activeCategories ? (
+        {shopCategories?.length > 0 ? (
           <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-            {activeCategories.map((category, i) => {
+            {shopCategories.map((cat, i) => {
               return (
                 <button
                   key={i}
-                  onClick={() => setOpenCategory(category)}
+                  onClick={() => setOpenCategory(cat)}
                   className="flex flex-col items-center min-w-[90px] focus:outline-none"
                 >
                   <div className="w-20 h-20 rounded-full overflow-hidden shadow ">
                     <img
-                      src={category.image || category?.category?.image}
-                      alt={category.name}
+                      src={cat.image || cat?.category?.image}
+                      alt={cat.name}
                       className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
                     />
                   </div>
 
                   <p className="mt-2 text-xs font-medium text-gray-700 text-center line-clamp-2">
-                    {category.name || category?.category?.name}
+                    {cat.name || cat?.category?.name}
                   </p>
                 </button>
               );
@@ -140,52 +154,119 @@ const Menu = () => {
           <div className="bg-white rounded-xl shadow p-4">Product</div>
         </>
       )}
+
       {/* ===== CATEGORY DETAILS ===== */}
       {openCategory && (
-        <div className="fixed inset-0 z-50 flex items-end bg-black/40">
-          <div className="bg-white w-full rounded-t-2xl p-5 space-y-5">
-            <div className="w-10 h-1 bg-gray-300 rounded mx-auto" />
+        <div className="fixed inset-0 mb-14 z-50 flex items-end bg-black/40">
+          <div className="bg-white w-full rounded-t-2xl p-5 max-h-[85vh] overflow-y-auto">
+            {/* Drag handle */}
+            <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mb-4"></div>
 
+            {/* Category image */}
             <img
-              src={openCategory.image}
+              src={openCategory.image || openCategory.category?.image}
               alt={openCategory.name}
               className="w-full h-40 object-cover rounded-xl"
             />
 
-            <div>
-              <h3 className="text-lg font-bold">{openCategory.name}</h3>
+            {/* Name & description */}
+            <div className="mt-4">
+              <h3 className="text-lg font-bold">
+                {openCategory.name || openCategory.category?.name}
+              </h3>
               <p className="text-sm text-gray-600">
-                {openCategory.description}
+                {openCategory.description || openCategory.category?.description}
               </p>
             </div>
 
-            <div className="flex gap-2 flex-wrap">
-              {openCategory?.tags?.map((tag, i) => (
-                <span
-                  key={i}
-                  className="bg-gray-100 px-3 py-1 rounded-full text-sm"
-                >
-                  {tag}
-                </span>
-              ))}
+            {/* ===== TAGS ===== */}
+            {/* ===== TAGS ===== */}
+            <div className="mt-4">
+              <p className="text-sm font-medium text-gray-700 mb-2">
+                Category Tags
+              </p>
 
-              <button
-                onClick={() => setShowCreateShop(true)}
-                className="px-3 py-1 border border-dashed rounded-full text-sm text-blue-600"
-              >
-                ➕ Add Tag
-              </button>
+              {/* Existing tags */}
+              <div className="flex flex-wrap gap-2 mb-4">
+                {tags.map((tag, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center gap-2 bg-gray-100 border px-3 py-1.5 rounded-lg text-xs"
+                  >
+                    {tag}
+                    <span className="text-red-500 cursor-pointer">✕</span>
+                  </div>
+                ))}
+              </div>
             </div>
 
+            {/* Action buttons */}
+            <div className="mt-6 space-y-3">
+              <button
+                onClick={() => setShowAddTagSheet(true)}
+                className="w-full border border-dashed border-blue-500 text-blue-600 py-2 rounded-lg text-sm"
+              >
+                ➕ Add New Tag
+              </button>
+
+              <button
+                onClick={() => setOpenCategory(null)}
+                className="w-full text-sm text-gray-500"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showAddTagSheet && (
+        <div className="fixed inset-0 z-[60] flex items-end bg-black/50">
+          <div className="bg-white w-full rounded-t-2xl p-5 space-y-4">
+            <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto"></div>
+
+            <h3 className="text-lg font-bold text-center">Add New Tag</h3>
+            <p className="text-sm text-gray-500 text-center">
+              Create labels for your category
+            </p>
+
+            <input
+              placeholder="Ex: Spicy, Bestseller, Kids Special"
+              className="w-full border rounded-lg px-3 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+            />
+
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                "Spicy",
+                "Veg",
+                "Non-Veg",
+                "Bestseller",
+                "New",
+                "Chef Special",
+              ].map((tag, i) => (
+                <button
+                  key={i}
+                  className="border rounded-lg py-2 text-sm text-gray-700"
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
+
+            <button className="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold">
+              Add Tag
+            </button>
+
             <button
-              onClick={() => setOpenCategory(null)}
-              className="w-full text-sm text-gray-500 mb-14"
+              onClick={() => setShowAddTagSheet(false)}
+              className="w-full text-sm text-gray-500"
             >
-              Close
+              Cancel
             </button>
           </div>
         </div>
       )}
+
       {/* ===== CREATE SHOP CTA ===== */}
       {showCreateShop && (
         <div className="fixed inset-0 z-50 flex items-end bg-black/40 mb-14">
@@ -217,27 +298,21 @@ const Menu = () => {
         </div>
       )}
 
-      <AddCategorySheet
-        open={showAddCategorySheet}
-        onClose={() => setShowAddCategorySheet(false)}
-        shopCategories={activeCategories}
-        onAddCategories={() => alert("add selected")}
-      />
+      {showAddCategorySheet && (
+        <AddCategorySheet
+          open={showAddCategorySheet}
+          onClose={() => {
+            setShowAddCategorySheet(false);
+            setSelected([]);
+          }}
+          shopCategories={shopCategories}
+          onAddCategories={picakCategoriesHandler}
+          selected={selected}
+          setSelected={setSelected}
+        />
+      )}
     </div>
   );
 };
 
 export default Menu;
-
-/* ===== COMPONENTS ===== */
-
-const CategoryItem = ({ name, image, onClick }) => (
-  <button onClick={onClick} className="flex flex-col items-center min-w-[90px]">
-    <img
-      src={image}
-      alt={name}
-      className="w-16 h-16 rounded-full object-cover"
-    />
-    <p className="mt-2 text-xs font-medium">{name}</p>
-  </button>
-);

@@ -20,6 +20,7 @@ export const tagEndPoints = {
   UPDATE_TAG_API: BASE_URL + "/tag/updateTag",
   GET_ALL_TAG_API: BASE_URL + "/tag/getAllTag",
   TOGGLE_TAG_STATUS_API: BASE_URL + "/tag/toggleTagStatus",
+  GET_ALL_ACTIVE_TAG_API: BASE_URL + "/tag/getActiveTag",
 };
 
 export const shopEndPoints = {
@@ -36,4 +37,12 @@ export const shopCategoryEndPoints = {
   GET_SINGLE_SHOP_CATEGORY_API: BASE_URL + "/shop-category/shopCategoryDetails",
   REMOVE_SHOP_CATEGORY_API: BASE_URL + "/shop-category/remove",
   TOGGLE_SHOP_CATEGORY_API: BASE_URL + "/shop-category/toggleCategory",
+  PICK_TAGS_API: BASE_URL + "/shop-category/pickTags",
+  REMOVE_TAG_API: BASE_URL + "/shop-category/removeTag",
+};
+
+export const productEndPoints = {
+  ADD_PRODUCT_API: BASE_URL + "/product/addProduct",
+  FETCH_CATEGORY_BY_PRODUCT: BASE_URL + "/product/fetchCategoryProduct",
+  UPDATE_PRODUCT_API: BASE_URL + "/product/updateProduct",
 };

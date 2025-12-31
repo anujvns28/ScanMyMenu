@@ -42,11 +42,11 @@ const ShopDashboard = () => {
     <div className="min-h-screen w-full bg-gray-100 pb-16">
       <TopNav />
 
-      {shopDetails?.progress > 0 && shopDetails?.progress < 100 && (
+      {/* {shopDetails?.progress > 0 && shopDetails?.progress < 100 && (
         <div className="px-4 mt-2">
           <ProgressBar progress={shopDetails.progress} />
         </div>
-      )}
+      )} */}
 
       <Outlet />
 

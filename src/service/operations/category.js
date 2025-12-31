@@ -16,6 +16,8 @@ const {
   PICK_CATEGORIES_API,
   REMOVE_SHOP_CATEGORY_API,
   TOGGLE_SHOP_CATEGORY_API,
+  PICK_TAGS_API,
+  REMOVE_TAG_API,
 } = shopCategoryEndPoints;
 
 export const createCategory = async (data, token, dispatch) => {
@@ -208,7 +210,7 @@ export const getSingleShopCategory = async (shopCategoryId, dispatch) => {
   return result;
 };
 
-export const removeShopCategory = async (data, dispatch) => {
+export const removeShopCategory = async (data, token, dispatch) => {
   dispatch(setUserLoading(true));
   let result = null;
 
@@ -218,6 +220,9 @@ export const removeShopCategory = async (data, dispatch) => {
       url: REMOVE_SHOP_CATEGORY_API,
       data: data,
       withCredentials: true,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
 
     if (response) {
@@ -232,7 +237,7 @@ export const removeShopCategory = async (data, dispatch) => {
   return result;
 };
 
-export const toggleShopCategory = async (data, dispatch) => {
+export const toggleShopCategory = async (data, token, dispatch) => {
   dispatch(setUserLoading(true));
   let result = null;
 
@@ -242,6 +247,9 @@ export const toggleShopCategory = async (data, dispatch) => {
       url: TOGGLE_SHOP_CATEGORY_API,
       data: data,
       withCredentials: true,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
 
     if (response) {
@@ -250,6 +258,60 @@ export const toggleShopCategory = async (data, dispatch) => {
     }
   } catch (err) {
     console.log("toggle shop category error", err);
+  }
+
+  dispatch(setUserLoading(false));
+  return result;
+};
+
+export const pickTags = async (data, dispatch, token) => {
+  dispatch(setUserLoading(true));
+  let result = null;
+
+  try {
+    const response = await axios({
+      method: "PUT",
+      url: PICK_TAGS_API,
+      data: data,
+      withCredentials: true,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (response) {
+      console.log("pick tag response", response);
+      result = response.data;
+    }
+  } catch (err) {
+    console.log("pick tag error", err);
+  }
+
+  dispatch(setUserLoading(false));
+  return result;
+};
+
+export const removeTags = async (data, dispatch, token) => {
+  dispatch(setUserLoading(true));
+  let result = null;
+
+  try {
+    const response = await axios({
+      method: "PUT",
+      url: REMOVE_TAG_API,
+      data: data,
+      withCredentials: true,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (response) {
+      console.log("remove tag response", response);
+      result = response.data;
+    }
+  } catch (err) {
+    console.log("remove tag error", err);
   }
 
   dispatch(setUserLoading(false));

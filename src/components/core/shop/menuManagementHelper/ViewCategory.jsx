@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchAllActiveTag } from "../../../service/operations/tag";
-import LoaderComponent from "../../common/LoaderComponent";
-import { pickTags, removeShopCategory, removeTags, toggleShopCategory } from "../../../service/operations/category";
-import ConfirmationModal from "../../common/ConfirmationModal";
+import { fetchAllActiveTag } from "../../../../service/operations/tag";
+import LoaderComponent from "../../../common/LoaderComponent";
+import { pickTags, removeShopCategory, removeTags, toggleShopCategory } from "../../../../service/operations/category";
+import ConfirmationModal from "../../../common/ConfirmationModal";
 
 const ViewCategory = ({ openCategory, setOpenCategory,setShopCategories }) => {
   const { shopDetails } = useSelector((state) => state.shop);

@@ -603,7 +603,8 @@ const ShopProfile = () => {
       </div>
 
       {/* ===== MENU QR CODE ===== */}
-      {!shop && (
+
+      {shop && (
         <div className="bg-white rounded-xl shadow p-4 text-center">
           <h2 className="font-semibold mb-2">Menu QR Code</h2>
 
@@ -615,9 +616,18 @@ const ShopProfile = () => {
             Customers scan this QR to view your menu
           </p>
 
-          <button className="w-full bg-green-600 text-white py-2 rounded-lg">
-            Download QR
-          </button>
+          <div className="space-y-2">
+            <button
+              onClick={() => window.open(`/menu/${shop._id}`, "_blank")}
+              className="w-full bg-blue-600 text-white py-2 rounded-lg"
+            >
+              👀 View Menu
+            </button>
+
+            <button className="w-full bg-green-600 text-white py-2 rounded-lg">
+              ⬇ Download QR
+            </button>
+          </div>
         </div>
       )}
 

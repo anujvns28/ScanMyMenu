@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useSelector,useDispatch } from "react-redux";
-import LoaderComponent from "../../common/LoaderComponent";
-import { addProduct } from "../../../service/operations/product";
+import LoaderComponent from "../../../common/LoaderComponent";
+import { addProduct } from "../../../../service/operations/product";
 
 const AddProduct = ({
   setShowAddProductSheet,
@@ -37,7 +37,7 @@ const AddProduct = ({
 
     // API call here
     const result = await addProduct(data,token,dispatch);
-    if(result){
+    if(result){ 
         setCurrCategoryProduct(prev => [...prev,result.data])
     }
     setShowAddProductSheet(false)

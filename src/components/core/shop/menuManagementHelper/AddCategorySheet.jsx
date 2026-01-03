@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchAllActiveCategory, pickCategoriesForShop } from "../../../service/operations/category";
-import LoaderComponent from "../../common/LoaderComponent";
+import { fetchAllActiveCategory, pickCategoriesForShop } from "../../../../service/operations/category";
+import LoaderComponent from "../../../common/LoaderComponent";
+
 
 const AddCategorySheet = ({
   open,
@@ -184,7 +185,7 @@ const AddCategorySheet = ({
         </div>
       </div>
 
-      {userLoading && <LoaderComponent />}
+      {userLoading && <LoaderComponent/>}
     </div>
   );
 };

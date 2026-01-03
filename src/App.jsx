@@ -7,7 +7,7 @@ import Footer from "./components/common/Footer";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import About from "./pages/About";
-import MobilePremiumMenu from "./pages/Menu";
+import Menu from "./pages/Menu";
 import AdminDashboardPage from "./pages/AdminDashboard";
 import Shops from "./components/core/Admin/Shops";
 import Categories from "./components/core/Admin/Categories";
@@ -36,8 +36,9 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/about" element={<About />} />
-          <Route path="/menu" element={<MobilePremiumMenu />} />
           <Route path="/dashbord" element={<Dashboard />} />
+
+          <Route path="/menu/:shopId" element={<Menu />} />
 
           <Route path="/admin" element={<AdminDashboardPage />}>
             <Route index element={<AdminDashboard />} />

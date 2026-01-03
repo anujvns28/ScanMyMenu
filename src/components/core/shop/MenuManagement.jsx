@@ -5,11 +5,11 @@ import {
   pickCategoriesForShop,
 } from "../../../service/operations/category";
 import { useDispatch, useSelector } from "react-redux";
-import AddCategorySheet from "../menuManagementHelper/AddCategorySheet";
+import AddCategorySheet from "./menuManagementHelper/AddCategorySheet";
 import { useNavigate } from "react-router-dom";
-import ViewCategory from "../menuManagementHelper/ViewCategory";
-import ViewProduct from "../menuManagementHelper/ViewProduct";
-import AddProduct from "../menuManagementHelper/AddProduct";
+import ViewCategory from "./menuManagementHelper/ViewCategory";
+import ViewProduct from "./menuManagementHelper/ViewProduct";
+import AddProduct from "./menuManagementHelper/AddProduct";
 import { fetchCategoryByProduct } from "../../../service/operations/product";
 
 const Menu = () => {

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { updateProduct } from "../../../service/operations/product";
+import { updateProduct } from "../../../../service/operations/product";
 import { useSelector, useDispatch } from "react-redux";
-import { fetchAllActiveTag } from "../../../service/operations/tag";
+import { fetchAllActiveTag } from "../../../../service/operations/tag";
 
 const ViewProduct = ({
   viewProduct,

@@ -1,19 +1,30 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { fetchMyShop } from "../service/operations/shop";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { getShopCategories } from "../service/operations/category";
+import { fetchCategoryByProduct } from "../service/operations/product";
+import MenuItemCard from "../components/core/menu/MenuItemCard";
+import {
+  ItemSkeleton,
+  CategorySkeleton,
+  HeaderSkeleton,
+} from "../utils/skeleton";
+import { smartTabs } from "../utils/data";
 
 const menu = () => {
   const { shopId } = useParams();
   const { token, userLoading } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
+  const scrollRef = useRef(null);
+  const itemRefs = useRef({});
 
   const [shopDetails, setShopDetails] = useState(null);
   const [categories, setCategories] = useState([]);
   const [currCategoryItem, setCurrCategoryItem] = useState([]);
   const [currCategory, setCurrCategory] = useState(null);
+  const [scrolled, setScrolled] = useState(false);
 
   const fetchShopDetailsHandler = async () => {
     const shop = await fetchMyShop(token, dispatch);
@@ -23,63 +34,74 @@ const menu = () => {
     }
     if (category) {
       setCategories(category.data);
+      setCurrCategory(smartTabs[0]._id);
     }
   };
+
+  const fetchCategoryByProductHandler = async () => {
+    const result = await fetchCategoryByProduct(
+      { shopCategoryId: currCategory },
+      token,
+      dispatch
+    );
+    if (result) {
+      setCurrCategoryItem(result.data);
+    }
+  };
+
+  const finalCategories = [
+    ...smartTabs.map((t) => ({
+      _id: t._id,
+      name: t.name,
+      icon: t.icon,
+      bg: t.bg,
+      isSmart: true,
+    })),
+    ...categories.map((c) => ({
+      _id: c._id,
+      name: c.category.name,
+      image: c.category.image,
+      isBest: c.category.isBest,
+      isSmart: false,
+    })),
+  ];
+
   useEffect(() => {
     fetchShopDetailsHandler();
   }, []);
 
-  const CategorySkeleton = () => (
-    <div className="flex gap-5 overflow-x-auto no-scrollbar px-2 py-3">
-      {[1, 2, 3, 4, 5, 6].map((i) => (
-        <div
-          key={i}
-          className="flex flex-col items-center min-w-20 animate-pulse"
-        >
-          {/* Circle */}
-          <div className="w-22 h-22 rounded-full bg-linear-to-br from-gray-200 to-gray-300 shadow-sm" />
+  useEffect(() => {
+    if (currCategory) fetchCategoryByProductHandler();
+  }, [currCategory]);
 
-          {/* Text lines */}
-          <div className="w-16 h-5 bg-gray-200 mt-3 rounded" />
-        </div>
-      ))}
-    </div>
-  );
+  useEffect(() => {
+    const el = itemRefs.current[currCategory];
+    if (el && scrollRef.current) {
+      const container = scrollRef.current;
+      const left =
+        el.offsetLeft - container.clientWidth / 2 + el.clientWidth / 2;
 
-  const ItemSkeleton = () => (
-    <div className="rounded-2xl  bg-white shadow-sm overflow-hidden animate-pulse">
-      <div className="w-full h-48 bg-gray-200" />
-      <div className="p-4 space-y-2">
-        <div className="h-4 w-1/2 bg-gray-200 rounded" />
-        <div className="h-3 w-full bg-gray-200 rounded" />
-        <div className="h-3 w-3/4 bg-gray-200 rounded" />
-      </div>
-    </div>
-  );
+      container.scrollTo({
+        left,
+        behavior: "smooth",
+      });
+    }
+  }, [currCategory]);
 
-  const HeaderSkeleton = () => (
-    <div className="animate-pulse">
-      <div className="flex justify-between items-start">
-        <div className="space-y-2">
-          <div className="h-5 w-40 bg-gray-200 rounded" />
-          <div className="h-1.5 w-32 bg-gray-200 rounded" />
-          <div className="h-2 w-32 bg-gray-200 rounded" />
-        </div>
-
-        <div className="space-y-2 flex flex-col items-end">
-          <div className="h-6 w-24 bg-gray-200 rounded-lg" />
-          <div className="h-3 w-16 bg-gray-200 rounded" />
-        </div>
-      </div>
-    </div>
-  );
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
     <div className="min-h-screen w-full bg-gray-100 flex justify-center">
       {/* PHONE CONTAINER */}
       <div className="w-full max-w-md bg-white min-h-screen shadow-xl flex flex-col">
         {/* HEADER */}
-        <header className="px-4 pt-4 pb-3 border-b border-gray-100 sticky top-0 z-20 bg-white">
+        <header className="px-4 pt-4 pb-3 border-b border-gray-100  z-20 bg-white">
           {!shopDetails ? (
             <HeaderSkeleton />
           ) : (
@@ -115,67 +137,97 @@ const menu = () => {
         </header>
 
         {/* CATEGORY ICONS START */}
-        <div className="px-4  py-3 bg-white sticky top-[72px] z-10 border-b border-gray-200">
-          <div className="flex gap-4 overflow-x-auto no-scrollbar pb-1">
-            {categories.length == 0 ? (
-              <CategorySkeleton />
-            ) : (
-              categories.map((cat, i) => (
-                <div
-                  key={i}
-                  className="flex flex-col items-center min-w-[65px]"
-                >
-                  <div className="w-22 h-22 rounded-full overflow-hidden shadow-md bg-white">
-                    <img
-                      src={cat?.category?.image}
-                      alt={cat?.category?.image}
-                      className="w-full h-full object-cover"
-                    />
+        <div
+          className={`sticky top-12 z-20 bg-white/90 backdrop-blur border-b
+  ${scrolled ? "shadow-lg" : "shadow-sm"}`}
+        >
+          {/* Swipe hint gradients */}
+          <div className="pointer-events-none absolute left-0 top-0 h-full w-8 bg-linear-to-r from-white to-transparent z-30" />
+          <div className="pointer-events-none absolute right-0 top-0 h-full w-8 bg-linear-to-l from-white to-transparent z-30" />
+
+          {categories.length === 0 ? (
+            <CategorySkeleton />
+          ) : (
+            <div
+              ref={scrollRef}
+              className="flex gap-6 px-4 py-3 overflow-x-auto scroll-smooth scrollbar-thin scrollbar-thumb-gray-300"
+            >
+              {finalCategories.map((cat) => {
+                const isActive = currCategory === cat._id;
+                return (
+                  <div
+                    key={cat._id}
+                    ref={(el) => (itemRefs.current[cat._id] = el)}
+                    onClick={() => setCurrCategory(cat._id)}
+                    className="flex flex-col items-center min-w-[72px] cursor-pointer"
+                  >
+                    {/* SMART TAB */}
+                    {cat.isSmart ? (
+                      <div
+                        className={`w-20 h-20 rounded-full flex items-center justify-center text-white text-2xl shadow transition
+        ${
+          isActive
+            ? `bg-linear-to-tr ${cat.bg} scale-105 shadow-lg`
+            : "bg-gray-200 text-gray-600"
+        }`}
+                      >
+                        {cat.icon}
+                      </div>
+                    ) : (
+                      /* NORMAL CATEGORY */
+                      <div
+                        className={`relative p-[3px] rounded-full transition-all duration-300
+        ${
+          isActive
+            ? "bg-linear-to-tr from-orange-500 via-red-500 to-pink-500 scale-105 shadow-md"
+            : cat.isBest
+            ? "bg-linear-to-tr from-yellow-400 to-orange-500"
+            : ""
+        }`}
+                      >
+                        <div className="w-20 h-20 rounded-full overflow-hidden bg-white shadow-inner">
+                          <img
+                            src={cat.image}
+                            alt={cat.name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    <p
+                      className={`text-[11px] mt-2 font-semibold truncate w-full text-center
+      ${isActive ? "text-orange-600" : "text-gray-700"}`}
+                    >
+                      {cat.name}
+                    </p>
                   </div>
-                  <p className="text-[11px] mt-1 font-medium text-gray-700">
-                    {cat?.category?.name}
-                  </p>
-                </div>
-              ))
-            )}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* MENU CONTENT */}
-        <main className="flex-1 mt-4 overflow-y-auto pb-10 px-4 space-y-6">
-          {currCategoryItem.length == 0
-            ? [1, 2, 3].map((i) => <ItemSkeleton key={i} />)
-            : currCategoryItem.map((item) => (
-                <div
-                  key={item.name}
-                  className="rounded-2xl border border-gray-200 bg-white shadow-sm hover:shadow-md transition-all overflow-hidden"
-                >
-                  <div className="relative w-full h-48 overflow-hidden">
-                    <img
-                      src={item.img}
-                      alt={item.name}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute top-3 left-3 bg-black/60 text-white text-xs font-semibold px-3 py-1 rounded-full">
-                      {item.tag}
-                    </div>
-                    <div className="absolute bottom-3 right-3 bg-white/90 backdrop-blur text-gray-900 text-sm font-bold px-3 py-1 rounded-full shadow">
-                      ₹{item.price}
-                    </div>
-                    <span className="absolute top-3 right-3 w-4 h-4 border border-green-700 rounded-sm grid place-items-center text-green-700 text-[10px] font-bold bg-white/80 backdrop-blur">
-                      •
-                    </span>
-                  </div>
-                  <div className="p-4 space-y-1">
-                    <h2 className="text-base font-semibold text-gray-900">
-                      {item.name}
-                    </h2>
-                    <p className="text-[12px] text-gray-500 leading-relaxed">
-                      {item.desc}
-                    </p>
-                  </div>
-                </div>
-              ))}
+        <main className="flex-1 mt-4 overflow-y-auto pb-16 px-4 space-y-6">
+          {/* 1️⃣ Loading */}
+          {userLoading && [1, 2, 3].map((i) => <ItemSkeleton key={i} />)}
+
+          {/* 2️⃣ Data Loaded with Products */}
+          {!userLoading &&
+            currCategoryItem?.products?.length > 0 &&
+            currCategoryItem.products.map((item) => (
+              <MenuItemCard key={item._id} item={item} />
+            ))}
+
+          {/* 3️⃣ Data Loaded but Empty */}
+          {!userLoading && currCategoryItem?.products?.length === 0 && (
+            <div className="flex flex-col items-center justify-center mt-20 text-center text-gray-500">
+              <span className="text-5xl mb-3">🍽️</span>
+              <p className="font-semibold">No items available</p>
+              <p className="text-sm">in this category</p>
+            </div>
+          )}
         </main>
 
         {/* FOOTER */}

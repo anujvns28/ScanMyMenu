@@ -12,6 +12,9 @@ import {
   HeaderSkeleton,
 } from "../utils/skeleton";
 import { smartTabs } from "../utils/data";
+import ForYou from "../components/core/menu/ForYou";
+import TopRated from "../components/core/menu/Toprated";
+import ProductBottomSheet from "../components/core/menu/ProductBottomSheet";
 
 const menu = () => {
   const { shopId } = useParams();
@@ -25,6 +28,9 @@ const menu = () => {
   const [currCategoryItem, setCurrCategoryItem] = useState([]);
   const [currCategory, setCurrCategory] = useState(null);
   const [scrolled, setScrolled] = useState(false);
+  const [search, setSearch] = useState("");
+
+  const isSmartTab = (id) => ["for-you", "top-rated"].includes(id);
 
   const fetchShopDetailsHandler = async () => {
     const shop = await fetchMyShop(token, dispatch);
@@ -66,12 +72,39 @@ const menu = () => {
     })),
   ];
 
+  const smartFilters = [
+    { id: "veg", label: "🟢 Veg" },
+    { id: "spicy", label: "🔥 Spicy" },
+    { id: "bestseller", label: "⭐ Bestseller" },
+    { id: "quick", label: "⏱ Under 15 min" },
+    { id: "cheap", label: "₹ Under 200" },
+  ];
+
+  const [activeFilters, setActiveFilters] = useState([]);
+
+  const dummyProduct = {
+    name: "Butter Chicken",
+    image: "https://images.pexels.com/photos/461198/pexels-photo-461198.jpeg",
+    description: "Creamy tomato gravy with smoky tandoori chicken",
+    price: 299,
+    rating: 4.6,
+    preparationTime: 15,
+    spiceLevel: "Medium",
+    ingredients: ["Chicken", "Butter", "Tomato", "Cream", "Spices"],
+    allergens: ["Milk"],
+    reviews: [
+      { user: "Rahul", text: "Amazing taste!", time: "2 days ago" },
+      { user: "Ankit", text: "Very creamy and rich.", time: "1 week ago" },
+    ],
+  };
+
   useEffect(() => {
     fetchShopDetailsHandler();
   }, []);
 
   useEffect(() => {
-    if (currCategory) fetchCategoryByProductHandler();
+    if (currCategory && !isSmartTab(currCategory))
+      fetchCategoryByProductHandler();
   }, [currCategory]);
 
   useEffect(() => {
@@ -210,30 +243,115 @@ const menu = () => {
 
         {/* MENU CONTENT */}
         <main className="flex-1 mt-4 overflow-y-auto pb-16 px-4 space-y-6">
-          {/* 1️⃣ Loading */}
-          {userLoading && [1, 2, 3].map((i) => <ItemSkeleton key={i} />)}
+          {/* Selected Category Header */}
+          {!isSmartTab(currCategory) && (
+            <div className="sticky top-0 z-10 bg-white pb-3 flex flex-col gap-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-lg font-bold text-gray-900">
+                    {finalCategories.find((c) => c._id === currCategory)?.name}
+                  </h2>
+                  <p className="text-xs text-gray-500">
+                    {currCategoryItem?.products?.length || 0} dishes
+                  </p>
+                </div>
 
-          {/* 2️⃣ Data Loaded with Products */}
-          {!userLoading &&
-            currCategoryItem?.products?.length > 0 &&
-            currCategoryItem.products.map((item) => (
-              <MenuItemCard key={item._id} item={item} />
-            ))}
+                <span className="px-3 py-1 bg-orange-100 text-orange-600 text-xs font-semibold rounded-full">
+                  Browse menu
+                </span>
+              </div>
 
-          {/* 3️⃣ Data Loaded but Empty */}
-          {!userLoading && currCategoryItem?.products?.length === 0 && (
-            <div className="flex flex-col items-center justify-center mt-20 text-center text-gray-500">
-              <span className="text-5xl mb-3">🍽️</span>
-              <p className="font-semibold">No items available</p>
-              <p className="text-sm">in this category</p>
+              <div className="relative mt-2">
+                {/* Soft fade edges */}
+                <div className="absolute left-0 top-0 h-full w-10 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
+                <div className="absolute right-0 top-0 h-full w-10 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
+
+                <div className="flex gap-3 overflow-x-auto px-1 pb-2 snap-x snap-mandatory scrollbar-hide scroll-smooth items-center">
+                  {/* 🔍 Search pill */}
+                  <div className="snap-start shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full bg-gray-100 border border-gray-200">
+                    <span className="text-gray-400">🔍</span>
+                    <input
+                      type="text"
+                      placeholder="Search dish..."
+                      className="bg-transparent outline-none text-xs w-24 focus:w-40 transition-all"
+                      onChange={(e) => setSearch(e.target.value)}
+                    />
+                  </div>
+
+                  {smartFilters.map((filter) => {
+                    const active = activeFilters.includes(filter.id);
+
+                    return (
+                      <button
+                        key={filter.id}
+                        onClick={() =>
+                          setActiveFilters((prev) =>
+                            prev.includes(filter.id)
+                              ? prev.filter((f) => f !== filter.id)
+                              : [...prev, filter.id]
+                          )
+                        }
+                        className={`snap-start shrink-0 px-5 py-2.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200
+            ${
+              active
+                ? "bg-orange-500 text-white shadow-lg scale-105"
+                : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50"
+            }
+          `}
+                      >
+                        {filter.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           )}
+
+          <div className="space-y-5">
+            {/* Loading Skeletons */}
+            {userLoading &&
+              [1, 2, 3].map((i) => (
+                <div key={i} className="bg-white rounded-2xl shadow-sm p-4">
+                  <ItemSkeleton />
+                </div>
+              ))}
+
+            {/* Smart Tabs */}
+            {!userLoading && isSmartTab(currCategory) ? (
+              <>
+                {currCategory === "for-you" && <ForYou />}
+                {currCategory === "top-rated" && <TopRated />}
+              </>
+            ) : (
+              currCategoryItem?.products?.length > 0 &&
+              currCategoryItem?.products?.map((item) => (
+                <div
+                  key={item._id}
+                  className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300"
+                >
+                  <MenuItemCard item={item} />
+                </div>
+              ))
+            )}
+
+            {/* Empty State */}
+            {!userLoading && currCategoryItem?.products?.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-20 text-center text-gray-500">
+                <span className="text-5xl mb-3">🍽️</span>
+                <p className="font-semibold">No items available</p>
+                <p className="text-sm">in this category</p>
+              </div>
+            )}
+          </div>
         </main>
 
         {/* FOOTER */}
         <footer className="px-4 py-3 text-center text-[11px] text-gray-500 border-t border-gray-200 bg-white">
           View-only digital menu • Scan My Menu
         </footer>
+
+        <ProductBottomSheet product={dummyProduct} />
       </div>
     </div>
   );

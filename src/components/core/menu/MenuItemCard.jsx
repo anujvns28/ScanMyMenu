@@ -1,100 +1,149 @@
-const MenuItemCard = ({ item }) => {
-  const hasDiscount =
-    item.discountPrice && item.discountPrice < item.price;
+import { Star, Flame, Heart, Clock, Plus, Minus } from "lucide-react";
+import { useState } from "react";
 
-  const isVeg = item.tags?.some((tag) => tag.slug === "veg");
-  const isSpicy = item.tags?.some((tag) => tag.slug === "spicy");
-  const isBestseller = item.tags?.some((tag) => tag.slug === "bestseller");
+const MenuItemCard = ({ item }) => {
+  const [qty, setQty] = useState(0);
 
   return (
-    <div className="rounded-2xl bg-white shadow-sm hover:shadow-lg transition overflow-hidden border border-gray-100">
-      {/* IMAGE */}
-      <div className="relative w-full h-48 overflow-hidden">
+    <div className="relative bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition group">
+      {/* ❌ Not Available Overlay */}
+      {!item.isAvailable && (
+        <div className="absolute inset-0 bg-black/60 z-20 flex items-center justify-center">
+          <span className="px-4 py-2 bg-red-500 text-white text-sm font-semibold rounded-lg">
+            Not Available
+          </span>
+        </div>
+      )}
+
+      {/* ================= IMAGE SECTION ================= */}
+      <div className="relative h-56 overflow-hidden">
         <img
           src={item.image}
           alt={item.name}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover group-hover:scale-105 transition"
         />
 
-        {/* Dark Gradient */}
-        <div className="absolute inset-0 bg-linear-to-t from-black/40 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent"></div>
 
-        {/* Today Special */}
-        {item.isTodaySpecial && (
-          <span className="absolute top-3 left-3 bg-orange-500 text-white text-[11px] font-bold px-3 py-1 rounded-full shadow">
-            🔥 Today’s Special
-          </span>
+        {/* ⭐ Rating */}
+        {true && (
+          <div className="absolute top-3 left-3 bg-green-600 text-white px-2 py-1 rounded-lg text-xs flex items-center gap-1 z-10">
+            <Star size={12} />
+            4.5
+          </div>
         )}
 
-        {/* Bestseller */}
-        {isBestseller && (
-          <span className="absolute top-12 left-3 bg-yellow-400 text-black text-[10px] font-semibold px-2 py-0.5 rounded-full shadow">
-            ⭐ Bestseller
-          </span>
-        )}
+        {/* ❤️ Wishlist */}
+        <button className="absolute top-3 right-3 bg-white p-1.5 rounded-full shadow z-10">
+          <Heart size={16} className="text-gray-700" />
+        </button>
 
-        {/* Veg / Non Veg */}
-        <span
-          className={`absolute top-3 right-3 w-4 h-4 border rounded-sm grid place-items-center text-[10px] font-bold
-          ${
-            isVeg
-              ? "border-green-700 text-green-700 bg-white/80"
-              : "border-red-700 text-red-700 bg-white/80"
-          }`}
-        >
-          •
-        </span>
-
-        {/* Price */}
-        <div className="absolute bottom-3 right-3 bg-white/90 backdrop-blur px-3 py-1 rounded-full shadow text-sm font-bold">
-          ₹{hasDiscount ? item.discountPrice : item.price}
+        {/* 🟢 Veg / 🔴 Non-Veg */}
+        <div className="absolute top-3 right-12 z-10">
+          <div
+            className={`w-4 h-4 rounded-full border-2 ${
+              true
+                ? "bg-green-500 border-green-700"
+                : "bg-red-500 border-red-700"
+            }`}
+          ></div>
         </div>
 
-        {/* Tags */}
-        <div className="absolute bottom-3 left-3 flex gap-2">
-          {item.tags?.slice(0, 2).map((tag) => (
-            <span
-              key={tag._id}
-              className={`px-2 py-[2px] text-[10px] font-semibold rounded-full bg-${tag.color}-100 text-${tag.color}-700`}
-            >
-              {tag.name}
-            </span>
-          ))}
+        {/* 🔥 Bestseller / ⭐ Today Special */}
+        {true && (
+          <div className="absolute top-12 left-3 bg-orange-500 text-white px-2 py-0.5 rounded-lg text-[10px] font-semibold z-10">
+            🔥 Bestseller
+          </div>
+        )}
+        {true && (
+          <div className="absolute top-12 left-3 bg-purple-600 text-white px-2 py-0.5 rounded-lg text-[10px] font-semibold z-10">
+            ⭐ Today’s Special
+          </div>
+        )}
+
+        {/* Name + Tags */}
+        <div className="absolute bottom-3 left-3 right-3 z-10">
+          <h3 className="text-white font-bold text-lg leading-tight drop-shadow">
+            {item.name}
+          </h3>
+
+          <div className="flex flex-wrap gap-2 mt-1">
+            {item.tags?.map((tag, i) => (
+              <span
+                key={i}
+                className="text-[10px] px-2 py-0.5 rounded-full bg-white/90 text-gray-800 flex items-center gap-1"
+              >
+                <Flame size={10} />
+                {tag.name || tag}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* CONTENT */}
-      <div className="p-4 space-y-1">
-        <div className="flex justify-between items-start">
-          <h2 className="text-base font-semibold text-gray-900">
-            {item.name}
-          </h2>
-
-          {hasDiscount && (
-            <span className="text-xs line-through text-gray-400">
-              ₹{item.price}
-            </span>
-          )}
-        </div>
-
-        <p className="text-[12px] text-gray-500 leading-relaxed line-clamp-2">
-          {item.description}
+      {/* ================= BOTTOM CONTENT ================= */}
+      <div className="p-4 space-y-2">
+        {/* Description */}
+        <p className="text-xs text-gray-500 line-clamp-2 leading-snug">
+          {item.description || "Delicious chef-style preparation"}
         </p>
 
-        {/* Meta */}
-        <div className="flex justify-between items-center mt-3 text-xs text-gray-500">
-          <div className="flex gap-3">
-            <span>⏱ {item.preparationTime} min</span>
-            <span>⭐ {item.rating || "New"}</span>
+        {/* Low Stock Alert */}
+        {item.stock <= 5 && item.isAvailable && (
+          <p className="text-[11px] text-red-500 font-semibold">
+            Only {item.stock} left
+          </p>
+        )}
+
+        {/* Price + Time */}
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="font-bold text-gray-900 text-lg">₹{item.price}</p>
+            {item.discountPrice && (
+              <p className="text-xs line-through text-gray-400">
+                ₹{item.discountPrice}
+              </p>
+            )}
           </div>
 
-          {item.orderCount > 10 && (
-            <span className="text-orange-600 font-semibold">
-              Popular
-            </span>
-          )}
+          <div className="flex items-center gap-1 text-xs text-gray-500">
+            <Clock size={14} />
+            {item.preparationTime} mins
+          </div>
         </div>
       </div>
+
+      {/* ================= ADD TO PLATE ================= */}
+      {item.isAvailable && (
+        <div className="px-4 pb-4">
+          {qty === 0 ? (
+            <button
+              onClick={() => setQty(1)}
+              className="w-full py-2 rounded-xl bg-green-600 text-white text-sm font-semibold hover:bg-green-700 transition"
+            >
+              ➕ Add to plate
+            </button>
+          ) : (
+            <div className="flex items-center justify-between bg-gray-100 rounded-xl px-3 py-2">
+              <button
+                onClick={() => setQty(qty - 1)}
+                className="p-1 rounded-full bg-white shadow"
+              >
+                <Minus size={16} />
+              </button>
+
+              <span className="font-semibold">{qty}</span>
+
+              <button
+                onClick={() => setQty(qty + 1)}
+                className="p-1 rounded-full bg-white shadow"
+              >
+                <Plus size={16} />
+              </button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

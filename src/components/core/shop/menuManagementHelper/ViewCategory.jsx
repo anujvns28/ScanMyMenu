@@ -26,9 +26,13 @@ const ViewCategory = ({ openCategory, setOpenCategory,setShopCategories }) => {
   const fetchAllTagHendler = async () => {
     const result = await fetchAllActiveTag(token, dispatch);
     if (result) {
-      const currentTagIds = openCategory?.tags.map((tag)=>tag._id);
-      const notSelectedTag = result?.tags.filter((tag)=>!currentTagIds.includes(tag._id))
-      setTags(notSelectedTag)
+      // tiltring category tags in all active tags
+      const categoryTags = result?.tags.filter((tag) => tag.type == "category");
+      const currentTagIds = openCategory?.tags.map((tag) => tag._id);
+      const notSelectedTag = categoryTags.filter(
+        (tag) => !currentTagIds.includes(tag._id)
+      );
+      setTags(notSelectedTag);
     }
   };
 

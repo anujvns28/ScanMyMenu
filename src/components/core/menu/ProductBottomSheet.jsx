@@ -1,25 +1,27 @@
 import { X, Star, Flame, Clock } from "lucide-react";
+import { useState } from "react";
+import WriteReviewSheet from "./WriteReviewSheet";
+import ProductReviewsSheet from "./ProductReviewsSheet";
 
-const ProductBottomSheet = ({ product, onClose }) => {
+const ProductBottomSheet = ({ product, setProductSheetDetails }) => {
   if (!product) return null;
+
+  const [openReviewForm, setOpenRevewForm] = useState(false);
+  const [openReviewSheet, setOpenReviewSheet] = useState(false);
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center">
       {/* Background overlay */}
-      <div
-        className="absolute inset-0 bg-black/40"
-        onClick={onClose}
-      ></div>
+      <div className="absolute inset-0 bg-black/40"></div>
 
       {/* Bottom Sheet */}
       <div className="relative w-full max-w-md bg-white rounded-t-3xl shadow-2xl max-h-[85vh] flex flex-col animate-slide-up">
-
         {/* Drag handle */}
         <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mt-3 mb-2"></div>
 
         {/* Close */}
         <button
-          onClick={onClose}
+          onClick={() => setProductSheetDetails(null)}
           className="absolute top-4 right-4 p-1 rounded-full bg-gray-100"
         >
           <X size={18} />
@@ -27,7 +29,6 @@ const ProductBottomSheet = ({ product, onClose }) => {
 
         {/* ================= SCROLLABLE CONTENT ================= */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
-
           {/* Image */}
           <img
             src={product.image}
@@ -110,10 +111,20 @@ const ProductBottomSheet = ({ product, onClose }) => {
             ))}
 
             {product.reviews?.length > 1 && (
-              <button className="mt-3 text-orange-600 text-sm font-semibold">
+              <button
+                onClick={() => setOpenReviewSheet(true)}
+                className="mt-3 text-orange-600 text-sm font-semibold"
+              >
                 View all {product.reviews.length} reviews →
               </button>
             )}
+
+            <button
+              onClick={() => setOpenRevewForm(true)}
+              className="w-full mt-3 py-2 border border-orange-500 text-orange-600 rounded-xl text-sm font-semibold"
+            >
+              ✍ Write a review
+            </button>
           </div>
         </div>
 
@@ -125,6 +136,22 @@ const ProductBottomSheet = ({ product, onClose }) => {
           </button>
         </div>
       </div>
+
+      {openReviewForm && (
+        <WriteReviewSheet
+          open={openReviewForm}
+          onClose={() => setOpenRevewForm(false)}
+          product={product}
+        />
+      )}
+
+      {openReviewSheet && (
+        <ProductReviewsSheet
+          open={openReviewSheet}
+          onClose={() => setOpenReviewSheet(false)}
+          product={product}
+        />
+      )}
     </div>
   );
 };

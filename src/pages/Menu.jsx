@@ -11,7 +11,7 @@ import {
   CategorySkeleton,
   HeaderSkeleton,
 } from "../utils/skeleton";
-import { smartTabs } from "../utils/data";
+import { smartFilters, smartTabs } from "../utils/data";
 import ForYou from "../components/core/menu/ForYou";
 import TopRated from "../components/core/menu/Toprated";
 import ProductBottomSheet from "../components/core/menu/ProductBottomSheet";
@@ -29,6 +29,8 @@ const menu = () => {
   const [currCategory, setCurrCategory] = useState(null);
   const [scrolled, setScrolled] = useState(false);
   const [search, setSearch] = useState("");
+  const [productSheetDetails, setProductSheetDetails] = useState(null);
+  const [activeFilters, setActiveFilters] = useState([]);
 
   const isSmartTab = (id) => ["for-you", "top-rated"].includes(id);
 
@@ -44,7 +46,7 @@ const menu = () => {
     }
   };
 
-  const fetchCategoryByProductHandler = async () => {
+  const fetchCategoryInfoAndItems = async () => {
     const result = await fetchCategoryByProduct(
       { shopCategoryId: currCategory },
       token,
@@ -72,39 +74,72 @@ const menu = () => {
     })),
   ];
 
-  const smartFilters = [
-    { id: "veg", label: "🟢 Veg" },
-    { id: "spicy", label: "🔥 Spicy" },
-    { id: "bestseller", label: "⭐ Bestseller" },
-    { id: "quick", label: "⏱ Under 15 min" },
-    { id: "cheap", label: "₹ Under 200" },
-  ];
-
-  const [activeFilters, setActiveFilters] = useState([]);
-
   const dummyProduct = {
+    _id: "1",
     name: "Butter Chicken",
     image: "https://images.pexels.com/photos/461198/pexels-photo-461198.jpeg",
     description: "Creamy tomato gravy with smoky tandoori chicken",
     price: 299,
+    discountPrice: 349,
+
     rating: 4.6,
+    reviewsCount: 128,
+
     preparationTime: 15,
     spiceLevel: "Medium",
-    ingredients: ["Chicken", "Butter", "Tomato", "Cream", "Spices"],
-    allergens: ["Milk"],
+
+    isVeg: false,
+    isBestseller: true,
+    isTodaySpecial: true,
+
+    tags: ["Bestseller", "Creamy", "Spicy", "North Indian"],
+
+    ingredients: [
+      "Chicken",
+      "Butter",
+      "Tomato",
+      "Fresh Cream",
+      "Cashew Paste",
+      "Garam Masala",
+      "Kashmiri Chilli",
+    ],
+
     reviews: [
-      { user: "Rahul", text: "Amazing taste!", time: "2 days ago" },
-      { user: "Ankit", text: "Very creamy and rich.", time: "1 week ago" },
+      {
+        user: "Rahul",
+        rating: 5,
+        text: "Absolutely delicious! The gravy was rich and perfectly spiced.",
+        time: "2 days ago",
+      },
+      {
+        user: "Ankit",
+        rating: 4,
+        text: "Very creamy and well cooked chicken. Would order again.",
+        time: "1 week ago",
+      },
+      {
+        user: "Neha",
+        rating: 5,
+        text: "Best butter chicken I've had in a long time!",
+        time: "3 days ago",
+      },
+      {
+        user: "Amit",
+        rating: 4,
+        text: "Great taste, portion size could be slightly bigger.",
+        time: "5 days ago",
+      },
     ],
   };
+
+  console.log(currCategoryItem, "this is curr category");
 
   useEffect(() => {
     fetchShopDetailsHandler();
   }, []);
 
   useEffect(() => {
-    if (currCategory && !isSmartTab(currCategory))
-      fetchCategoryByProductHandler();
+    if (currCategory && !isSmartTab(currCategory)) fetchCategoryInfoAndItems();
   }, [currCategory]);
 
   useEffect(() => {
@@ -245,7 +280,7 @@ const menu = () => {
         <main className="flex-1 mt-4 overflow-y-auto pb-16 px-4 space-y-6">
           {/* Selected Category Header */}
           {!isSmartTab(currCategory) && (
-            <div className="sticky top-0 z-10 bg-white pb-3 flex flex-col gap-3">
+            <div className="sticky top-0 z-10 bg-white pb-3 flex flex-col gap-3 border-b">
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-lg font-bold text-gray-900">
@@ -303,6 +338,32 @@ const menu = () => {
                       </button>
                     );
                   })}
+
+                  {currCategory?.tags?.map((filter) => {
+                    const active = activeFilters.includes(filter.id);
+
+                    return (
+                      <button
+                        key={filter.id}
+                        onClick={() =>
+                          setActiveFilters((prev) =>
+                            prev.includes(filter.id)
+                              ? prev.filter((f) => f !== filter.id)
+                              : [...prev, filter.id]
+                          )
+                        }
+                        className={`snap-start shrink-0 px-5 py-2.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200
+            ${
+              active
+                ? "bg-orange-500 text-white shadow-lg scale-105"
+                : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50"
+            }
+          `}
+                      >
+                        {filter.name}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -328,6 +389,7 @@ const menu = () => {
               currCategoryItem?.products?.map((item) => (
                 <div
                   key={item._id}
+                  onClick={() => setProductSheetDetails(dummyProduct)}
                   className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300"
                 >
                   <MenuItemCard item={item} />
@@ -351,7 +413,10 @@ const menu = () => {
           View-only digital menu • Scan My Menu
         </footer>
 
-        <ProductBottomSheet product={dummyProduct} />
+        <ProductBottomSheet
+          product={productSheetDetails}
+          setProductSheetDetails={setProductSheetDetails}
+        />
       </div>
     </div>
   );

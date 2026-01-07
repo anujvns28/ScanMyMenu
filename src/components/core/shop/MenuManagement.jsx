@@ -79,7 +79,6 @@ const Menu = () => {
      }
    };
 
-   console.log(currCategoryProduct);
    useEffect(() => {
      fetchCategoriesHandler();
    }, []);

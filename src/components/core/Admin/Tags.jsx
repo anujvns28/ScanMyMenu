@@ -275,8 +275,8 @@ const AdminTags = () => {
                       }}
                     >
                       <option value="">Select tag type</option>
-                      <option value="food">Food</option>
-                      <option value="shop">Shop</option>
+                      <option value="category">Category</option>
+                      <option value="product">Product</option>
                     </select>
 
                     {errors.type && (

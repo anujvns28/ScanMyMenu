@@ -82,7 +82,8 @@ const ViewProduct = ({
   const fetchTagsHandler = async () => {
     const result = await fetchAllActiveTag(token, dispatch);
     if (result) {
-      setAllTags(result.tags);
+      const productTags = result?.tags.filter((tag) => tag.type == "product");
+      setAllTags(productTags);
     }
   };
 

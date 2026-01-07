@@ -3,7 +3,8 @@ import { setUserLoading } from "../../redux/slices/auth";
 import  {productEndPoints}  from "../api";
 
 
-const {ADD_PRODUCT_API,FETCH_CATEGORY_BY_PRODUCT,UPDATE_PRODUCT_API} = productEndPoints;
+const { ADD_PRODUCT_API, FETCH_CATEGORY_INFO_AND_PRODUCT, UPDATE_PRODUCT_API } =
+  productEndPoints;
 
 export const addProduct = async (data, token, dispatch) => {
   dispatch(setUserLoading(true));
@@ -13,7 +14,7 @@ export const addProduct = async (data, token, dispatch) => {
     const response = await axios({
       method: "POST",
       url: ADD_PRODUCT_API,
-      data: data, 
+      data: data,
       withCredentials: true,
       headers: {
         Authorization: `Bearer ${token}`,
@@ -40,8 +41,8 @@ export const fetchCategoryByProduct = async (data, token, dispatch) => {
   try {
     const response = await axios({
       method: "POST",
-      url: FETCH_CATEGORY_BY_PRODUCT,
-      data: data, 
+      url: FETCH_CATEGORY_INFO_AND_PRODUCT,
+      data: data,
       withCredentials: true,
       headers: {
         Authorization: `Bearer ${token}`,

@@ -43,6 +43,6 @@ export const shopCategoryEndPoints = {
 
 export const productEndPoints = {
   ADD_PRODUCT_API: BASE_URL + "/product/addProduct",
-  FETCH_CATEGORY_BY_PRODUCT: BASE_URL + "/product/fetchCategoryProduct",
+  FETCH_CATEGORY_INFO_AND_PRODUCT: BASE_URL + "/product/fetchCategoryProduct",
   UPDATE_PRODUCT_API: BASE_URL + "/product/updateProduct",
 };

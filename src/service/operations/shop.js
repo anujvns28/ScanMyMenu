@@ -4,13 +4,13 @@ import { shopEndPoints } from "../api";
 import { setShopSlice } from "../../redux/slices/shop";
 
 const {
-    GET_MY_SHOP_API,
-    UPDATE_CONTACT_INFO_API,
-    UPDATE_SHOP_ADDRESS_API,
-    UPDATE_SHOP_PROFILE_API,
-    UPDATE_SHOP_TIMING_API
+  GET_MY_SHOP_API,
+  UPDATE_CONTACT_INFO_API,
+  UPDATE_SHOP_ADDRESS_API,
+  UPDATE_SHOP_PROFILE_API,
+  UPDATE_SHOP_TIMING_API,
+  GET_SHOP_DETAILD_API,
 } = shopEndPoints;
-
 
 export const fetchMyShop = async (token, dispatch) => {
   dispatch(setUserLoading(true));
@@ -29,7 +29,7 @@ export const fetchMyShop = async (token, dispatch) => {
     if (response) {
       console.log("fetch my shop api response", response);
       result = response.data;
-      dispatch(setShopSlice(response.data.data))
+      dispatch(setShopSlice(response.data.data));
     }
   } catch (err) {
     console.log("fetch my shop api error", err);
@@ -39,7 +39,6 @@ export const fetchMyShop = async (token, dispatch) => {
   return result;
 };
 
-
 export const updateShopProfile = async (data, token, dispatch) => {
   dispatch(setUserLoading(true));
   let result;
@@ -48,7 +47,7 @@ export const updateShopProfile = async (data, token, dispatch) => {
     const response = await axios({
       method: "PUT",
       url: UPDATE_SHOP_PROFILE_API,
-      data: data, 
+      data: data,
       withCredentials: true,
       headers: {
         Authorization: `Bearer ${token}`,
@@ -59,7 +58,7 @@ export const updateShopProfile = async (data, token, dispatch) => {
     if (response) {
       console.log("update shop profile response", response);
       result = response.data;
-      dispatch(setShopSlice(response.data.data))
+      dispatch(setShopSlice(response.data.data));
     }
   } catch (err) {
     console.log("update shop profile error", err);
@@ -68,7 +67,6 @@ export const updateShopProfile = async (data, token, dispatch) => {
   dispatch(setUserLoading(false));
   return result;
 };
-
 
 export const updateContactInfo = async (data, token, dispatch) => {
   dispatch(setUserLoading(true));
@@ -88,7 +86,7 @@ export const updateContactInfo = async (data, token, dispatch) => {
     if (response) {
       console.log("update contact info response", response);
       result = response.data;
-      dispatch(setShopSlice(response.data.data))
+      dispatch(setShopSlice(response.data.data));
     }
   } catch (err) {
     console.log("update contact info error", err);
@@ -97,7 +95,6 @@ export const updateContactInfo = async (data, token, dispatch) => {
   dispatch(setUserLoading(false));
   return result;
 };
-
 
 export const updateShopAddress = async (data, token, dispatch) => {
   dispatch(setUserLoading(true));
@@ -117,7 +114,7 @@ export const updateShopAddress = async (data, token, dispatch) => {
     if (response) {
       console.log("update shop address response", response);
       result = response.data;
-      dispatch(setShopSlice(response.data.data))
+      dispatch(setShopSlice(response.data.data));
     }
   } catch (err) {
     console.log("update shop address error", err);
@@ -145,7 +142,7 @@ export const updateShopTiming = async (data, token, dispatch) => {
     if (response) {
       console.log("update shop timing response", response);
       result = response.data;
-      dispatch(setShopSlice(response.data.data))
+      dispatch(setShopSlice(response.data.data));
     }
   } catch (err) {
     console.log("update shop timing error", err);
@@ -155,6 +152,30 @@ export const updateShopTiming = async (data, token, dispatch) => {
   return result;
 };
 
+export const fetchShopDetails = async (data, dispatch) => {
+  dispatch(setUserLoading(true));
+  let result;
+
+  try {
+    const response = await axios({
+      method: "POST",
+      url: GET_SHOP_DETAILD_API,
+      data: data,
+      withCredentials: true,
+    });
+
+    if (response) {
+      console.log("fetch  shop api response", response);
+      result = response.data;
+      dispatch(setShopSlice(response.data.data));
+    }
+  } catch (err) {
+    console.log("fetch  shop api error", err);
+  }
+
+  dispatch(setUserLoading(false));
+  return result;
+};
 
 
 

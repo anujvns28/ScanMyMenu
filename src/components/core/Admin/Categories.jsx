@@ -16,6 +16,8 @@ const AdminCategories = () => {
   const [image, setImg] = useState();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [dietType, setDietType] = useState("mixed");
+
   const [categories, setCategories] = useState([]);
   const [currCategory, setCurrCategory] = useState();
   const [modalData, setModalData] = useState();
@@ -45,7 +47,7 @@ const AdminCategories = () => {
     if (!validateForm()) return;
 
     if (mode == "Add") {
-      const data = { name, description, image };
+      const data = { name, description, image, dietType };
       await createCategory(data, token, dispatch);
     } else {
       const data = {};
@@ -53,6 +55,7 @@ const AdminCategories = () => {
       if (description !== currCategory.description)
         data.description = description;
       if (typeof image !== "string") data.image = image;
+      if (dietType !== currCategory.dietType) data.dietType = dietType;
 
       if (Object.keys(data).length > 0) {
         data.categoryId = currCategory._id;
@@ -68,6 +71,7 @@ const AdminCategories = () => {
     setOpenModal(false);
     setMode("Add");
     fetchAllCategoryHandler();
+    setDietType("mixed");
   };
 
   const handleEditCategory = async (category) => {
@@ -203,8 +207,8 @@ This category will no longer be visible to customers.`;
 
       {/* Add Category Modal */}
       {openModal && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white   rounded-2xl w-[440px] p-6 shadow-xl">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
+          <div className="bg-white rounded-2xl w-[440px] max-h-[90vh] overflow-y-auto p-6 shadow-xl">
             {!userLoading ? (
               <div>
                 {/* Header */}
@@ -263,6 +267,36 @@ This category will no longer be visible to customers.`;
                         {errors.description}
                       </p>
                     )}
+                  </div>
+
+                  {/* Diet Type */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Diet Type
+                    </label>
+
+                    <div className="grid grid-cols-3 gap-2 bg-gray-100 p-1 rounded-xl">
+                      {[
+                        { id: "veg", label: "🟢 Veg" },
+                        { id: "non-veg", label: "🔴 Non-Veg" },
+                        { id: "mixed", label: "🍱 Mixed" },
+                      ].map((type) => (
+                        <button
+                          key={type.id}
+                          type="button"
+                          onClick={() => setDietType(type.id)}
+                          className={`py-2 text-sm font-semibold rounded-lg transition-all
+          ${
+            dietType === type.id
+              ? "bg-white shadow text-blue-600"
+              : "text-gray-500 hover:text-gray-700"
+          }
+        `}
+                        >
+                          {type.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
 
                   {/* Image Upload */}
@@ -351,6 +385,7 @@ This category will no longer be visible to customers.`;
                         setOpenModal(false);
                         setErrors({});
                         setMode("Add");
+                        setDietType("mixed");
                       }}
                       className="px-4 py-2 cursor-pointer rounded-lg border text-gray-600 hover:bg-gray-100"
                     >

@@ -34,7 +34,7 @@ export const addProduct = async (data, token, dispatch) => {
   return result;
 };
 
-export const fetchCategoryByProduct = async (data, token, dispatch) => {
+export const fetchCategoryByProduct = async (data, dispatch) => {
   dispatch(setUserLoading(true));
   let result;
 
@@ -44,9 +44,6 @@ export const fetchCategoryByProduct = async (data, token, dispatch) => {
       url: FETCH_CATEGORY_INFO_AND_PRODUCT,
       data: data,
       withCredentials: true,
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
     });
 
     if (response) {

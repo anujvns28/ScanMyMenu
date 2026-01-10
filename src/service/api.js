@@ -25,6 +25,7 @@ export const tagEndPoints = {
 
 export const shopEndPoints = {
   GET_MY_SHOP_API: BASE_URL + "/shop/my-shop",
+  GET_SHOP_DETAILD_API: BASE_URL + "/shop/getShopDetails",
   UPDATE_SHOP_PROFILE_API: BASE_URL + "/shop/profile",
   UPDATE_CONTACT_INFO_API: BASE_URL + "/shop/contact",
   UPDATE_SHOP_ADDRESS_API: BASE_URL + "/shop/address",
@@ -45,4 +46,12 @@ export const productEndPoints = {
   ADD_PRODUCT_API: BASE_URL + "/product/addProduct",
   FETCH_CATEGORY_INFO_AND_PRODUCT: BASE_URL + "/product/fetchCategoryProduct",
   UPDATE_PRODUCT_API: BASE_URL + "/product/updateProduct",
+};
+
+export const ratingAndReviews = {
+  ADD_RATING_AND_REVIEW: BASE_URL + "/rating/add",
+  EDIT_RATING_AND_REVIEW: BASE_URL + "/rating/edit",
+  GET_ALL_REVIEW: BASE_URL + "/rating/allReview",
+  GET_RATING_SUMMARY: BASE_URL + "/rating/ratingSummary",
+  GET_USER_REVIEW: BASE_URL + "/rating/has-reviewed",
 };

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import './App.css'
 import Navbar from './components/common/Navbar'
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import Home from "./pages/Home";
 import Footer from "./components/common/Footer";
 import Login from "./pages/Login";
@@ -24,8 +24,33 @@ import Review from "./components/core/shop/Review";
 import Offers from "./components/core/shop/Offers";
 import Support from "./components/core/shop/Support";
 import ShopProfile from "./components/core/shop/ShopProfile";
+import { useDispatch } from "react-redux";
+import { useEffect } from "react";
+import { setToken } from "./redux/slices/auth";
 
 function App() {
+  const dispatch = useDispatch();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const token = params.get("token");
+
+    if (token) {
+      localStorage.setItem("token", JSON.stringify(token));
+      dispatch(setToken(token));
+
+      const intent = localStorage.getItem("LOGIN_INTENT");
+      if (intent) {
+        localStorage.setItem("POST_LOGIN_INTENT", intent);
+        localStorage.removeItem("LOGIN_INTENT");
+      }
+
+      navigate(location.pathname, { replace: true });
+    }
+  }, []);
+
   return (
     <div>
       <Navbar />

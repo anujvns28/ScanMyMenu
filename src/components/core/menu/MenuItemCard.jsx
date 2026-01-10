@@ -1,149 +1,120 @@
 import { Star, Flame, Heart, Clock, Plus, Minus } from "lucide-react";
 import { useState } from "react";
+import { colorClasses } from "../../../utils/data";
 
 const MenuItemCard = ({ item }) => {
   const [qty, setQty] = useState(0);
 
   return (
-    <div className="relative bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition group">
-      {/* ❌ Not Available Overlay */}
+    <div className="relative bg-white rounded-xl shadow-sm hover:shadow-md transition overflow-hidden">
+      {/* ❌ Not Available */}
       {!item.isAvailable && (
         <div className="absolute inset-0 bg-black/60 z-20 flex items-center justify-center">
-          <span className="px-4 py-2 bg-red-500 text-white text-sm font-semibold rounded-lg">
+          <span className="px-3 py-1 bg-red-500 text-white text-xs font-semibold rounded-md">
             Not Available
           </span>
         </div>
       )}
 
-      {/* ================= IMAGE SECTION ================= */}
-      <div className="relative h-56 overflow-hidden">
+      {/* IMAGE */}
+      <div className="relative h-44 overflow-hidden">
         <img
           src={item.image}
           alt={item.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition"
+          className="w-full h-full object-cover"
         />
 
         <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent"></div>
 
-        {/* ⭐ Rating */}
-        {true && (
-          <div className="absolute top-3 left-3 bg-green-600 text-white px-2 py-1 rounded-lg text-xs flex items-center gap-1 z-10">
-            <Star size={12} />
-            4.5
-          </div>
-        )}
-
-        {/* ❤️ Wishlist */}
-        <button className="absolute top-3 right-3 bg-white p-1.5 rounded-full shadow z-10">
-          <Heart size={16} className="text-gray-700" />
-        </button>
-
-        {/* 🟢 Veg / 🔴 Non-Veg */}
-        <div className="absolute top-3 right-12 z-10">
-          <div
-            className={`w-4 h-4 rounded-full border-2 ${
-              true
-                ? "bg-green-500 border-green-700"
-                : "bg-red-500 border-red-700"
-            }`}
-          ></div>
+        {/* Rating */}
+        <div className="absolute top-2 left-2 bg-green-600 text-white px-2 py-0.5 rounded-md text-[10px] flex items-center gap-1">
+          <Star size={10} /> {item.rating}
         </div>
 
-        {/* 🔥 Bestseller / ⭐ Today Special */}
-        {true && (
-          <div className="absolute top-12 left-3 bg-orange-500 text-white px-2 py-0.5 rounded-lg text-[10px] font-semibold z-10">
-            🔥 Bestseller
-          </div>
-        )}
-        {true && (
-          <div className="absolute top-12 left-3 bg-purple-600 text-white px-2 py-0.5 rounded-lg text-[10px] font-semibold z-10">
-            ⭐ Today’s Special
-          </div>
-        )}
+        {/* Wishlist */}
+        <button className="absolute top-2 right-2 bg-white p-1 rounded-full shadow">
+          <Heart size={14} className="text-gray-700" />
+        </button>
 
-        {/* Name + Tags */}
-        <div className="absolute bottom-3 left-3 right-3 z-10">
-          <h3 className="text-white font-bold text-lg leading-tight drop-shadow">
+        {/* Name & Tags */}
+        <div className="absolute bottom-2 left-2 right-2">
+          <h3 className="text-white font-semibold text-sm leading-tight line-clamp-1">
             {item.name}
           </h3>
 
-          <div className="flex flex-wrap gap-2 mt-1">
-            {item.tags?.map((tag, i) => (
+          <div className="flex flex-wrap gap-1 mt-1">
+            {item.tags?.slice(0).map((tag, i) => (
               <span
                 key={i}
-                className="text-[10px] px-2 py-0.5 rounded-full bg-white/90 text-gray-800 flex items-center gap-1"
+                className={`px-2 py-0.5 text-[9px] rounded-full flex items-center gap-1 font-medium shadow-sm
+                ${colorClasses[tag.color || "blue"]}`}
               >
-                <Flame size={10} />
-                {tag.name || tag}
+                <Flame size={9} />
+                {tag.name}
               </span>
             ))}
+
+            <span className="px-2 py-0.5 text-[9px] rounded-full bg-black/50 text-white flex items-center gap-1">
+              <Clock size={9} />
+              {item.preparationTime}m
+            </span>
           </div>
         </div>
       </div>
 
-      {/* ================= BOTTOM CONTENT ================= */}
-      <div className="p-4 space-y-2">
-        {/* Description */}
-        <p className="text-xs text-gray-500 line-clamp-2 leading-snug">
-          {item.description || "Delicious chef-style preparation"}
+      {/* CONTENT */}
+      <div className="p-3 space-y-1.5">
+        <p className="text-[11px] text-gray-500 line-clamp-1">
+          {item.description || "Chef special preparation"}
         </p>
 
-        {/* Low Stock Alert */}
-        {item.stock <= 5 && item.isAvailable && (
-          <p className="text-[11px] text-red-500 font-semibold">
-            Only {item.stock} left
-          </p>
-        )}
-
-        {/* Price + Time */}
         <div className="flex items-center justify-between">
+          {/* Price + Time */}
           <div>
-            <p className="font-bold text-gray-900 text-lg">₹{item.price}</p>
+            <p className="font-bold text-gray-900 text-sm">₹{item.price}</p>
+
             {item.discountPrice && (
-              <p className="text-xs line-through text-gray-400">
+              <p className="text-[10px] line-through text-gray-400">
                 ₹{item.discountPrice}
               </p>
             )}
           </div>
 
-          <div className="flex items-center gap-1 text-xs text-gray-500">
-            <Clock size={14} />
-            {item.preparationTime} mins
-          </div>
-        </div>
-      </div>
+          {/* ADD Button */}
+          {item.isAvailable && (
+            <div>
+              {qty === 0 ? (
+                <button
+                  onClick={() => setQty(1)}
+                  className="px-4 py-1.5 border border-green-600 text-green-700 text-xs font-semibold rounded-lg bg-green-50 hover:bg-green-100"
+                >
+                  ADD
+                </button>
+              ) : (
+                <div className="flex items-center border border-green-600 rounded-lg bg-green-50 px-1.5 py-1">
+                  <button
+                    onClick={() => setQty(qty - 1)}
+                    className="w-6 h-6 flex items-center justify-center bg-white rounded-md shadow-sm"
+                  >
+                    <Minus size={12} />
+                  </button>
 
-      {/* ================= ADD TO PLATE ================= */}
-      {item.isAvailable && (
-        <div className="px-4 pb-4">
-          {qty === 0 ? (
-            <button
-              onClick={() => setQty(1)}
-              className="w-full py-2 rounded-xl bg-green-600 text-white text-sm font-semibold hover:bg-green-700 transition"
-            >
-              ➕ Add to plate
-            </button>
-          ) : (
-            <div className="flex items-center justify-between bg-gray-100 rounded-xl px-3 py-2">
-              <button
-                onClick={() => setQty(qty - 1)}
-                className="p-1 rounded-full bg-white shadow"
-              >
-                <Minus size={16} />
-              </button>
+                  <span className="w-6 text-center text-xs font-semibold text-green-700">
+                    {qty}
+                  </span>
 
-              <span className="font-semibold">{qty}</span>
-
-              <button
-                onClick={() => setQty(qty + 1)}
-                className="p-1 rounded-full bg-white shadow"
-              >
-                <Plus size={16} />
-              </button>
+                  <button
+                    onClick={() => setQty(qty + 1)}
+                    className="w-6 h-6 flex items-center justify-center bg-white rounded-md shadow-sm"
+                  >
+                    <Plus size={12} />
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>
-      )}
+      </div>
     </div>
   );
 };

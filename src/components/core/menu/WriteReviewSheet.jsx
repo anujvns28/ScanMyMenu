@@ -1,24 +1,131 @@
 import { X, Star, Camera } from "lucide-react";
 import { useState } from "react";
+import GoogleLoginSheet from "../../common/GoogleLoginSheet";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  addRatingAndReview,
+  editRatingAndReview,
+} from "../../../service/operations/rating&review";
+import { useEffect } from "react";
 
-const WriteReviewSheet = ({ open, onClose, product }) => {
+const WriteReviewSheet = ({
+  open,
+  onClose,
+  product,
+  category,
+  existingReview,
+  setUserRatingAndReview,
+}) => {
   const [rating, setRating] = useState(0);
   const [hover, setHover] = useState(0);
   const [comment, setComment] = useState("");
+  const [showLogin, setShowLogin] = useState(false);
+
+  const [images, setImages] = useState([]);
+  const [previews, setPreviews] = useState([]);
+
+  const { token } = useSelector((state) => state.auth);
+  const { shopDetails } = useSelector((state) => state.shop);
+  const dispatch = useDispatch();
 
   if (!open || !product) return null;
+
+  // Handle image selection
+  const handleImagePick = (e) => {
+    const files = Array.from(e.target.files);
+
+    const newFiles = [...images, ...files].slice(0, 5); // max 5
+    setImages(newFiles);
+
+    const newPreviews = newFiles.map((file) => URL.createObjectURL(file));
+    setPreviews(newPreviews);
+  };
+
+  // Remove selected image
+  const removeImage = (index) => {
+    const newFiles = images.filter((_, i) => i !== index);
+    setImages(newFiles);
+    setPreviews(newFiles.map((file) => URL.createObjectURL(file)));
+  };
+
+  // Submit review
+  const handleSubmit = async () => {
+    if (rating === 0) return;
+    if (!token) {
+      const intent = {
+        action: "SUBMIT_REVIEW",
+        productId: product._id,
+        categoryId: category,
+        shopId: shopDetails._id,
+
+        payload: {
+          rating,
+          comment,
+        },
+      };
+
+      localStorage.setItem("LOGIN_INTENT", JSON.stringify(intent));
+      setShowLogin(true);
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("productId", product._id);
+    formData.append("shopId", shopDetails._id);
+    formData.append("rating", rating);
+    formData.append("reviewText", comment);
+
+    if (existingReview) {
+      formData.append("reviewId", existingReview._id);
+    }
+
+    images.forEach((img) => {
+      formData.append("images", img);
+    });
+
+    const result = existingReview
+      ? await editRatingAndReview(formData, token, dispatch)
+      : await addRatingAndReview(formData, token, dispatch);
+
+    if (result) {
+      setUserRatingAndReview(result.data);
+    }
+    onClose();
+  };
+
+  const googleLogin = () => {
+    window.location.href = `http://localhost:4000/auth/user/google?shopId=${shopDetails._id}`;
+  };
+
+  useEffect(() => {
+    const intent = JSON.parse(localStorage.getItem("POST_LOGIN_INTENT"));
+    if (intent?.action === "SUBMIT_REVIEW") {
+      setRating(intent.payload.rating);
+      setComment(intent.payload.comment);
+      localStorage.removeItem("POST_LOGIN_INTENT");
+    }
+  }, []);
+
+  useEffect(() => {
+    if (existingReview) {
+      setRating(existingReview.rating);
+      setComment(existingReview.reviewText);
+      setPreviews(existingReview.images || []);
+    } else {
+      setRating(0);
+      setComment("");
+      setPreviews([]);
+      setImages([]);
+    }
+  }, [existingReview, open]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center">
       {/* Overlay */}
-      <div
-        className="absolute inset-0 bg-black/40"
-        onClick={onClose}
-      />
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
 
       {/* Sheet */}
       <div className="relative w-full max-w-md bg-white rounded-t-3xl shadow-2xl max-h-[80vh] flex flex-col animate-slide-up">
-
         {/* Handle */}
         <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mt-3 mb-2"></div>
 
@@ -32,7 +139,6 @@ const WriteReviewSheet = ({ open, onClose, product }) => {
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-4 space-y-6">
-
           {/* Product */}
           <div className="flex items-center gap-3">
             <img
@@ -50,20 +156,17 @@ const WriteReviewSheet = ({ open, onClose, product }) => {
 
           {/* Rating */}
           <div>
-            <p className="text-sm font-semibold mb-2">
-              How was it?
-            </p>
+            <p className="text-sm font-semibold mb-2">How was it?</p>
             <div className="flex gap-3">
               {[1, 2, 3, 4, 5].map((star) => (
                 <Star
                   key={star}
                   size={32}
-                  className={`cursor-pointer transition-all
-                    ${
-                      (hover || rating) >= star
-                        ? "text-yellow-400 fill-yellow-400 scale-110"
-                        : "text-gray-300"
-                    }`}
+                  className={`cursor-pointer transition-all ${
+                    (hover || rating) >= star
+                      ? "text-yellow-400 fill-yellow-400 scale-110"
+                      : "text-gray-300"
+                  }`}
                   onMouseEnter={() => setHover(star)}
                   onMouseLeave={() => setHover(0)}
                   onClick={() => setRating(star)}
@@ -84,9 +187,7 @@ const WriteReviewSheet = ({ open, onClose, product }) => {
 
           {/* Comment */}
           <div>
-            <p className="text-sm font-semibold mb-2">
-              Write your review
-            </p>
+            <p className="text-sm font-semibold mb-2">Write your review</p>
             <textarea
               rows="4"
               value={comment}
@@ -96,35 +197,69 @@ const WriteReviewSheet = ({ open, onClose, product }) => {
             />
           </div>
 
-          {/* Upload Photo (future ready) */}
-          <div className="flex items-center gap-3">
-            <button className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-300 text-sm text-gray-600">
+          {/* Image Upload */}
+          <div>
+            <label className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-300 text-sm text-gray-600 w-fit cursor-pointer">
               <Camera size={16} />
-              Add photo
-            </button>
-            <p className="text-xs text-gray-400">
-              (optional)
+              Add photos
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                hidden
+                onChange={handleImagePick}
+              />
+            </label>
+
+            {previews.length > 0 && (
+              <div className="flex gap-3 mt-3 overflow-x-auto pb-2">
+                {previews.map((img, i) => (
+                  <div
+                    key={i}
+                    className="relative w-24 h-24 flex-shrink-0 rounded-xl overflow-hidden border shadow-sm"
+                  >
+                    <img src={img} className="w-full h-full object-cover" />
+
+                    {/* Remove button */}
+                    <button
+                      onClick={() => removeImage(i)}
+                      className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/70 text-white flex items-center justify-center text-xs hover:bg-black"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <p className="text-xs text-gray-400 mt-1">
+              You can upload up to 5 photos
             </p>
           </div>
-
         </div>
 
         {/* Submit */}
         <div className="shrink-0 p-4 border-t bg-white">
           <button
-            disabled={rating === 0}
-            className={`w-full py-3 rounded-xl text-white font-semibold text-lg transition
-              ${
-                rating === 0
-                  ? "bg-gray-300"
-                  : "bg-orange-500 hover:bg-orange-600 shadow-lg"
-              }
-            `}
+            disabled={rating === 0 || !comment}
+            onClick={handleSubmit}
+            className={`w-full py-3 rounded-xl text-white font-semibold text-lg transition ${
+              rating === 0 || !comment
+                ? "bg-gray-300"
+                : "bg-orange-500 hover:bg-orange-600 shadow-lg"
+            }`}
           >
-            Submit Review
+            {existingReview ? "Update Review" : "Submit Review"}
           </button>
         </div>
       </div>
+
+      <GoogleLoginSheet
+        open={showLogin}
+        onClose={() => setShowLogin(false)}
+        onGoogleLogin={googleLogin}
+        purpose="review"
+      />
     </div>
   );
 };

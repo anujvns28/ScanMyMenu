@@ -18,10 +18,8 @@ const Login = () => {
   };
 
   const googleLogin = () => {
-    window.location.href = "http://localhost:4000/auth/google";
+    window.location.href = "http://10.54.219.153:4000/auth/shop/google";
   };
-
-  console.log("authloading", authLoading);
 
   if (authLoading) {
     return (

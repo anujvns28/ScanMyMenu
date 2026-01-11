@@ -5,6 +5,8 @@ import ProductReviewsSheet from "./ProductReviewsSheet";
 import { colorClasses } from "../../../utils/data";
 import { useEffect } from "react";
 import {
+  addRatingAndReview,
+  editRatingAndReview,
   getAllReview,
   getProductRatingSummary,
   getUserReviewOfProduct,
@@ -18,15 +20,36 @@ const ProductBottomSheet = ({
   currCategory,
   openReviewForm,
   setOpenReviewForm,
+  setCurrCategoryItem,
 }) => {
   if (!product) return null;
   const [openReviewSheet, setOpenReviewSheet] = useState(false);
 
   const [allReview, setAllReview] = useState([]);
   const [userRatingAndReview, setUserRatingAndReview] = useState(null);
-  const [editingReview, setEditingReview] = useState(null);
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
+  const [images, setImages] = useState([]);
+  const [showLogin, setShowLogin] = useState(false);
+  const [isEditReview, setIsEditReview] = useState(false);
+  const [existingImages, setExistingImages] = useState([]);
+
+  const reviewState = {
+    rating,
+    setRating,
+    comment,
+    setComment,
+    images,
+    setImages,
+    showLogin,
+    setShowLogin,
+    isEditReview,
+    existingImages,
+    setExistingImages,
+  };
 
   const dispatch = useDispatch();
+  const { shopDetails } = useSelector((state) => state.shop);
   const { token } = useSelector((state) => state.auth);
 
   const dummyProduct = {
@@ -90,24 +113,100 @@ const ProductBottomSheet = ({
   const hasReviews = allReview && allReview.length > 0;
 
   const fetchRatingAndReviewHandler = async () => {
-    const reviews = await getAllReview({ productId: product._id }, dispatch);
-    if (reviews) {
-      setAllReview(reviews.data);
-    }
+    let myReview = null;
 
+    // 1️⃣ Agar logged in hai → apna review lao
     if (token) {
       const userReview = await getUserReviewOfProduct(
         { productId: product._id },
         token,
         dispatch
       );
-      if (userReview) {
-        if (userReview?.hasReviewed) {
-          setUserRatingAndReview(userReview.review);
-        }
+
+      if (userReview?.hasReviewed) {
+        myReview = userReview.review;
+        setUserRatingAndReview(myReview);
+      }
+    }
+
+    // 2️⃣ Saare reviews lao
+    const reviews = await getAllReview({ productId: product._id }, dispatch);
+
+    if (reviews?.data) {
+      // 3️⃣ Agar user ka review hai → usko list se hata do
+      if (myReview) {
+        setAllReview(reviews.data.filter((r) => r._id !== myReview._id));
+      } else {
+        setAllReview(reviews.data);
       }
     }
   };
+
+  // Submit review
+  const handleSubmitReview = async () => {
+    if (rating === 0) return;
+    if (!token) {
+      const intent = {
+        action: "SUBMIT_REVIEW",
+        productId: product._id,
+        categoryId: currCategory,
+        shopId: shopDetails._id,
+
+        payload: {
+          rating,
+          comment,
+        },
+      };
+
+      localStorage.setItem("LOGIN_INTENT", JSON.stringify(intent));
+      setShowLogin(true);
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("productId", product._id);
+    formData.append("shopId", shopDetails._id);
+    formData.append("rating", rating);
+    formData.append("reviewText", comment);
+
+    formData.append("keepImages", JSON.stringify(existingImages));
+
+    if (userRatingAndReview) {
+      formData.append("reviewId", userRatingAndReview._id);
+    }
+
+    images.forEach((img) => {
+      formData.append("images", img);
+    });
+
+    const result = userRatingAndReview
+      ? await editRatingAndReview(formData, token, dispatch)
+      : await addRatingAndReview(formData, token, dispatch);
+
+    if (result) {
+      setUserRatingAndReview(result.review);
+      setProductSheetDetails((prev) => ({
+        ...prev,
+        rating: result.productRating,
+      }));
+      setCurrCategoryItem((prev) => ({
+        ...prev,
+        products: prev.products.map((p) =>
+          p._id != product._id ? p : { ...p, rating: result.productRating }
+        ),
+      }));
+    }
+    setOpenReviewForm(false);
+    setImages([]);
+  };
+
+  useEffect(() => {
+    if (userRatingAndReview) {
+      setRating(userRatingAndReview.rating);
+      setComment(userRatingAndReview.reviewText);
+      setExistingImages(userRatingAndReview.images);
+    }
+  }, [isEditReview]);
 
   useEffect(() => {
     fetchRatingAndReviewHandler();
@@ -205,9 +304,9 @@ const ProductBottomSheet = ({
           <div className="bg-gray-50 rounded-2xl p-4 space-y-4">
             {/* MY REVIEW */}
             {userRatingAndReview && (
-              <div className="bg-gradient-to-r from-orange-50 to-white rounded-2xl p-4 border border-orange-200 shadow-sm">
+              <div className="bg-gradient-to-r from-orange-50 to-white rounded-2xl p-4 border border-orange-200 shadow-sm space-y-3">
                 {/* Header */}
-                <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="px-2 py-[2px] bg-orange-100 text-orange-600 text-[11px] font-semibold rounded-full">
                       ⭐ Your Review
@@ -220,7 +319,7 @@ const ProductBottomSheet = ({
                   <button
                     onClick={() => {
                       setOpenReviewForm(true);
-                      setEditingReview(userRatingAndReview);
+                      setIsEditReview(true);
                     }}
                     className="text-xs font-semibold text-orange-600 hover:underline"
                   >
@@ -229,7 +328,7 @@ const ProductBottomSheet = ({
                 </div>
 
                 {/* Stars */}
-                <div className="flex items-center gap-1 mb-2">
+                <div className="flex items-center gap-1">
                   {[1, 2, 3, 4, 5].map((s) => (
                     <Star
                       key={s}
@@ -243,9 +342,35 @@ const ProductBottomSheet = ({
                   ))}
                 </div>
 
-                {/* Review text */}
+                {/* Text */}
                 <p className="text-sm text-gray-700 leading-relaxed">
                   {userRatingAndReview.reviewText}
+                </p>
+
+                {/* Images */}
+                {userRatingAndReview.images?.length > 0 && (
+                  <div className="flex gap-2 overflow-x-auto">
+                    {userRatingAndReview.images.map((img, i) => (
+                      <img
+                        key={i}
+                        src={img}
+                        alt=""
+                        className="w-20 h-20 rounded-xl object-cover border"
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Only user has reviewed */}
+            {userRatingAndReview && !hasReviews && (
+              <div className="bg-white rounded-xl p-4 border border-dashed border-gray-300 text-center">
+                <p className="text-sm font-semibold text-gray-800">
+                  You’re the first reviewer 🌟
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  No one else has reviewed this item yet.
                 </p>
               </div>
             )}
@@ -280,7 +405,7 @@ const ProductBottomSheet = ({
                   {allReview.slice(0, 3).map((r, i) => (
                     <div
                       key={i}
-                      className="bg-white rounded-xl p-4 shadow-sm border border-gray-100"
+                      className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-3"
                     >
                       {/* Header */}
                       <div className="flex items-center justify-between">
@@ -304,9 +429,24 @@ const ProductBottomSheet = ({
                         </div>
                       </div>
 
-                      <p className="text-sm text-gray-700 mt-3 leading-relaxed">
+                      {/* Text */}
+                      <p className="text-sm text-gray-700 leading-relaxed">
                         {r.reviewText}
                       </p>
+
+                      {/* Images if any */}
+                      {r.images?.length > 0 && (
+                        <div className="flex gap-2 overflow-x-auto">
+                          {r.images.map((img, idx) => (
+                            <img
+                              key={idx}
+                              src={img}
+                              alt=""
+                              className="w-24 h-24 rounded-xl object-cover border"
+                            />
+                          ))}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -315,7 +455,7 @@ const ProductBottomSheet = ({
                   onClick={() => setOpenReviewSheet(true)}
                   className="mt-4 w-full py-2 rounded-xl border border-orange-200 text-orange-600 text-sm font-semibold hover:bg-orange-50"
                 >
-                  View all {allReview.length} reviews →
+                  View all reviews →
                 </button>
               </div>
             )}
@@ -344,15 +484,20 @@ const ProductBottomSheet = ({
       {openReviewForm && (
         <WriteReviewSheet
           open={openReviewForm}
-          onClose={() => setOpenReviewForm(false)}
+          onClose={() => {
+            setOpenReviewForm(false);
+            setImages([]);
+            setRating(userRatingAndReview?.rating || "");
+            setComment(userRatingAndReview?.reviewText || "");
+            setExistingImages(userRatingAndReview?.images || []);
+          }}
           product={{
-            image: product.image,
             _id: product._id,
             name: product.name,
+            image: product.image,
           }}
-          category={currCategory}
-          existingReview={editingReview}
-          setUserRatingAndReview={setUserRatingAndReview}
+          reviewState={reviewState}
+          onSubmit={handleSubmitReview}
         />
       )}
 

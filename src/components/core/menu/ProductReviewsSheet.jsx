@@ -32,10 +32,10 @@ const ProductReviewsSheet = ({ onClose, reviews, myReview, product }) => {
   }, []);
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-center items-end">
+    <div className="fixed inset-0 z-50 flex justify-center items-end ">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
 
-      <div className="relative w-full max-w-md bg-white rounded-t-3xl shadow-2xl flex flex-col h-[85vh]">
+      <div className="relative w-full max-w-md bg-white rounded-t-3xl shadow-2xl flex flex-col h-[85vh] pb-5">
         {/* Header */}
         <div className="p-4 border-b  ">
           <div className="flex justify-between items-center">
@@ -136,13 +136,6 @@ const ProductReviewsSheet = ({ onClose, reviews, myReview, product }) => {
                         {timeAgo(myReview.createdAt)}
                       </p>
                     </div>
-
-                    <button
-                      onClick={() => setOpenReviewForm(true)}
-                      className="text-xs font-semibold text-orange-600 hover:underline"
-                    >
-                      Edit
-                    </button>
                   </div>
 
                   <div className="flex items-center gap-1 mb-2">
@@ -159,9 +152,23 @@ const ProductReviewsSheet = ({ onClose, reviews, myReview, product }) => {
                     ))}
                   </div>
 
-                  <p className="text-sm text-gray-700 leading-relaxed">
+                  <p className="text-sm text-gray-700 leading-relaxed pb-1">
                     {myReview.reviewText}
                   </p>
+
+                  {/* Images */}
+                  {myReview.images?.length > 0 && (
+                    <div className="flex gap-2 overflow-x-auto">
+                      {myReview.images.map((img, i) => (
+                        <img
+                          key={i}
+                          src={img}
+                          alt=""
+                          className="w-20 h-20 rounded-xl object-cover border"
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -196,6 +203,20 @@ const ProductReviewsSheet = ({ onClose, reviews, myReview, product }) => {
                 <p className="text-sm text-gray-700 mt-3 leading-relaxed">
                   {r.reviewText}
                 </p>
+
+                {/* Images */}
+                {r.images?.length > 0 && (
+                  <div className="flex gap-2 overflow-x-auto">
+                    {r.images.map((img, i) => (
+                      <img
+                        key={i}
+                        src={img}
+                        alt=""
+                        className="w-20 h-20 rounded-xl object-cover border"
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
 

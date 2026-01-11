@@ -391,6 +391,7 @@ const menu = () => {
           currCategory={currCategory}
           openReviewForm={openReviewForm}
           setOpenReviewForm={setOpenReviewForm}
+          setCurrCategoryItem={setCurrCategoryItem}
         />
       </div>
     </div>

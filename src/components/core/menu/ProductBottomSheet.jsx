@@ -1,7 +1,7 @@
 import { X, Star, Flame, Clock } from "lucide-react";
 import { useState } from "react";
-import WriteReviewSheet from "./WriteReviewSheet";
-import ProductReviewsSheet from "./ProductReviewsSheet";
+import WriteReviewSheet from "./rating&review/WriteReviewSheet";
+import ProductReviewsSheet from "./rating&review/ProductReviewsSheet";
 import { colorClasses } from "../../../utils/data";
 import { useEffect } from "react";
 import {
@@ -13,6 +13,8 @@ import {
 } from "../../../service/operations/rating&review";
 import { useDispatch, useSelector } from "react-redux";
 import { timeAgo } from "../../../utils/convertTime";
+import ImageLightbox from "./rating&review/ImageLightbox";
+import { useCart } from "../../../context/CartContext";
 
 const ProductBottomSheet = ({
   product,
@@ -34,6 +36,10 @@ const ProductBottomSheet = ({
   const [isEditReview, setIsEditReview] = useState(false);
   const [existingImages, setExistingImages] = useState([]);
 
+  const [lightboxImages, setLightboxImages] = useState([]);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [openLightbox, setOpenLightbox] = useState(false);
+
   const reviewState = {
     rating,
     setRating,
@@ -51,64 +57,7 @@ const ProductBottomSheet = ({
   const dispatch = useDispatch();
   const { shopDetails } = useSelector((state) => state.shop);
   const { token } = useSelector((state) => state.auth);
-
-  const dummyProduct = {
-    _id: "1",
-    name: "Butter Chicken",
-    image: "https://images.pexels.com/photos/461198/pexels-photo-461198.jpeg",
-    description: "Creamy tomato gravy with smoky tandoori chicken",
-    price: 299,
-    discountPrice: 349,
-
-    rating: 4.6,
-    reviewsCount: 128,
-
-    preparationTime: 15,
-    spiceLevel: "Medium",
-
-    isVeg: false,
-    isBestseller: true,
-    isTodaySpecial: true,
-
-    tags: ["Bestseller", "Creamy", "Spicy", "North Indian"],
-
-    ingredients: [
-      "Chicken",
-      "Butter",
-      "Tomato",
-      "Fresh Cream",
-      "Cashew Paste",
-      "Garam Masala",
-      "Kashmiri Chilli",
-    ],
-
-    reviews: [
-      {
-        user: "Rahul",
-        rating: 5,
-        text: "Absolutely delicious! The gravy was rich and perfectly spiced.",
-        time: "2 days ago",
-      },
-      {
-        user: "Ankit",
-        rating: 4,
-        text: "Very creamy and well cooked chicken. Would order again.",
-        time: "1 week ago",
-      },
-      {
-        user: "Neha",
-        rating: 5,
-        text: "Best butter chicken I've had in a long time!",
-        time: "3 days ago",
-      },
-      {
-        user: "Amit",
-        rating: 4,
-        text: "Great taste, portion size could be slightly bigger.",
-        time: "5 days ago",
-      },
-    ],
-  };
+  const { addToCart, isCartOpen } = useCart();
 
   const hasReviews = allReview && allReview.length > 0;
 
@@ -218,7 +167,7 @@ const ProductBottomSheet = ({
       <div className="absolute inset-0 bg-black/40"></div>
 
       {/* Bottom Sheet */}
-      <div className="relative w-full max-w-md bg-white rounded-t-3xl shadow-2xl max-h-[85vh] flex flex-col animate-slide-up">
+      <div className="relative pb-36 w-full max-w-md bg-white rounded-t-3xl shadow-2xl max-h-[85vh] flex flex-col animate-slide-up">
         {/* Drag handle */}
         <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mt-3 mb-2"></div>
 
@@ -279,27 +228,41 @@ const ProductBottomSheet = ({
               <Clock size={14} />
               {product.preparationTime} mins
             </div>
-            <div className="flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-full">
+            <div
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium shadow-sm
+  ${
+    product?.spiceLevel === "mild"
+      ? "bg-green-100 text-green-700"
+      : product?.spiceLevel === "medium"
+      ? "bg-yellow-100 text-yellow-700"
+      : product?.spiceLevel === "spicy"
+      ? "bg-orange-100 text-orange-700"
+      : "bg-red-100 text-red-700"
+  }`}
+            >
               <Flame size={14} />
-              {product?.spiceLevel || "Medium spicy"}
+              <span className="capitalize">
+                {product?.spiceLevel || "medium"} spicy
+              </span>
             </div>
           </div>
 
           {/* Ingredients */}
-          <div className="bg-gray-50 rounded-2xl p-4">
-            <p className="text-sm font-semibold mb-2">Ingredients</p>
-            <div className="flex flex-wrap gap-2">
-              {dummyProduct.ingredients?.map((i, index) => (
-                <span
-                  key={index}
-                  className="px-3 py-1 bg-white rounded-full text-xs shadow-sm"
-                >
-                  {i}
-                </span>
-              ))}
+          {product?.ingredients && (
+            <div className="bg-gray-50 rounded-2xl p-4">
+              <p className="text-sm font-semibold mb-2">Ingredients</p>
+              <div className="flex flex-wrap gap-2">
+                {product.ingredients?.map((i, index) => (
+                  <span
+                    key={index}
+                    className="px-3 py-1 bg-white rounded-full text-xs shadow-sm"
+                  >
+                    {i}
+                  </span>
+                ))}
+              </div>
             </div>
-          </div>
-
+          )}
           {/* Reviews Preview */}
           <div className="bg-gray-50 rounded-2xl p-4 space-y-4">
             {/* MY REVIEW */}
@@ -354,8 +317,12 @@ const ProductBottomSheet = ({
                       <img
                         key={i}
                         src={img}
-                        alt=""
-                        className="w-20 h-20 rounded-xl object-cover border"
+                        onClick={() => {
+                          setLightboxImages(userRatingAndReview.images);
+                          setLightboxIndex(i);
+                          setOpenLightbox(true);
+                        }}
+                        className="w-24 h-24 rounded-xl object-cover cursor-pointer"
                       />
                     ))}
                   </div>
@@ -437,12 +404,16 @@ const ProductBottomSheet = ({
                       {/* Images if any */}
                       {r.images?.length > 0 && (
                         <div className="flex gap-2 overflow-x-auto">
-                          {r.images.map((img, idx) => (
+                          {r.images.map((img, i) => (
                             <img
-                              key={idx}
+                              key={i}
                               src={img}
-                              alt=""
-                              className="w-24 h-24 rounded-xl object-cover border"
+                              onClick={() => {
+                                setLightboxImages(r.images);
+                                setLightboxIndex(i);
+                                setOpenLightbox(true);
+                              }}
+                              className="w-24 h-24 rounded-xl object-cover cursor-pointer"
                             />
                           ))}
                         </div>
@@ -473,9 +444,17 @@ const ProductBottomSheet = ({
         </div>
 
         {/* ================= STICKY CTA ================= */}
-        <div className="shrink-0 bg-white p-4 flex items-center justify-between border-t">
+        <div
+          className={`fixed left-0 right-0 bg-white p-4 flex items-center justify-between border-t transition-all duration-300
+    ${isCartOpen ? "bottom-18" : "bottom-0"}
+  `}
+        >
           <p className="text-xl font-bold">₹{product.price}</p>
-          <button className="px-6 py-3 rounded-xl bg-green-600 text-white font-semibold shadow-md">
+
+          <button
+            onClick={() => addToCart(product)}
+            className="px-6 py-3 rounded-xl bg-green-600 text-white font-semibold shadow-md"
+          >
             Add to plate
           </button>
         </div>
@@ -511,6 +490,14 @@ const ProductBottomSheet = ({
             _id: product._id,
             name: product.name,
           }}
+        />
+      )}
+
+      {openLightbox && (
+        <ImageLightbox
+          images={lightboxImages}
+          startIndex={lightboxIndex}
+          onClose={() => setOpenLightbox(false)}
         />
       )}
     </div>

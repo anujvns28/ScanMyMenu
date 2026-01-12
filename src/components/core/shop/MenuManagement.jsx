@@ -71,7 +71,6 @@ const Menu = () => {
      // fetched product of current category if and set
      const result = await fetchCategoryByProduct(
        { shopCategoryId: currSelectedCategory._id },
-       token,
        dispatch
      );
      if (result) {

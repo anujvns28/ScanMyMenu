@@ -1,12 +1,17 @@
 import { X, Star } from "lucide-react";
 import { useState } from "react";
-import { timeAgo } from "../../../utils/convertTime";
-import { getProductRatingSummary } from "../../../service/operations/rating&review";
+import { timeAgo } from "../../../../utils/convertTime";
+import { getProductRatingSummary } from "../../../../service/operations/rating&review";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
+import ImageLightbox from "./ImageLightbox";
 
 const ProductReviewsSheet = ({ onClose, reviews, myReview, product }) => {
   const [ratingSummary, setRatingSummary] = useState(null);
+  const [lightboxImages, setLightboxImages] = useState([]);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [openLightbox, setOpenLightbox] = useState(false);
+
   const [filter, setFilter] = useState("all");
   const dispatch = useDispatch();
 
@@ -16,6 +21,13 @@ const ProductReviewsSheet = ({ onClose, reviews, myReview, product }) => {
 
   const filtered =
     filter === "all" ? reviews : reviews.filter((r) => r.rating === filter);
+  
+  const allImages = [
+  ...(myReview?.images || []),
+  ...reviews.flatMap((r) => r.images || [])
+];
+
+
 
   const fetchRatingSummary = async () => {
     const overAllRating = await getProductRatingSummary(
@@ -104,6 +116,30 @@ const ProductReviewsSheet = ({ onClose, reviews, myReview, product }) => {
             })}
           </div>
 
+          {allImages.length > 0 && (
+  <div className="px-4 py-3 border-b">
+    <p className="text-sm font-semibold text-gray-800 mb-2">
+      Customer Photos
+    </p>
+
+    <div className="flex gap-2 overflow-x-auto pb-2">
+      {allImages.map((img, idx) => (
+        <img
+          key={idx}
+          src={img}
+          onClick={() => {
+            setLightboxImages(allImages);
+            setLightboxIndex(idx);
+            setOpenLightbox(true);
+          }}
+          className="w-20 h-20 rounded-xl object-cover cursor-pointer border"
+        />
+      ))}
+    </div>
+  </div>
+)}
+
+
           {/* FILTERS (STICKY) */}
           <div className="sticky top-0 z-20 bg-white border-b px-4 py-2 flex gap-2 overflow-x-auto">
             {["all", 5, 4, 3, 2, 1].map((f) => (
@@ -161,11 +197,15 @@ const ProductReviewsSheet = ({ onClose, reviews, myReview, product }) => {
                     <div className="flex gap-2 overflow-x-auto">
                       {myReview.images.map((img, i) => (
                         <img
-                          key={i}
-                          src={img}
-                          alt=""
-                          className="w-20 h-20 rounded-xl object-cover border"
-                        />
+                        key={i}
+                        src={img}
+                        onClick={() => {
+                          setLightboxImages(myReview.images);
+                          setLightboxIndex(i);
+                          setOpenLightbox(true);
+                        }}
+                        className="w-24 h-24 rounded-xl object-cover cursor-pointer"
+                      />
                       ))}
                     </div>
                   )}
@@ -211,8 +251,12 @@ const ProductReviewsSheet = ({ onClose, reviews, myReview, product }) => {
                       <img
                         key={i}
                         src={img}
-                        alt=""
-                        className="w-20 h-20 rounded-xl object-cover border"
+                        onClick={() => {
+                          setLightboxImages(r.images);
+                          setLightboxIndex(i);
+                          setOpenLightbox(true);
+                        }}
+                        className="w-24 h-24 rounded-xl object-cover cursor-pointer"
                       />
                     ))}
                   </div>
@@ -227,6 +271,14 @@ const ProductReviewsSheet = ({ onClose, reviews, myReview, product }) => {
             )}
           </div>
         </div>
+
+        {openLightbox && (
+                <ImageLightbox
+                  images={lightboxImages}
+                  startIndex={lightboxIndex}
+                  onClose={() => setOpenLightbox(false)}
+                />
+              )}
       </div>
     </div>
   );

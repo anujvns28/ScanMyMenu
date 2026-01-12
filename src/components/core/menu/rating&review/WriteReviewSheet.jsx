@@ -1,9 +1,9 @@
 import { X, Star, Camera } from "lucide-react";
 import { useState } from "react";
-import GoogleLoginSheet from "../../common/GoogleLoginSheet";
+import GoogleLoginSheet from "../../../common/GoogleLoginSheet";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
-import LoaderComponent from "../../common/LoaderComponent";
+import LoaderComponent from "../../../common/LoaderComponent";
 
 const WriteReviewSheet = ({
   open,

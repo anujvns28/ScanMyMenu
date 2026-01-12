@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { updateProduct } from "../../../../service/operations/product";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchAllActiveTag } from "../../../../service/operations/tag";
+import { colorClasses } from "../../../../utils/data";
 
 const ViewProduct = ({
   viewProduct,
@@ -15,18 +16,13 @@ const ViewProduct = ({
     discountPrice: "",
   });
 
-  const colorClasses = {
-    red: "bg-red-200 text-red-700",
-    green: "bg-green-200 text-green-700",
-    yellow: "bg-yellow-200 text-yellow-700",
-    blue: "bg-blue-200 text-blue-700",
-    purple: "bg-purple-200 text-purple-700",
-  };
-
   const [selectedTags, setSelectedTags] = useState([]);
   const [selectedTagsIds, setSelectedTagsIds] = useState([]);
   const [allTags, setAllTags] = useState([]);
   const [preview, setPreview] = useState(null);
+
+  const [ingredients, setIngredients] = useState([]);
+  const [newIngredient, setNewIngredient] = useState("");
 
   const { token, userLoading } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
@@ -36,6 +32,10 @@ const ViewProduct = ({
 
     if (editField == "isAvailable") {
       data = { ...data, value: editValue == "Available" ? true : false };
+    }
+
+    if (editField == "ingredients") {
+      data.value = ingredients;
     }
 
     if (editField == "tags") {
@@ -101,11 +101,12 @@ const ViewProduct = ({
     setSelectedTags(viewProduct.tags);
     setSelectedTagsIds(viewProduct.tags.map((temp) => temp._id));
     fetchTagsHandler();
+    setIngredients(viewProduct.ingredients || []);
   }, []);
 
   return (
     <div className="fixed inset-0 bg-black/40 z-50 flex items-end">
-      <div className="bg-white w-full rounded-t-2xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white w-full rounded-t-2xl max-h-[85vh] overflow-y-auto">
         {/* Drag handle */}
         <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto my-3"></div>
         {/* Top Header */}
@@ -215,8 +216,15 @@ const ViewProduct = ({
           >
             <div className="flex justify-between items-start">
               <div className="w-full">
-                <p className="text-xs text-gray-500 mb-1">Item Name</p>
-
+                <div className="flex flex-row items-center justify-between mb-2">
+                  <p className="text-xs text-gray-500 mb-1">Item Name</p>
+                  <button
+                    onClick={() => setEditField("name")}
+                    className="text-blue-600 text-sm font-medium"
+                  >
+                    Edit
+                  </button>
+                </div>
                 {editField === "name" ? (
                   <>
                     <input
@@ -245,13 +253,6 @@ const ViewProduct = ({
                 ) : (
                   <div className="flex justify-between items-center">
                     <p className="text-lg font-semibold">{viewProduct.name}</p>
-
-                    <button
-                      onClick={() => setEditField("name")}
-                      className="text-blue-600 text-sm font-medium"
-                    >
-                      Edit
-                    </button>
                   </div>
                 )}
               </div>
@@ -341,8 +342,15 @@ const ViewProduct = ({
                 : "bg-gray-50"
             }`}
           >
-            <p className="text-xs text-gray-500 mb-1">Description</p>
-
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs text-gray-500 mb-1">Description</p>
+              <button
+                onClick={() => setEditField("description")}
+                className="text-blue-600 text-sm"
+              >
+                Edit
+              </button>
+            </div>
             {editField === "description" ? (
               <>
                 <textarea
@@ -372,12 +380,6 @@ const ViewProduct = ({
                 <p className="text-sm text-gray-700 w-[85%]">
                   {viewProduct.description}
                 </p>
-                <button
-                  onClick={() => setEditField("description")}
-                  className="text-blue-600 text-sm"
-                >
-                  Edit
-                </button>
               </div>
             )}
           </div>
@@ -390,8 +392,15 @@ const ViewProduct = ({
                 : "bg-gray-50"
             }`}
           >
-            <p className="text-xs text-gray-500 mb-1">Tags</p>
-
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs text-gray-500 mb-1">Tags</p>
+              <button
+                onClick={() => setEditField("tags")}
+                className="text-blue-600 text-sm"
+              >
+                Edit
+              </button>
+            </div>
             {editField === "tags" ? (
               <>
                 {/* Selected tags */}
@@ -474,13 +483,6 @@ const ViewProduct = ({
                     );
                   })}
                 </div>
-
-                <button
-                  onClick={() => setEditField("tags")}
-                  className="text-blue-600 text-sm"
-                >
-                  Edit
-                </button>
               </div>
             )}
           </div>
@@ -658,6 +660,172 @@ const ViewProduct = ({
 
                 <button
                   onClick={() => setEditField("isTodaySpecial")}
+                  className="text-blue-600 text-sm"
+                >
+                  Edit
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Ingredients */}
+          <div
+            className={`rounded-xl p-4 transition ${
+              editField === "ingredients"
+                ? "bg-white border-2 border-blue-500 shadow-md"
+                : "bg-gray-50"
+            }`}
+          >
+            <div className="flex flex-row items-center justify-between mb-2 ">
+              <p className="text-xs text-gray-500 mb-2">Ingredients</p>
+
+              <button
+                onClick={() => setEditField("ingredients")}
+                className="text-blue-600 text-sm"
+              >
+                {viewProduct.ingredients?.length > 0 ? "Edit" : "Add"}
+              </button>
+            </div>
+
+            {editField === "ingredients" ? (
+              <>
+                {/* Existing */}
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {ingredients.map((ing, i) => (
+                    <span
+                      key={i}
+                      onClick={() =>
+                        setIngredients((prev) =>
+                          prev.filter((_, index) => index !== i)
+                        )
+                      }
+                      className="px-3 py-1 bg-green-100 text-green-700 text-xs rounded-full cursor-pointer"
+                    >
+                      {ing} ✕
+                    </span>
+                  ))}
+                </div>
+
+                {/* Add */}
+                <div className="flex gap-2">
+                  <input
+                    value={newIngredient}
+                    onChange={(e) => setNewIngredient(e.target.value)}
+                    placeholder="Add ingredient"
+                    className="flex-1 border rounded-lg p-2"
+                  />
+                  <button
+                    onClick={() => {
+                      if (newIngredient.trim() !== "") {
+                        setIngredients([...ingredients, newIngredient]);
+                        setNewIngredient("");
+                      }
+                    }}
+                    className="px-4 bg-green-600 text-white rounded-lg"
+                  >
+                    Add
+                  </button>
+                </div>
+
+                <div className="flex justify-end gap-3 mt-3">
+                  <button
+                    onClick={() => setEditField(null)}
+                    className="px-4 py-2 border rounded-lg"
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setEditValue(ingredients);
+                      updateProductHandler();
+                    }}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+                  >
+                    Save
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className="flex justify-between items-start">
+                {viewProduct.ingredients &&
+                viewProduct.ingredients.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {viewProduct.ingredients.map((ing, i) => (
+                      <span
+                        key={i}
+                        className="px-3 py-1 bg-green-100 text-green-700 text-xs rounded-full"
+                      >
+                        {ing}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-400 italic">
+                    No ingredients added yet
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Spice Level */}
+          <div
+            className={`rounded-xl p-4 transition ${
+              editField === "spiceLevel"
+                ? "bg-white border-2 border-blue-500 shadow-md"
+                : "bg-gray-50"
+            }`}
+          >
+            <p className="text-xs text-gray-500 mb-2">Spice Level</p>
+
+            {editField === "spiceLevel" ? (
+              <>
+                {/* Chips */}
+                <div className="flex flex-wrap gap-2">
+                  {["mild", "medium", "spicy", "extra-spicy"].map((level) => (
+                    <button
+                      key={level}
+                      onClick={() => setEditValue(level)}
+                      className={`px-3 py-2 rounded-full text-xs sm:text-sm transition ${
+                        editValue === level
+                          ? "bg-red-600 text-white"
+                          : "bg-gray-100 text-gray-700"
+                      }`}
+                    >
+                      🌶 {level}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Buttons */}
+                <div className="flex justify-end gap-3 mt-4">
+                  <button
+                    onClick={() => setEditField(null)}
+                    className="px-4 py-2 border rounded-lg text-sm"
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    onClick={updateProductHandler}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm"
+                  >
+                    Save
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className="flex justify-between items-center">
+                <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs sm:text-sm">
+                  🌶 {viewProduct.spiceLevel || "medium"}
+                </span>
+
+                <button
+                  onClick={() => {
+                    setEditField("spiceLevel");
+                    setEditValue(viewProduct.spiceLevel);
+                  }}
                   className="text-blue-600 text-sm"
                 >
                   Edit

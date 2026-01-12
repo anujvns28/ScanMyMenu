@@ -15,6 +15,9 @@ import { colorClasses, smartFilters, smartTabs } from "../utils/data";
 import ForYou from "../components/core/menu/ForYou";
 import TopRated from "../components/core/menu/Toprated";
 import ProductBottomSheet from "../components/core/menu/ProductBottomSheet";
+import CartBottomSheet from "../components/core/menu/BottomCart";
+import FloatingCartBar from "../components/core/menu/FloatingCartBar";
+import { useCart } from "../context/CartContext";
 
 const menu = () => {
   const { shopId } = useParams();
@@ -32,6 +35,10 @@ const menu = () => {
   const [productSheetDetails, setProductSheetDetails] = useState(null);
   const [activeFilters, setActiveFilters] = useState([]);
   const [openReviewForm, setOpenReviewForm] = useState(false);
+  const [filteredItems, setFilteredItems] = useState([]);
+  const [showOrderSheet, setShowOrderSheet] = useState(false);
+
+  const { totalItems } = useCart();
 
   const isSmartTab = (id) => ["for-you", "top-rated"].includes(id);
 
@@ -57,6 +64,7 @@ const menu = () => {
     );
     if (result) {
       setCurrCategoryItem(result.data);
+      setFilteredItems(result?.data?.products);
     }
   };
 
@@ -144,9 +152,36 @@ const menu = () => {
     if (intent?.action === "SUBMIT_REVIEW") {
       console.log("callling functions");
       restoreReview(intent);
-      // localStorage.removeItem("POST_LOGIN_INTENT");
     }
   }, [token]);
+
+  useEffect(() => {
+    if (!currCategoryItem?.products) return;
+    let temp = [...currCategoryItem.products];
+
+    // 🔍 SEARCH
+    if (search.trim() !== "") {
+      temp = temp.filter((item) =>
+        item.name.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+    console.log(activeFilters);
+    if (activeFilters.length > 0) {
+      temp = temp.filter((item) =>
+        activeFilters.every((tagName) =>
+          item.tags.some((t) => t.name === tagName)
+        )
+      );
+    }
+
+    setFilteredItems(temp);
+  }, [search, activeFilters]);
+
+  useEffect(() => {
+    if (totalItems === 0) {
+      setShowOrderSheet(false);
+    }
+  }, [totalItems]);
 
   return (
     <div className="min-h-screen w-full bg-gray-100 flex justify-center">
@@ -172,9 +207,9 @@ const menu = () => {
               </div>
               <div className="flex flex-col items-end gap-1">
                 <div className="px-2 py-1 rounded-lg bg-green-100 text-[11px] font-semibold text-green-700 flex items-center gap-1">
-                  <span>⭐ 4.6</span>
+                  <span>⭐ {shopDetails.rating}</span>
                   <span className="text-[10px] text-gray-500">
-                    1.2k+ ratings
+                    {shopDetails.reviewCount} ratings
                   </span>
                 </div>
                 <div className="flex items-center gap-1 text-[10px] text-green-700 font-semibold">
@@ -284,7 +319,7 @@ const menu = () => {
 
                   {/* smart tags */}
                   {visibleSmartFilters.map((filter) => {
-                    const active = activeFilters.includes(filter.id);
+                    const active = activeFilters.includes(filter.value);
 
                     return (
                       <button
@@ -357,8 +392,8 @@ const menu = () => {
                 {currCategory === "top-rated" && <TopRated />}
               </>
             ) : (
-              currCategoryItem?.products?.length > 0 &&
-              currCategoryItem?.products?.map((item) => (
+              filteredItems?.length > 0 &&
+              filteredItems?.map((item) => (
                 <div
                   key={item._id}
                   onClick={() => setProductSheetDetails(item)}
@@ -380,11 +415,6 @@ const menu = () => {
           </div>
         </main>
 
-        {/* FOOTER */}
-        <footer className="px-4 py-3 text-center text-[11px] text-gray-500 border-t border-gray-200 bg-white">
-          View-only digital menu • Scan My Menu
-        </footer>
-
         <ProductBottomSheet
           product={productSheetDetails}
           setProductSheetDetails={setProductSheetDetails}
@@ -393,6 +423,12 @@ const menu = () => {
           setOpenReviewForm={setOpenReviewForm}
           setCurrCategoryItem={setCurrCategoryItem}
         />
+
+        {showOrderSheet && (
+          <CartBottomSheet onClose={() => setShowOrderSheet(false)} />
+        )}
+
+        <FloatingCartBar onOpen={() => setShowOrderSheet(true)} />
       </div>
     </div>
   );

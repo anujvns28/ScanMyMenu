@@ -27,6 +27,7 @@ import ShopProfile from "./components/core/shop/ShopProfile";
 import { useDispatch } from "react-redux";
 import { useEffect } from "react";
 import { setToken } from "./redux/slices/auth";
+import MenuPage from "./pages/MenuPage";
 
 function App() {
   const dispatch = useDispatch();
@@ -63,7 +64,7 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/dashbord" element={<Dashboard />} />
 
-          <Route path="/menu/:shopId" element={<Menu />} />
+          <Route path="/menu/:shopId" element={<MenuPage />} />
 
           <Route path="/admin" element={<AdminDashboardPage />}>
             <Route index element={<AdminDashboard />} />

@@ -15,9 +15,12 @@ import { colorClasses, smartFilters, smartTabs } from "../utils/data";
 import ForYou from "../components/core/menu/ForYou";
 import TopRated from "../components/core/menu/Toprated";
 import ProductBottomSheet from "../components/core/menu/ProductBottomSheet";
-import CartBottomSheet from "../components/core/menu/BottomCart";
-import FloatingCartBar from "../components/core/menu/FloatingCartBar";
+import CartBottomSheet from "../components/core/menu/order/BottomCart";
+import FloatingCartBar from "../components/core/menu/order/FloatingCartBar";
 import { useCart } from "../context/CartContext";
+import FloatingOrderTracker from "../components/core/menu/order/FloatingOrderTracker";
+import OrderOverlay from "../components/core/menu/order/OrderOverlay";
+import OrderRatingFlow from "../components/core/menu/order/OrderRatingFlow";
 
 const menu = () => {
   const { shopId } = useParams();
@@ -36,9 +39,9 @@ const menu = () => {
   const [activeFilters, setActiveFilters] = useState([]);
   const [openReviewForm, setOpenReviewForm] = useState(false);
   const [filteredItems, setFilteredItems] = useState([]);
-  const [showOrderSheet, setShowOrderSheet] = useState(false);
+  const [showCartheet, setShowCartSheet] = useState(false);
 
-  const { totalItems } = useCart();
+  const { totalItems, setCart } = useCart();
 
   const isSmartTab = (id) => ["for-you", "top-rated"].includes(id);
 
@@ -97,7 +100,7 @@ const menu = () => {
     return true;
   });
 
-  const restoreReview = async (intent) => {
+  const restoreUIForRating = async (intent) => {
     const products = await fetchCategoryByProduct(
       { shopCategoryId: intent.categoryId },
       dispatch
@@ -112,6 +115,20 @@ const menu = () => {
     }
     setCurrCategory(intent.categoryId);
     setOpenReviewForm(true);
+  };
+
+  const restoreUIForOder = (intent) => {
+    if (!intent || intent.action !== "PLACE_ORDER") return;
+
+    console.log(intent, "this is intent ");
+    setCurrCategory(intent.categoryId);
+
+    if (intent.payload?.cart?.length > 0) {
+      setCart(intent.payload.cart);
+    }
+
+    setShowCartSheet(true);
+    localStorage.removeItem("POST_LOGIN_INTENT");
   };
 
   useEffect(() => {
@@ -148,10 +165,12 @@ const menu = () => {
     if (!token) return;
 
     const intent = JSON.parse(localStorage.getItem("POST_LOGIN_INTENT"));
-    console.log(intent, "thi is intene");
+
     if (intent?.action === "SUBMIT_REVIEW") {
-      console.log("callling functions");
-      restoreReview(intent);
+      restoreUIForRating(intent);
+    }
+    if (intent?.action === "PLACE_ORDER") {
+      restoreUIForOder(intent);
     }
   }, [token]);
 
@@ -179,7 +198,7 @@ const menu = () => {
 
   useEffect(() => {
     if (totalItems === 0) {
-      setShowOrderSheet(false);
+      setShowCartSheet(false);
     }
   }, [totalItems]);
 
@@ -424,11 +443,16 @@ const menu = () => {
           setCurrCategoryItem={setCurrCategoryItem}
         />
 
-        {showOrderSheet && (
-          <CartBottomSheet onClose={() => setShowOrderSheet(false)} />
+        {showCartheet && (
+          <CartBottomSheet
+            onClose={() => setShowCartSheet(false)}
+            currCategory={currCategory}
+          />
         )}
 
-        <FloatingCartBar onOpen={() => setShowOrderSheet(true)} />
+        <FloatingCartBar onOpen={() => setShowCartSheet(true)} />
+        {/* <OrderOverlay /> */}
+        <OrderRatingFlow />
       </div>
     </div>
   );

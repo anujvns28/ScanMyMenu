@@ -157,14 +157,14 @@ const ForYou = () => {
       {/* ⭐ Loved by Customers */}
       <section>
         <div className="flex items-center justify-between">
-  <h3 className="text-base font-semibold">⭐ Loved by Customers</h3>
-  <button
-    onClick={() => navigate("/menu/top-rated")}
-    className="text-xs text-blue-600 font-medium"
-  >
-    View all
-  </button>
-</div>
+          <h3 className="text-base font-semibold">⭐ Loved by Customers</h3>
+          <button
+            onClick={() => navigate("/menu/top-rated")}
+            className="text-xs text-blue-600 font-medium"
+          >
+            View all
+          </button>
+        </div>
 
         <p className="text-xs text-gray-500 mb-3">
           Top rated dishes from this restaurant

@@ -55,3 +55,16 @@ export const ratingAndReviews = {
   GET_RATING_SUMMARY: BASE_URL + "/rating/ratingSummary",
   GET_USER_REVIEW: BASE_URL + "/rating/has-reviewed",
 };
+
+
+export const orderEndPoints = {
+  // User
+  CREATE_ORDER_API: BASE_URL + "/orders/create",
+  VERIFY_PAYMENT_API: BASE_URL + "/orders/payment/verify",
+  GET_MY_ACTIVE_ORDER: BASE_URL + "/orders/my-active",
+
+  // Kitchen
+  // GET_KITCHEN_ORDERS:  `${BASE_URL}/orders/kitchen/${shopId}`,
+
+  // UPDATE_ORDER_STATUS:  `${BASE_URL}/orders/${orderId}/status`,
+};

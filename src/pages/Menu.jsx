@@ -24,7 +24,6 @@ import OrderRatingFlow from "../components/core/menu/order/OrderRatingFlow";
 
 const menu = () => {
   const { shopId } = useParams();
-  const { token, userLoading } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const scrollRef = useRef(null);
   const itemRefs = useRef({});
@@ -40,8 +39,11 @@ const menu = () => {
   const [openReviewForm, setOpenReviewForm] = useState(false);
   const [filteredItems, setFilteredItems] = useState([]);
   const [showCartheet, setShowCartSheet] = useState(false);
-
+  const { token, userLoading } = useSelector((state) => state.auth);
+  const { activeOrder } = useSelector((state) => state.order);
   const { totalItems, setCart } = useCart();
+
+  console.log(activeOrder);
 
   const isSmartTab = (id) => ["for-you", "top-rated"].includes(id);
 
@@ -451,8 +453,7 @@ const menu = () => {
         )}
 
         <FloatingCartBar onOpen={() => setShowCartSheet(true)} />
-        {/* <OrderOverlay /> */}
-        <OrderRatingFlow />
+        {activeOrder && <OrderOverlay />}
       </div>
     </div>
   );

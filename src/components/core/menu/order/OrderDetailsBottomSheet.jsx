@@ -25,8 +25,6 @@ export default function OrderDetailsBottomSheet({
   const dispatch = useDispatch();
   const { user,token } = useSelector((state) => state.auth);
 
-  console.log(user,"this is user")
-
 const {shopDetails} = useSelector((state)=>state.shop);
 
   const isValid =

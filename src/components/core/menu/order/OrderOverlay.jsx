@@ -8,7 +8,7 @@ export default function OrderOverlay() {
   // 🔥 Dummy order
   const [order] = useState({
     orderNumber: "SM-2391",
-    status: "SERVED", // try: PREPARING / READY / SERVED
+    status: "SERVED",
     total: 544,
     items: [
       { name: "Butter Chicken", qty: 2, price: 199 },

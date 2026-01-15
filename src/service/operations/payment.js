@@ -1,15 +1,12 @@
 import axios from "axios";
 import { setUserLoading } from "../../redux/slices/auth";
 import { orderEndPoints } from "../api";
+import { setActiveOrder } from "../../redux/slices/order";
 
+const { CREATE_ORDER_API, GET_MY_ACTIVE_ORDER, VERIFY_PAYMENT_API } =
+  orderEndPoints;
 
-const {
-    CREATE_ORDER_API,
-    GET_MY_ACTIVE_ORDER,
-    VERIFY_PAYMENT_API
-}  = orderEndPoints;
-
-export const createRazorpayOrder = async (data,token, dispatch) => {
+export const createRazorpayOrder = async (data, token, dispatch) => {
   dispatch(setUserLoading(true));
   let result;
 
@@ -19,9 +16,9 @@ export const createRazorpayOrder = async (data,token, dispatch) => {
       url: CREATE_ORDER_API,
       data: data,
       withCredentials: true,
-      headers:{
-        Authorization : `Bearer ${token}`
-      }
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
 
     if (response) {
@@ -35,7 +32,6 @@ export const createRazorpayOrder = async (data,token, dispatch) => {
   dispatch(setUserLoading(false));
   return result;
 };
-
 
 export const openRazorpayCheckout = (order, user, onSuccess) => {
   const options = {
@@ -64,8 +60,7 @@ export const openRazorpayCheckout = (order, user, onSuccess) => {
   razorpay.open();
 };
 
-
-export const verifyRazorpayPayment = async (data,token, dispatch) => {
+export const verifyRazorpayPayment = async (data, token, dispatch) => {
   dispatch(setUserLoading(true));
   let result;
 
@@ -75,14 +70,16 @@ export const verifyRazorpayPayment = async (data,token, dispatch) => {
       url: VERIFY_PAYMENT_API,
       data: data,
       withCredentials: true,
-      headers:{
-        Authorization : `Bearer ${token}`
-      }
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
 
     if (response) {
       console.log("Payment verify response", response);
       result = response.data;
+      dispatch(setActiveOrder(result.order));
+      localStorage.setItem("order", JSON.stringify(result.order));
     }
   } catch (err) {
     console.log("Payment verify error", err);

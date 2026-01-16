@@ -46,6 +46,8 @@ export const productEndPoints = {
   ADD_PRODUCT_API: BASE_URL + "/product/addProduct",
   FETCH_CATEGORY_INFO_AND_PRODUCT: BASE_URL + "/product/fetchCategoryProduct",
   UPDATE_PRODUCT_API: BASE_URL + "/product/updateProduct",
+  GET_TOP_RATED_PRODUCT: BASE_URL + "/product/topRatedProducts",
+  GET_PRODUCT_DETAILS: BASE_URL + "/product/getProductDetails",
 };
 
 export const ratingAndReviews = {

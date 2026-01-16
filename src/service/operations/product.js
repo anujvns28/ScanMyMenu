@@ -3,8 +3,13 @@ import { setUserLoading } from "../../redux/slices/auth";
 import  {productEndPoints}  from "../api";
 
 
-const { ADD_PRODUCT_API, FETCH_CATEGORY_INFO_AND_PRODUCT, UPDATE_PRODUCT_API } =
-  productEndPoints;
+const {
+  ADD_PRODUCT_API,
+  FETCH_CATEGORY_INFO_AND_PRODUCT,
+  UPDATE_PRODUCT_API,
+  GET_TOP_RATED_PRODUCT,
+  GET_PRODUCT_DETAILS,
+} = productEndPoints;
 
 export const addProduct = async (data, token, dispatch) => {
   dispatch(setUserLoading(true));
@@ -66,7 +71,7 @@ export const updateProduct = async (data, token, dispatch) => {
     const response = await axios({
       method: "PUT",
       url: UPDATE_PRODUCT_API,
-      data: data, 
+      data: data,
       withCredentials: true,
       headers: {
         Authorization: `Bearer ${token}`,
@@ -83,5 +88,53 @@ export const updateProduct = async (data, token, dispatch) => {
   }
 
   dispatch(setUserLoading(false));
+  return result;
+};
+
+export const getTopRatedProducts = async (shopId, dispatch) => {
+  // dispatch(setUserLoading(true));
+  let result;
+
+  try {
+    const response = await axios({
+      method: "GET",
+      url: GET_TOP_RATED_PRODUCT,
+      params: { shopId },
+      withCredentials: true,
+    });
+
+    if (response) {
+      console.log("get top rated products api response", response);
+      result = response.data;
+    }
+  } catch (err) {
+    console.log("get top rated products api error", err);
+  }
+
+  // dispatch(setUserLoading(false));
+  return result;
+};
+
+export const getProductDetails = async (productId, dispatch) => {
+  // dispatch(setUserLoading(true));
+  let result;
+
+  try {
+    const response = await axios({
+      method: "POST",
+      url: GET_PRODUCT_DETAILS,
+      data: { productId },
+      withCredentials: true,
+    });
+
+    if (response) {
+      console.log("get products details api response", response);
+      result = response.data;
+    }
+  } catch (err) {
+    console.log("get  products detaisl api error", err);
+  }
+
+  // dispatch(setUserLoading(false));
   return result;
 };

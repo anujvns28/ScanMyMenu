@@ -13,7 +13,7 @@ export default function OrderDetailsBottomSheet({
   onClose,
   onEditCart,
 }) {
-  const { cart, totalPrice, totalItems } = useCart();
+  const { cart, totalPrice, totalItems, setCart } = useCart();
 
   const gst = Math.round(totalPrice * 0.05);
   const grandTotal = totalPrice + gst;
@@ -23,78 +23,76 @@ export default function OrderDetailsBottomSheet({
   const [phone, setPhone] = useState("");
   const [instructions, setInstructions] = useState("");
   const dispatch = useDispatch();
-  const { user,token } = useSelector((state) => state.auth);
+  const { user, token } = useSelector((state) => state.auth);
 
-const {shopDetails} = useSelector((state)=>state.shop);
+  const { shopDetails } = useSelector((state) => state.shop);
 
   const isValid =
     (orderType === "DINE_IN" && tableNo.trim()) ||
     (orderType === "TAKEAWAY" && phone.length >= 10);
 
   const handlePay = async () => {
-  if (!isValid) return;
+    if (!isValid) return;
 
-  const formattedCart = cart.map((item) => ({
-    productId: item._id,
-    name: item.name,
-    price: item.price,
-    qty: item.qty,
-    image: item.image,
-}));
+    const formattedCart = cart.map((item) => ({
+      productId: item._id,
+      name: item.name,
+      price: item.price,
+      qty: item.qty,
+      image: item.image,
+    }));
 
+    const orderPayload = {
+      amount: grandTotal * 100,
+      cartItems: formattedCart,
+      shopId: shopDetails._id,
+      orderType,
+      tableNo,
+      phone,
+      instructions,
+    };
 
-  const orderPayload = {
-    amount: grandTotal * 100,
-    cartItems: formattedCart,
-    shopId:shopDetails._id,
-    orderType,
-    tableNo,
-    phone,
-    instructions,
-  };
+    const orderData = await createRazorpayOrder(orderPayload, token, dispatch);
 
-  const orderData = await createRazorpayOrder(orderPayload,token, dispatch);
-  
-
-  if (!orderData?.razorpayOrderId) {
-    alert("Unable to start payment");
-    return;
-  }
-
-  openRazorpayCheckout(
-    {
-      id: orderData.razorpayOrderId,
-      amount: orderData.amount * 100,
-    },
-    user,
-    async (payment) => {
-      const verifyData = await verifyRazorpayPayment(
-        {
-          razorpay_order_id: payment.razorpay_order_id,
-          razorpay_payment_id: payment.razorpay_payment_id,
-          razorpay_signature: payment.razorpay_signature,
-
-          cartItems: formattedCart,
-          shopId: shopDetails._id,
-          orderType,
-          tableNo,
-          phone,
-          instructions,
-          amount: orderData.amount,
-        },
-        token,
-        dispatch
-      );
-
-      if (verifyData?.success) {
-        alert("Order placed 🎉");
-        onClose();
-      } else {
-        alert("Payment failed ❌");
-      }
+    if (!orderData?.razorpayOrderId) {
+      alert("Unable to start payment");
+      return;
     }
-  );
-};
+
+    openRazorpayCheckout(
+      {
+        id: orderData.razorpayOrderId,
+        amount: orderData.amount * 100,
+      },
+      user,
+      async (payment) => {
+        const verifyData = await verifyRazorpayPayment(
+          {
+            razorpay_order_id: payment.razorpay_order_id,
+            razorpay_payment_id: payment.razorpay_payment_id,
+            razorpay_signature: payment.razorpay_signature,
+
+            cartItems: formattedCart,
+            shopId: shopDetails._id,
+            orderType,
+            tableNo,
+            phone,
+            instructions,
+            amount: orderData.amount,
+          },
+          token,
+          dispatch
+        );
+
+        if (verifyData?.success) {
+          setCart([]);
+          onClose();
+        } else {
+          alert("Payment failed ❌");
+        }
+      }
+    );
+  };
 
 
   return (

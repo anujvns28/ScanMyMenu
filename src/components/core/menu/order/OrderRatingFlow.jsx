@@ -6,6 +6,8 @@ import {
   editRatingAndReview,
   getUserReviewOfProduct,
 } from "../../../../service/operations/rating&review";
+import LoaderComponent from "../../../common/LoaderComponent";
+import { clearOrder, setActiveOrder } from "../../../../redux/slices/order";
 
 export default function OrderRatingFlow({ onClose }) {
   const [step, setStep] = useState(0);
@@ -19,7 +21,7 @@ export default function OrderRatingFlow({ onClose }) {
   const [reviewId, setReviewId] = useState(null);
 
   const { activeOrder } = useSelector((state) => state.order);
-  const { token } = useSelector((state) => state.auth);
+  const { token, userLoading } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
 
   const currentProduct = products[step];
@@ -76,7 +78,6 @@ export default function OrderRatingFlow({ onClose }) {
       setProductRating(res.review.rating);
       setProductComment(res.review.reviewText || "");
 
-      // 👇 convert existing URLs to editable format
       setProductImages(
         res.review.images.map((url) => ({
           type: "existing",
@@ -156,7 +157,12 @@ export default function OrderRatingFlow({ onClose }) {
             Your feedback helps the chef and other customers.
           </p>
           <button
-            onClick={onClose}
+            onClick={() => {
+              onClose();
+              dispatch(clearOrder());
+              dispatch(setActiveOrder(null));
+              localStorage.removeItem("order");
+            }}
             className="bg-black text-white px-8 py-3 rounded-xl"
           >
             Back to Menu
@@ -224,39 +230,53 @@ export default function OrderRatingFlow({ onClose }) {
 
         {/* Image Upload */}
         <div className="w-full mt-6">
-          <label className="flex flex-col items-center justify-center gap-2 text-sm font-semibold cursor-pointer border-2 border-dashed border-gray-300 rounded-2xl py-6 bg-gray-50">
-            <Camera size={22} />
-            Add food photos
+          <label className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-300 text-sm text-gray-600 w-fit cursor-pointer">
+            <Camera size={16} />
+            Add photos
             <input
               type="file"
-              accept="image/*"
               multiple
+              accept="image/*"
               hidden
               onChange={handleImageUpload}
             />
           </label>
 
           {/* Preview */}
-          <div className="flex gap-3 mt-4 overflow-x-auto">
-            {productImages.map((img, idx) => (
-              <div key={idx} className="relative">
-                <img
-                  src={
-                    img.type === "existing"
-                      ? img.url
-                      : URL.createObjectURL(img.file)
-                  }
-                  alt="food"
-                  className="w-20 h-20 rounded-xl object-cover shadow"
-                />
-                <button
-                  onClick={() => removeImage(idx)}
-                  className="absolute -top-2 -right-2 bg-black text-white rounded-full p-1"
+          <div className="mt-4">
+            <p className="text-xs text-gray-400 mb-2">
+              Tap or hover on a photo to delete it
+            </p>
+
+            <div className="flex gap-3 overflow-x-auto">
+              {productImages.map((img, idx) => (
+                <div
+                  key={idx}
+                  className="relative group w-20 h-20 rounded-xl overflow-hidden shadow"
                 >
-                  <Trash2 size={12} />
-                </button>
-              </div>
-            ))}
+                  <img
+                    src={
+                      img.type === "existing"
+                        ? img.url
+                        : URL.createObjectURL(img.file)
+                    }
+                    alt="food"
+                    className="w-full h-full object-cover"
+                  />
+
+                  {/* Dark overlay */}
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition" />
+
+                  {/* Delete button */}
+                  <button
+                    onClick={() => removeImage(idx)}
+                    className="absolute top-1 right-1 bg-white/90 text-black rounded-full p-1 shadow opacity-0 group-hover:opacity-100 transition"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -283,6 +303,8 @@ export default function OrderRatingFlow({ onClose }) {
             </>
           )}
         </button>
+
+        {userLoading && <LoaderComponent />}
       </div>
     </div>
   );

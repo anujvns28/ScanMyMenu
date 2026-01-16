@@ -18,9 +18,7 @@ import ProductBottomSheet from "../components/core/menu/ProductBottomSheet";
 import CartBottomSheet from "../components/core/menu/order/BottomCart";
 import FloatingCartBar from "../components/core/menu/order/FloatingCartBar";
 import { useCart } from "../context/CartContext";
-import FloatingOrderTracker from "../components/core/menu/order/FloatingOrderTracker";
 import OrderOverlay from "../components/core/menu/order/OrderOverlay";
-import OrderRatingFlow from "../components/core/menu/order/OrderRatingFlow";
 
 const menu = () => {
   const { shopId } = useParams();
@@ -34,7 +32,7 @@ const menu = () => {
   const [currCategory, setCurrCategory] = useState(null);
   const [scrolled, setScrolled] = useState(false);
   const [search, setSearch] = useState("");
-  const [productSheetDetails, setProductSheetDetails] = useState(null);
+  const [productId, setProductId] = useState(null);
   const [activeFilters, setActiveFilters] = useState([]);
   const [openReviewForm, setOpenReviewForm] = useState(false);
   const [filteredItems, setFilteredItems] = useState([]);
@@ -42,8 +40,6 @@ const menu = () => {
   const { token, userLoading } = useSelector((state) => state.auth);
   const { activeOrder } = useSelector((state) => state.order);
   const { totalItems, setCart } = useCart();
-
-  console.log(activeOrder);
 
   const isSmartTab = (id) => ["for-you", "top-rated"].includes(id);
 
@@ -109,20 +105,18 @@ const menu = () => {
     );
 
     if (products) {
-      console.log(products.data.products, "this is currcategory products");
       const c_pro = products.data.products.find(
         (p) => p._id == intent.productId
       );
-      setProductSheetDetails(c_pro);
+      setProductId(c_pro._id);
     }
-    setCurrCategory(intent.categoryId);
+    setCurrCategory(intent?.categoryId);
     setOpenReviewForm(true);
   };
 
   const restoreUIForOder = (intent) => {
     if (!intent || intent.action !== "PLACE_ORDER") return;
 
-    console.log(intent, "this is intent ");
     setCurrCategory(intent.categoryId);
 
     if (intent.payload?.cart?.length > 0) {
@@ -417,7 +411,7 @@ const menu = () => {
               filteredItems?.map((item) => (
                 <div
                   key={item._id}
-                  onClick={() => setProductSheetDetails(item)}
+                  onClick={() => setProductId(item._id)}
                   className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300"
                 >
                   <MenuItemCard item={item} />
@@ -437,12 +431,12 @@ const menu = () => {
         </main>
 
         <ProductBottomSheet
-          product={productSheetDetails}
-          setProductSheetDetails={setProductSheetDetails}
+          productId={productId}
+          setProductId={setProductId}
           currCategory={currCategory}
           openReviewForm={openReviewForm}
           setOpenReviewForm={setOpenReviewForm}
-          setCurrCategoryItem={setCurrCategoryItem}
+          fetchProducts={fetchCategoryInfoAndItems}
         />
 
         {showCartheet && (

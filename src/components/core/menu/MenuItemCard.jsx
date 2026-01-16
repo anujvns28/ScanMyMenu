@@ -83,34 +83,12 @@ const MenuItemCard = ({ item }) => {
           {/* ADD Button */}
           {item.isAvailable && (
             <div>
-              {qty === 0 ? (
-                <button
-                  onClick={() => setQty(1)}
-                  className="px-4 py-1.5 border border-green-600 text-green-700 text-xs font-semibold rounded-lg bg-green-50 hover:bg-green-100"
-                >
-                  ADD
-                </button>
-              ) : (
-                <div className="flex items-center border border-green-600 rounded-lg bg-green-50 px-1.5 py-1">
-                  <button
-                    onClick={() => setQty(qty - 1)}
-                    className="w-6 h-6 flex items-center justify-center bg-white rounded-md shadow-sm"
-                  >
-                    <Minus size={12} />
-                  </button>
-
-                  <span className="w-6 text-center text-xs font-semibold text-green-700">
-                    {qty}
-                  </span>
-
-                  <button
-                    onClick={() => setQty(qty + 1)}
-                    className="w-6 h-6 flex items-center justify-center bg-white rounded-md shadow-sm"
-                  >
-                    <Plus size={12} />
-                  </button>
-                </div>
-              )}
+              <button
+                onClick={() => setQty(1)}
+                className="px-4 py-1.5 border border-green-600 text-green-700 text-xs font-semibold rounded-lg bg-green-50 hover:bg-green-100"
+              >
+                ADD
+              </button>
             </div>
           )}
         </div>

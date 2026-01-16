@@ -151,7 +151,10 @@ export default function CartBottomSheet({ onClose, currCategory }) {
         {showOderDetailSheet && (
           <OrderDetailsBottomSheet
             onEditCart={() => setShowOderDetailSheet(false)}
-            onClose={() => setShowOderDetailSheet(false)}
+            onClose={() => {
+              onClose();
+              setShowOderDetailSheet(false);
+            }}
           />
         )}
       </div>

@@ -8,25 +8,26 @@ import {
   addRatingAndReview,
   editRatingAndReview,
   getAllReview,
-  getProductRatingSummary,
   getUserReviewOfProduct,
 } from "../../../service/operations/rating&review";
 import { useDispatch, useSelector } from "react-redux";
 import { timeAgo } from "../../../utils/convertTime";
 import ImageLightbox from "./rating&review/ImageLightbox";
 import { useCart } from "../../../context/CartContext";
+import { getProductDetails } from "../../../service/operations/product";
 
 const ProductBottomSheet = ({
-  product,
-  setProductSheetDetails,
+  productId,
+  setProductId,
   currCategory,
   openReviewForm,
   setOpenReviewForm,
-  setCurrCategoryItem,
+  fetchProducts,
 }) => {
-  if (!product) return null;
-  const [openReviewSheet, setOpenReviewSheet] = useState(false);
+  if (!productId) return null;
 
+  const [openReviewSheet, setOpenReviewSheet] = useState(false);
+  const [product, setProduct] = useState({});
   const [allReview, setAllReview] = useState([]);
   const [userRatingAndReview, setUserRatingAndReview] = useState(null);
   const [rating, setRating] = useState(0);
@@ -67,7 +68,7 @@ const ProductBottomSheet = ({
     // 1️⃣ Agar logged in hai → apna review lao
     if (token) {
       const userReview = await getUserReviewOfProduct(
-        { productId: product._id },
+        { productId: productId },
         token,
         dispatch
       );
@@ -78,11 +79,9 @@ const ProductBottomSheet = ({
       }
     }
 
-    // 2️⃣ Saare reviews lao
-    const reviews = await getAllReview({ productId: product._id }, dispatch);
+    const reviews = await getAllReview({ productId: productId }, dispatch);
 
     if (reviews?.data) {
-      // 3️⃣ Agar user ka review hai → usko list se hata do
       if (myReview) {
         setAllReview(reviews.data.filter((r) => r._id !== myReview._id));
       } else {
@@ -113,7 +112,7 @@ const ProductBottomSheet = ({
     }
 
     const formData = new FormData();
-    formData.append("productId", product._id);
+    formData.append("productId", productId);
     formData.append("shopId", shopDetails._id);
     formData.append("rating", rating);
     formData.append("reviewText", comment);
@@ -134,20 +133,27 @@ const ProductBottomSheet = ({
 
     if (result) {
       setUserRatingAndReview(result.review);
-      setProductSheetDetails((prev) => ({
+      setProduct((prev) => ({
         ...prev,
         rating: result.productRating,
       }));
-      setCurrCategoryItem((prev) => ({
-        ...prev,
-        products: prev.products.map((p) =>
-          p._id != product._id ? p : { ...p, rating: result.productRating }
-        ),
-      }));
     }
+    fetchProducts();
     setOpenReviewForm(false);
     setImages([]);
   };
+
+  useEffect(() => {
+    const fetchProductDetails = async () => {
+      const result = await getProductDetails(productId, dispatch);
+
+      if (result) {
+        setProduct(result.data);
+      }
+    };
+
+    fetchProductDetails();
+  }, []);
 
   useEffect(() => {
     if (userRatingAndReview) {
@@ -173,7 +179,7 @@ const ProductBottomSheet = ({
 
         {/* Close */}
         <button
-          onClick={() => setProductSheetDetails(null)}
+          onClick={() => setProductId(null)}
           className="absolute top-4 right-4 p-1 rounded-full bg-gray-100"
         >
           <X size={18} />

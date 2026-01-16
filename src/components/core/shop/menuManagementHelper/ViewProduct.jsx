@@ -334,6 +334,92 @@ const ViewProduct = ({
             )}
           </div>
 
+          {/* Food Type */}
+          <div
+            className={`rounded-xl p-4 transition ${
+              editField === "type"
+                ? "bg-white border-2 border-blue-500 shadow-md"
+                : "bg-gray-50"
+            }`}
+          >
+            <p className="text-xs text-gray-500 mb-1">Food Type</p>
+
+            {editField === "type" ? (
+              <>
+                <select
+                  defaultValue={viewProduct?.type || ""}
+                  onChange={(e) => setEditValue(e.target.value)}
+                  className="w-full border rounded-lg p-3 capitalize"
+                >
+                  <option value="" disabled>
+                    Select type
+                  </option>
+                  <option value="veg">Veg 🌱</option>
+                  <option value="non-veg">Non-Veg 🍗</option>
+                  <option value="mix">Mix 🍱</option>
+                </select>
+
+                <div className="flex justify-end gap-3 mt-3">
+                  <button
+                    onClick={() => setEditField(null)}
+                    className="px-4 py-2 border rounded-lg"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={updateProductHandler}
+                    disabled={!editValue}
+                    className={`px-4 py-2 rounded-lg text-white ${
+                      editValue
+                        ? "bg-blue-600"
+                        : "bg-blue-300 cursor-not-allowed"
+                    }`}
+                  >
+                    {userLoading ? "loading..." : "Save"}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className="flex justify-between items-center">
+                {viewProduct?.type ? (
+                  <>
+                    <p className="font-medium capitalize">
+                      {viewProduct.type === "veg" && "Veg 🌱"}
+                      {viewProduct.type === "non-veg" && "Non-Veg 🍗"}
+                      {viewProduct.type === "mix" && "Mix 🍱"}
+                    </p>
+
+                    <button
+                      onClick={() => {
+                        setEditValue(viewProduct.type);
+                        setEditField("type");
+                      }}
+                      className="text-blue-600 text-sm"
+                    >
+                      Edit
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-sm text-gray-400 italic">
+                      Type not added
+                    </p>
+
+                    <button
+                      onClick={() => {
+                        setEditValue("");
+                        setEditField("type");
+                      }}
+                      className="text-blue-600 text-sm font-medium"
+                    >
+                      Add
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+
           {/* Description */}
           <div
             className={`rounded-xl p-4 transition ${

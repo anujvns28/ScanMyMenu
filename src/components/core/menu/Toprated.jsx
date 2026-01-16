@@ -1,130 +1,189 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  getProductDetails,
+  getTopRatedProducts,
+} from "../../../service/operations/product";
+import { useDispatch } from "react-redux";
+import { useParams } from "react-router-dom";
+import { SkeletonCard } from "../../../utils/skeleton";
+import ProductBottomSheet from "./ProductBottomSheet";
 
-/* Dummy data – later API se ayega */
-const topRatedItems = [
-  {
-    _id: "1",
-    name: "Butter Chicken",
-    rating: 4.8,
-    reviewsCount: 420,
-    price: 299,
-    image: "https://images.pexels.com/photos/461198/pexels-photo-461198.jpeg",
-    tags: ["Spicy", "Bestseller"],
-  },
-  {
-    _id: "2",
-    name: "Paneer Tikka Masala",
-    rating: 4.7,
-    reviewsCount: 380,
-    price: 259,
-    image: "https://images.pexels.com/photos/461377/pexels-photo-461377.jpeg",
-    tags: ["Veg", "Bestseller"],
-  },
-  {
-    _id: "3",
-    name: "Cheese Burst Pizza",
-    rating: 4.9,
-    reviewsCount: 480,
-    price: 399,
-    image: "https://images.pexels.com/photos/315755/pexels-photo-315755.jpeg",
-    tags: ["Bestseller"],
-  },
+const tabs = [
+  { label: "All", value: "ALL" },
+  { label: "Veg 🌱", value: "VEG" },
+  { label: "Non-Veg 🍗", value: "NON_VEG" },
 ];
 
-const filters = ["All", "Veg", "Spicy", "Bestseller"];
-
 const TopRated = () => {
-  const [activeFilter, setActiveFilter] = useState("All");
+  const { shopId } = useParams();
+  const dispatch = useDispatch();
 
-  const filtered =
-    activeFilter === "All"
-      ? topRatedItems
-      : topRatedItems.filter((i) => i.tags.includes(activeFilter));
+  const [products, setProducts] = useState([]);
+  const [activeTab, setActiveTab] = useState("ALL");
+  const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [openReviewForm, setOpenReviewForm] = useState(false);
+  const [product, setProduct] = useState(null);
+
+  const getRankByTab = (product) => {
+    if (activeTab === "VEG") return product.vegRank;
+    if (activeTab === "NON_VEG") return product.nonVegRank;
+    return product.overallRank;
+  };
+
+  const fetchProducts = async () => {
+    setLoading(true);
+    const result = await getTopRatedProducts(shopId, dispatch);
+    setLoading(false);
+
+    if (result?.success) {
+      setProducts(result.data);
+    }
+  };
+
+  //  Fetch from backend
+  useEffect(() => {
+    if (!shopId) return;
+
+    fetchProducts();
+  }, [shopId]);
+
+  // 🔍 Frontend filtering + ranking display
+  const filteredProducts = useMemo(() => {
+    let list = products;
+
+    if (activeTab === "VEG") {
+      list = list.filter((p) => p.type === "veg");
+    }
+
+    if (activeTab === "NON_VEG") {
+      list = list.filter((p) => p.type === "non-veg");
+    }
+
+    if (search) {
+      list = list.filter((p) =>
+        p.name.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+
+    return list;
+  }, [products, activeTab, search]);
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="min-h-screen bg-neutral-50 pb-24">
       {/* Header */}
-      <div className="sticky top-0 bg-white z-10 p-4 border-b">
-        <h1 className="text-xl font-bold">Top Rated</h1>
-        <p className="text-sm text-gray-500">Most loved dishes by customers</p>
+      <div className="bg-white/90 backdrop-blur p-4 border-b">
+        <h1 className="text-xl font-semibold tracking-tight">
+          Top Rated Dishes
+        </h1>
+        <p className="text-xs text-gray-500 mt-0.5">
+          Ranked by customer ratings & reviews
+        </p>
 
-        {/* Filters */}
-        <div className="flex gap-2 mt-3 overflow-x-auto">
-          {filters.map((f) => (
+        {/* Tabs */}
+        <div className="flex gap-2 mt-3">
+          {tabs.map((t) => (
             <button
-              key={f}
-              onClick={() => setActiveFilter(f)}
-              className={`px-4 py-1.5 rounded-full text-xs font-medium whitespace-nowrap
-              ${
-                activeFilter === f
-                  ? "bg-black text-white"
-                  : "bg-gray-100 text-gray-700"
-              }`}
+              key={t.value}
+              onClick={() => setActiveTab(t.value)}
+              className={`px-4 py-1.5 rounded-full text-xs font-medium transition
+                ${
+                  activeTab === t.value
+                    ? "bg-black text-white"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
             >
-              {f}
+              {t.label}
             </button>
           ))}
         </div>
 
-        <div className="mt-3 relative">
-          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">
-            🔍
-          </span>
-
+        {/* Search */}
+        <div className="mt-3">
           <input
-            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
             placeholder="Search dishes..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-full bg-gray-100 text-sm
-               focus:outline-none focus:ring-2 focus:ring-black/10 shadow-sm"
+            className="w-full px-4 py-2.5 rounded-full bg-gray-100 text-sm
+              focus:outline-none focus:ring-2 focus:ring-black/10"
           />
         </div>
       </div>
 
-      {/* Top Rated List */}
+      {/* List */}
       <div className="p-4 space-y-4">
-        {filtered.map((item) => (
-          <div
-            key={item._id}
-            className="bg-white rounded-2xl shadow flex overflow-hidden"
-          >
-            {/* Image */}
-            <img
-              src={item.image}
-              alt={item.name}
-              className="w-24 h-24 object-cover"
-            />
+        {/* 🔹 Skeleton while loading */}
+        {loading &&
+          Array.from({ length: 5 }).map((_, i) => <SkeletonCard key={i} />)}
 
-            {/* Info */}
-            <div className="flex-1 p-3">
-              <p className="font-semibold text-sm">{item.name}</p>
+        {/* 🔹 Real data */}
+        {!loading &&
+          filteredProducts.map((item) => (
+            <div
+              key={item._id}
+              onClick={() => setProduct(item._id)}
+              className="bg-white rounded-2xl shadow-sm hover:shadow-md transition flex overflow-hidden"
+            >
+              {/* Image + rank */}
+              <div className="relative w-28 h-28 flex-shrink-0">
+                <img
+                  src={item.image}
+                  alt={item.name}
+                  className="w-full h-full object-cover rounded-l-2xl"
+                />
 
-              <p className="text-xs text-gray-500 mt-1">
-                ⭐ {item.rating} • {item.reviewsCount} reviews
-              </p>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
 
-              <div className="flex gap-1 mt-2">
-                {item.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="text-[10px] px-2 py-px rounded-full bg-gray-100 text-gray-700"
-                  >
-                    {tag}
+                <span
+                  className="absolute left-1 top-1 text-5xl font-extrabold 
+  text-white select-none drop-shadow-lg"
+                >
+                  #{getRankByTab(item)}
+                </span>
+              </div>
+
+              {/* Info */}
+              <div className="flex-1 p-4">
+                <p className="font-medium text-sm">{item.name}</p>
+
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-xs font-semibold text-green-700">
+                    ⭐ {item.rating}
                   </span>
-                ))}
+                  <span className="text-xs text-gray-400">
+                    ({item.reviewsCount})
+                  </span>
+                </div>
+              </div>
+
+              {/* Price */}
+              <div className="p-4 flex flex-col justify-between items-end">
+                <p className="font-semibold text-sm">₹{item.price}</p>
+
+                <button className="text-xs px-4 py-1.5 rounded-full border border-black/80 font-medium hover:bg-black hover:text-white transition">
+                  Add
+                </button>
               </div>
             </div>
+          ))}
 
-            {/* Price */}
-            <div className="p-3 flex flex-col justify-between items-end">
-              <p className="font-bold text-sm">₹{item.price}</p>
-
-              <button className="text-xs bg-black text-white px-3 py-1 rounded-full">
-                Add
-              </button>
-            </div>
-          </div>
-        ))}
+        {/* Empty state */}
+        {!loading && filteredProducts.length === 0 && (
+          <p className="text-center text-sm text-gray-400 mt-12">
+            No dishes found
+          </p>
+        )}
       </div>
+
+      {product && (
+        <ProductBottomSheet
+          productId={product}
+          setProductId={setProduct}
+          openReviewForm={openReviewForm}
+          setOpenReviewForm={setOpenReviewForm}
+          fetchProducts={fetchProducts}
+        />
+      )}
     </div>
   );
 };

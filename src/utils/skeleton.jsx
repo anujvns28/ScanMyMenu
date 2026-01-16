@@ -43,3 +43,21 @@ export const HeaderSkeleton = () => (
       ))}
     </div>
   );
+
+export const SkeletonCard = () => {
+  return (
+    <div className="bg-white rounded-2xl shadow-sm flex overflow-hidden animate-pulse">
+      <div className="w-28 h-28 bg-gray-200" />
+
+      <div className="flex-1 p-4 space-y-3">
+        <div className="h-4 w-2/3 bg-gray-200 rounded" />
+        <div className="h-3 w-1/3 bg-gray-200 rounded" />
+      </div>
+
+      <div className="p-4 flex flex-col justify-between items-end">
+        <div className="h-4 w-10 bg-gray-200 rounded" />
+        <div className="h-7 w-14 bg-gray-200 rounded-full" />
+      </div>
+    </div>
+  );
+};

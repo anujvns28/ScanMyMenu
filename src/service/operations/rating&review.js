@@ -41,7 +41,7 @@ export const addRatingAndReview = async (data, token, dispatch) => {
 };
 
 export const editRatingAndReview = async (data, token, dispatch) => {
-  dispatch(setUserLoading(true));
+  // dispatch(setUserLoading(true));
   let result;
 
   try {
@@ -64,12 +64,12 @@ export const editRatingAndReview = async (data, token, dispatch) => {
     console.log("edit ratng api error", err);
   }
 
-  dispatch(setUserLoading(false));
+  // dispatch(setUserLoading(false));
   return result;
 };
 
 export const getAllReview = async (data, dispatch) => {
-  dispatch(setUserLoading(true));
+  // dispatch(setUserLoading(true));
   let result;
 
   try {
@@ -88,12 +88,12 @@ export const getAllReview = async (data, dispatch) => {
     console.log("get all rating and review api error", err);
   }
 
-  dispatch(setUserLoading(false));
+  // dispatch(setUserLoading(false));
   return result;
 };
 
 export const getProductRatingSummary = async (data, dispatch) => {
-  dispatch(setUserLoading(true));
+  // dispatch(setUserLoading(true));
   let result;
 
   try {
@@ -112,12 +112,12 @@ export const getProductRatingSummary = async (data, dispatch) => {
     console.log("get all rating summary api error", err);
   }
 
-  dispatch(setUserLoading(false));
+  // dispatch(setUserLoading(false));
   return result;
 };
 
-export const getUserReviewOfProduct = async (data,token, dispatch) => {
-  dispatch(setUserLoading(true));
+export const getUserReviewOfProduct = async (data, token, dispatch) => {
+  // dispatch(setUserLoading(true));
   let result;
 
   try {
@@ -126,9 +126,9 @@ export const getUserReviewOfProduct = async (data,token, dispatch) => {
       url: GET_USER_REVIEW,
       data: data,
       withCredentials: true,
-      headers:{
-        Authorization : `Bearer ${token}`
-      }
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
 
     if (response) {
@@ -139,7 +139,7 @@ export const getUserReviewOfProduct = async (data,token, dispatch) => {
     console.log("get user rating and review api error", err);
   }
 
-  dispatch(setUserLoading(false));
+  // dispatch(setUserLoading(false));
   return result;
 };
 

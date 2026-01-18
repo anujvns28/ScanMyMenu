@@ -40,6 +40,7 @@ const ProductBottomSheet = ({
   const [lightboxImages, setLightboxImages] = useState([]);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [openLightbox, setOpenLightbox] = useState(false);
+  const [ratingLoader, setRatingLoader] = useState(false);
 
   const reviewState = {
     rating,
@@ -53,6 +54,8 @@ const ProductBottomSheet = ({
     isEditReview,
     existingImages,
     setExistingImages,
+    ratingLoader,
+    setRatingLoader,
   };
 
   const dispatch = useDispatch();
@@ -65,12 +68,12 @@ const ProductBottomSheet = ({
   const fetchRatingAndReviewHandler = async () => {
     let myReview = null;
 
-    // 1️⃣ Agar logged in hai → apna review lao
+    // Agar logged in hai → apna review lao
     if (token) {
       const userReview = await getUserReviewOfProduct(
         { productId: productId },
         token,
-        dispatch
+        dispatch,
       );
 
       if (userReview?.hasReviewed) {
@@ -127,6 +130,7 @@ const ProductBottomSheet = ({
       formData.append("images", img);
     });
 
+    setRatingLoader(true);
     const result = userRatingAndReview
       ? await editRatingAndReview(formData, token, dispatch)
       : await addRatingAndReview(formData, token, dispatch);
@@ -138,6 +142,7 @@ const ProductBottomSheet = ({
         rating: result.productRating,
       }));
     }
+    setRatingLoader(false);
     fetchProducts();
     setOpenReviewForm(false);
     setImages([]);
@@ -164,16 +169,21 @@ const ProductBottomSheet = ({
   }, [isEditReview]);
 
   useEffect(() => {
+    if (!productId) return;
+
     fetchRatingAndReviewHandler();
-  }, []);
+  }, [productId, token]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center">
+    <div className="fixed inset-0 z-50 flex items-end justify-center ">
       {/* Background overlay */}
       <div className="absolute inset-0 bg-black/40"></div>
 
       {/* Bottom Sheet */}
-      <div className="relative pb-36 w-full max-w-md bg-white rounded-t-3xl shadow-2xl max-h-[85vh] flex flex-col animate-slide-up">
+      <div
+        className="relative  w-full max-w-md bg-white rounded-t-3xl shadow-2xl max-h-[85vh] flex flex-col animate-slide-up"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Drag handle */}
         <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mt-3 mb-2"></div>
 
@@ -240,10 +250,10 @@ const ProductBottomSheet = ({
     product?.spiceLevel === "mild"
       ? "bg-green-100 text-green-700"
       : product?.spiceLevel === "medium"
-      ? "bg-yellow-100 text-yellow-700"
-      : product?.spiceLevel === "spicy"
-      ? "bg-orange-100 text-orange-700"
-      : "bg-red-100 text-red-700"
+        ? "bg-yellow-100 text-yellow-700"
+        : product?.spiceLevel === "spicy"
+          ? "bg-orange-100 text-orange-700"
+          : "bg-red-100 text-red-700"
   }`}
             >
               <Flame size={14} />
@@ -270,7 +280,7 @@ const ProductBottomSheet = ({
             </div>
           )}
           {/* Reviews Preview */}
-          <div className="bg-gray-50 rounded-2xl p-4 space-y-4">
+          <div className="bg-gray-50 pb-36 rounded-2xl p-4 space-y-4">
             {/* MY REVIEW */}
             {userRatingAndReview && (
               <div className="bg-gradient-to-r from-orange-50 to-white rounded-2xl p-4 border border-orange-200 shadow-sm space-y-3">
@@ -451,8 +461,8 @@ const ProductBottomSheet = ({
 
         {/* ================= STICKY CTA ================= */}
         <div
-          className={`fixed left-0 right-0 bg-white p-4 flex items-center justify-between border-t transition-all duration-300
-    ${isCartOpen ? "bottom-18" : "bottom-0"}
+          className={`sticky bg-white p-4 flex items-center justify-between border-t transition-all duration-300
+    ${isCartOpen ? "bottom-20" : "bottom-0"}
   `}
         >
           <p className="text-xl font-bold">₹{product.price}</p>

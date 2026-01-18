@@ -26,10 +26,10 @@ const WriteReviewSheet = ({
     isEditReview,
     existingImages,
     setExistingImages,
+    ratingLoader,
+    setRatingLoader,
   } = reviewState;
   const { shopDetails } = useSelector((state) => state.shop);
-  const { userLoading } = useSelector((state) => state.auth);
-  const dispatch = useDispatch();
 
   if (!open || !product) return null;
 
@@ -169,7 +169,7 @@ const WriteReviewSheet = ({
                     <button
                       onClick={() =>
                         setExistingImages((prev) =>
-                          prev.filter((_, idx) => idx !== i)
+                          prev.filter((_, idx) => idx !== i),
                         )
                       }
                       className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/70 text-white flex items-center justify-center text-xs"
@@ -231,7 +231,7 @@ const WriteReviewSheet = ({
         purpose="review"
       />
 
-      {userLoading && <LoaderComponent />}
+      {ratingLoader && <LoaderComponent />}
     </div>
   );
 };

@@ -1,13 +1,14 @@
 import { Star, Flame, Heart, Clock, Plus, Minus } from "lucide-react";
 import { useState } from "react";
 import { colorClasses } from "../../../utils/data";
+import { useCart } from "../../../context/CartContext";
 
 const MenuItemCard = ({ item }) => {
-  const [qty, setQty] = useState(0);
+  const { addToCart } = useCart();
 
   return (
     <div className="relative bg-white rounded-xl shadow-sm hover:shadow-md transition overflow-hidden">
-      {/* ❌ Not Available */}
+      {/*  Not Available */}
       {!item.isAvailable && (
         <div className="absolute inset-0 bg-black/60 z-20 flex items-center justify-center">
           <span className="px-3 py-1 bg-red-500 text-white text-xs font-semibold rounded-md">
@@ -84,7 +85,10 @@ const MenuItemCard = ({ item }) => {
           {item.isAvailable && (
             <div>
               <button
-                onClick={() => setQty(1)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  addToCart(item);
+                }}
                 className="px-4 py-1.5 border border-green-600 text-green-700 text-xs font-semibold rounded-lg bg-green-50 hover:bg-green-100"
               >
                 ADD

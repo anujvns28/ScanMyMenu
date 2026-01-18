@@ -7,6 +7,7 @@ import { useDispatch } from "react-redux";
 import { useParams } from "react-router-dom";
 import { SkeletonCard } from "../../../utils/skeleton";
 import ProductBottomSheet from "./ProductBottomSheet";
+import { useCart } from "../../../context/CartContext";
 
 const tabs = [
   { label: "All", value: "ALL" },
@@ -23,7 +24,8 @@ const TopRated = () => {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [openReviewForm, setOpenReviewForm] = useState(false);
-  const [product, setProduct] = useState(null);
+  const [selectedProductId, setSelectedProductId] = useState(null);
+  const { addToCart } = useCart();
 
   const getRankByTab = (product) => {
     if (activeTab === "VEG") return product.vegRank;
@@ -62,12 +64,22 @@ const TopRated = () => {
 
     if (search) {
       list = list.filter((p) =>
-        p.name.toLowerCase().includes(search.toLowerCase())
+        p.name.toLowerCase().includes(search.toLowerCase()),
       );
     }
 
     return list;
   }, [products, activeTab, search]);
+
+  useEffect(() => {
+    if (!selectedProductId) {
+      fetchProducts();
+    }
+  }, [selectedProductId]);
+
+  useEffect(() => {
+    console.log("Selected product:", selectedProductId);
+  }, [selectedProductId]);
 
   return (
     <div className="min-h-screen bg-neutral-50 pb-24">
@@ -121,7 +133,7 @@ const TopRated = () => {
           filteredProducts.map((item) => (
             <div
               key={item._id}
-              onClick={() => setProduct(item._id)}
+              onClick={() => setSelectedProductId(item._id)}
               className="bg-white rounded-2xl shadow-sm hover:shadow-md transition flex overflow-hidden"
             >
               {/* Image + rank */}
@@ -160,7 +172,13 @@ const TopRated = () => {
               <div className="p-4 flex flex-col justify-between items-end">
                 <p className="font-semibold text-sm">₹{item.price}</p>
 
-                <button className="text-xs px-4 py-1.5 rounded-full border border-black/80 font-medium hover:bg-black hover:text-white transition">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    addToCart(item);
+                  }}
+                  className="text-xs px-4 py-1.5 rounded-full border border-black/80 font-medium hover:bg-black hover:text-white transition"
+                >
                   Add
                 </button>
               </div>
@@ -175,13 +193,14 @@ const TopRated = () => {
         )}
       </div>
 
-      {product && (
+      {selectedProductId && (
         <ProductBottomSheet
-          productId={product}
-          setProductId={setProduct}
+          productId={selectedProductId}
+          setProductId={setSelectedProductId}
           openReviewForm={openReviewForm}
           setOpenReviewForm={setOpenReviewForm}
           fetchProducts={fetchProducts}
+          currCategory="top-rated"
         />
       )}
     </div>

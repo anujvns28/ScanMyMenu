@@ -48,6 +48,7 @@ export const productEndPoints = {
   UPDATE_PRODUCT_API: BASE_URL + "/product/updateProduct",
   GET_TOP_RATED_PRODUCT: BASE_URL + "/product/topRatedProducts",
   GET_PRODUCT_DETAILS: BASE_URL + "/product/getProductDetails",
+  GET_FOR_YOU_PRODUCTS: BASE_URL + "/product/for-you",
 };
 
 export const ratingAndReviews = {
@@ -58,7 +59,6 @@ export const ratingAndReviews = {
   GET_USER_REVIEW: BASE_URL + "/rating/has-reviewed",
 };
 
-
 export const orderEndPoints = {
   // User
   CREATE_ORDER_API: BASE_URL + "/orders/create",
@@ -66,7 +66,7 @@ export const orderEndPoints = {
   GET_MY_ACTIVE_ORDER: BASE_URL + "/orders/my-active",
 
   // Kitchen
-  // GET_KITCHEN_ORDERS:  `${BASE_URL}/orders/kitchen/${shopId}`,
+  GET_KITCHEN_ORDERS: BASE_URL + "/orders/kitchen",
 
-  // UPDATE_ORDER_STATUS:  `${BASE_URL}/orders/${orderId}/status`,
+  UPDATE_ORDER_STATUS: BASE_URL + "/orders/updateOrderStatus",
 };

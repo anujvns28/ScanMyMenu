@@ -100,10 +100,10 @@ export default function ExpandableOrderTracker({ onRateClick }) {
                   order.status === "PLACED"
                     ? "25%"
                     : order.status === "PREPARING"
-                    ? "50%"
-                    : order.status === "READY"
-                    ? "75%"
-                    : "100%",
+                      ? "50%"
+                      : order.status === "READY"
+                        ? "75%"
+                        : "100%",
               }}
             />
 
@@ -115,10 +115,10 @@ export default function ExpandableOrderTracker({ onRateClick }) {
                   order.status === "PLACED"
                     ? "25%"
                     : order.status === "PREPARING"
-                    ? "50%"
-                    : order.status === "READY"
-                    ? "75%"
-                    : "100%",
+                      ? "50%"
+                      : order.status === "READY"
+                        ? "75%"
+                        : "100%",
               }}
             />
           </div>
@@ -150,8 +150,8 @@ export default function ExpandableOrderTracker({ onRateClick }) {
               completed
                 ? "bg-green-500 text-white"
                 : active
-                ? "bg-black text-white animate-pulse"
-                : "bg-gray-200 text-gray-400"
+                  ? "bg-black text-white animate-pulse"
+                  : "bg-gray-200 text-gray-400"
             }`}
                   >
                     {completed ? "✓" : step.icon}
@@ -197,10 +197,7 @@ export default function ExpandableOrderTracker({ onRateClick }) {
               ⭐ Rate & Review Your Order
             </button>
           )}
-          <button
-            onClick={() => dispatch(updateOrderStatus("SERVED"))}
-            className="w-full flex items-center justify-center gap-2 bg-black text-white py-3 rounded-xl"
-          >
+          <button className="w-full flex items-center justify-center gap-2 bg-black text-white py-3 rounded-xl">
             <Download size={16} />
             Download Bill
           </button>

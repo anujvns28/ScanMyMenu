@@ -61,3 +61,26 @@ export const SkeletonCard = () => {
     </div>
   );
 };
+
+export const ForYouSkeleton = () => {
+  return (
+    <div className="space-y-10 animate-pulse">
+      {/* Hero */}
+      <div className="h-64 rounded-3xl bg-gray-200" />
+
+      {/* Grid */}
+      <div className="grid grid-cols-2 gap-4">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="h-44 bg-gray-200 rounded-xl" />
+        ))}
+      </div>
+
+      {/* Horizontal */}
+      <div className="flex gap-4">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="min-w-40 h-40 bg-gray-200 rounded-xl" />
+        ))}
+      </div>
+    </div>
+  );
+};

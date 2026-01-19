@@ -161,7 +161,6 @@ export default function OrderRatingFlow({ onClose }) {
               onClose();
               dispatch(clearOrder());
               dispatch(setActiveOrder(null));
-              localStorage.removeItem("order");
             }}
             className="bg-black text-white px-8 py-3 rounded-xl"
           >

@@ -54,3 +54,27 @@ export const colorClasses = {
   lime: "bg-lime-100 text-lime-700 border border-lime-300",
 };
 
+export const statusConfig = {
+  new: {
+    label: "New",
+    badge: "bg-blue-100 text-blue-700",
+    card: "border-l-4 border-blue-500",
+  },
+  preparing: {
+    label: "Preparing",
+    badge: "bg-yellow-100 text-yellow-700",
+    card: "border-l-4 border-yellow-500",
+  },
+  ready: {
+    label: "Ready",
+    badge: "bg-purple-100 text-purple-700",
+    card: "border-l-4 border-purple-500",
+  },
+  completed: {
+    label: "Completed",
+    badge: "bg-green-100 text-green-700",
+    card: "border-l-4 border-green-500 opacity-80",
+  },
+};
+
+

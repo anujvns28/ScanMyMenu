@@ -1,5 +1,12 @@
 import { NavLink } from "react-router-dom";
-import { Home, MenuSquare, Star, BarChart, MoreHorizontal } from "lucide-react";
+import {
+  Home,
+  MenuSquare,
+  Star,
+  BarChart,
+  MoreHorizontal,
+  ClipboardList,
+} from "lucide-react";
 
 const BottomNav = () => {
   const linkClass = ({ isActive }) =>
@@ -19,10 +26,15 @@ const BottomNav = () => {
           Menu
         </NavLink>
 
-        <NavLink to="/shop/dashboard" className={linkClass}>
+        <NavLink to="/shop/orders" className={linkClass}>
+          <ClipboardList size={20} />
+          Orders
+        </NavLink>
+
+        {/* <NavLink to="/shop/dashboard" className={linkClass}>
           <BarChart size={20} />
           Dashboard
-        </NavLink>
+        </NavLink> */}
 
         <NavLink to="/shop/more" className={linkClass}>
           <MoreHorizontal size={20} />

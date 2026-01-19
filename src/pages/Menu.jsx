@@ -19,6 +19,7 @@ import CartBottomSheet from "../components/core/menu/order/BottomCart";
 import FloatingCartBar from "../components/core/menu/order/FloatingCartBar";
 import { useCart } from "../context/CartContext";
 import OrderOverlay from "../components/core/menu/order/OrderOverlay";
+import { getMyActiveOrder } from "../service/operations/payment";
 
 const menu = () => {
   const { shopId } = useParams();
@@ -58,10 +59,14 @@ const menu = () => {
     }
   };
 
+  const fetchMyActiveOrder = async () => {
+    const result = await getMyActiveOrder(token, dispatch);
+  };
+
   const fetchCategoryInfoAndItems = async () => {
     const result = await fetchCategoryByProduct(
       { shopCategoryId: currCategory },
-      dispatch
+      dispatch,
     );
     if (result) {
       setCurrCategoryItem(result.data);
@@ -101,12 +106,12 @@ const menu = () => {
   const restoreUIForRating = async (intent) => {
     const products = await fetchCategoryByProduct(
       { shopCategoryId: intent.categoryId },
-      dispatch
+      dispatch,
     );
 
     if (products) {
       const c_pro = products.data.products.find(
-        (p) => p._id == intent.productId
+        (p) => p._id == intent.productId,
       );
       setProductId(c_pro._id);
     }
@@ -129,6 +134,7 @@ const menu = () => {
 
   useEffect(() => {
     fetchShopDetailsHandler();
+    fetchMyActiveOrder();
   }, []);
 
   useEffect(() => {
@@ -177,15 +183,15 @@ const menu = () => {
     // 🔍 SEARCH
     if (search.trim() !== "") {
       temp = temp.filter((item) =>
-        item.name.toLowerCase().includes(search.toLowerCase())
+        item.name.toLowerCase().includes(search.toLowerCase()),
       );
     }
     console.log(activeFilters);
     if (activeFilters.length > 0) {
       temp = temp.filter((item) =>
         activeFilters.every((tagName) =>
-          item.tags.some((t) => t.name === tagName)
-        )
+          item.tags.some((t) => t.name === tagName),
+        ),
       );
     }
 
@@ -283,8 +289,8 @@ const menu = () => {
           isActive
             ? "bg-linear-to-tr from-orange-500 via-red-500 to-pink-500 scale-105 shadow-md"
             : cat.isBest
-            ? "bg-linear-to-tr from-yellow-400 to-orange-500"
-            : ""
+              ? "bg-linear-to-tr from-yellow-400 to-orange-500"
+              : ""
         }`}
                       >
                         <div className="w-20 h-20 rounded-full overflow-hidden bg-white shadow-inner">
@@ -343,7 +349,7 @@ const menu = () => {
                           setActiveFilters((prev) =>
                             prev.includes(filter.id)
                               ? prev.filter((f) => f !== filter.id)
-                              : [...prev, filter.id]
+                              : [...prev, filter.id],
                           )
                         }
                         className={`snap-start shrink-0 px-5 py-2.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200
@@ -371,7 +377,7 @@ const menu = () => {
                           setActiveFilters((prev) =>
                             prev.includes(tag._id)
                               ? prev.filter((f) => f !== tag._id)
-                              : [...prev, tag._id]
+                              : [...prev, tag._id],
                           )
                         }
                         className={`snap-start shrink-0 px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 border
@@ -403,7 +409,9 @@ const menu = () => {
             {/* Smart Tabs */}
             {!userLoading && isSmartTab(currCategory) ? (
               <>
-                {currCategory === "for-you" && <ForYou />}
+                {currCategory === "for-you" && (
+                  <ForYou setCurrCategory={setCurrCategory} />
+                )}
                 {currCategory === "top-rated" && <TopRated />}
               </>
             ) : (

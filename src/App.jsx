@@ -28,6 +28,8 @@ import { useDispatch } from "react-redux";
 import { useEffect } from "react";
 import { setToken } from "./redux/slices/auth";
 import MenuPage from "./pages/MenuPage";
+import Orders from "./components/core/shop/Orders";
+
 
 function App() {
   const dispatch = useDispatch();
@@ -83,6 +85,7 @@ function App() {
             <Route path="support" element={<Support />} />
             <Route path="dashboard" element={<ShopDashboard />} />
             <Route path="more" element={<More />} />
+            <Route path="orders" element={<Orders />} />
           </Route>
         </Routes>
       </div>

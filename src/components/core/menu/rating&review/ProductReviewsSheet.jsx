@@ -1,12 +1,23 @@
 import { X, Star } from "lucide-react";
 import { useState } from "react";
 import { timeAgo } from "../../../../utils/convertTime";
-import { getProductRatingSummary } from "../../../../service/operations/rating&review";
+import {
+  getAllReview,
+  getProductRatingSummary,
+} from "../../../../service/operations/rating&review";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import ImageLightbox from "./ImageLightbox";
+import { getProductDetails } from "../../../../service/operations/product";
 
-const ProductReviewsSheet = ({ onClose, reviews, myReview, product }) => {
+const ProductReviewsSheet = ({
+  onClose,
+  reviews,
+  setReview,
+  productId,
+  myReview,
+  product,
+}) => {
   const [ratingSummary, setRatingSummary] = useState(null);
   const [lightboxImages, setLightboxImages] = useState([]);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -21,18 +32,16 @@ const ProductReviewsSheet = ({ onClose, reviews, myReview, product }) => {
 
   const filtered =
     filter === "all" ? reviews : reviews.filter((r) => r.rating === filter);
-  
+
   const allImages = [
-  ...(myReview?.images || []),
-  ...reviews.flatMap((r) => r.images || [])
-];
-
-
+    ...(myReview?.images || []),
+    ...reviews.flatMap((r) => r.images || []),
+  ];
 
   const fetchRatingSummary = async () => {
     const overAllRating = await getProductRatingSummary(
       { productId: product._id },
-      dispatch
+      dispatch,
     );
     if (overAllRating) {
       setRatingSummary(overAllRating.data);
@@ -43,11 +52,22 @@ const ProductReviewsSheet = ({ onClose, reviews, myReview, product }) => {
     fetchRatingSummary();
   }, []);
 
+  useEffect(() => {
+    const fetchProductRating = async () => {
+      const result = await getAllReview({ productId: productId }, dispatch);
+
+      if (result) {
+        setReview(result.data);
+      }
+    };
+    fetchProductRating();
+  }, []);
+
   return (
     <div className="fixed inset-0 z-50 flex justify-center items-end ">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
 
-      <div className="relative w-full max-w-md bg-white rounded-t-3xl shadow-2xl flex flex-col h-[85vh] pb-5">
+      <div className="relative w-full max-w-md bg-white rounded-t-3xl shadow-2xl flex flex-col h-[85vh] pb-16">
         {/* Header */}
         <div className="p-4 border-b  ">
           <div className="flex justify-between items-center">
@@ -117,28 +137,27 @@ const ProductReviewsSheet = ({ onClose, reviews, myReview, product }) => {
           </div>
 
           {allImages.length > 0 && (
-  <div className="px-4 py-3 border-b">
-    <p className="text-sm font-semibold text-gray-800 mb-2">
-      Customer Photos
-    </p>
+            <div className="px-4 py-3 border-b">
+              <p className="text-sm font-semibold text-gray-800 mb-2">
+                Customer Photos
+              </p>
 
-    <div className="flex gap-2 overflow-x-auto pb-2">
-      {allImages.map((img, idx) => (
-        <img
-          key={idx}
-          src={img}
-          onClick={() => {
-            setLightboxImages(allImages);
-            setLightboxIndex(idx);
-            setOpenLightbox(true);
-          }}
-          className="w-20 h-20 rounded-xl object-cover cursor-pointer border"
-        />
-      ))}
-    </div>
-  </div>
-)}
-
+              <div className="flex gap-2 overflow-x-auto pb-2">
+                {allImages.map((img, idx) => (
+                  <img
+                    key={idx}
+                    src={img}
+                    onClick={() => {
+                      setLightboxImages(allImages);
+                      setLightboxIndex(idx);
+                      setOpenLightbox(true);
+                    }}
+                    className="w-20 h-20 rounded-xl object-cover cursor-pointer border"
+                  />
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* FILTERS (STICKY) */}
           <div className="sticky top-0 z-20 bg-white border-b px-4 py-2 flex gap-2 overflow-x-auto">
@@ -197,15 +216,15 @@ const ProductReviewsSheet = ({ onClose, reviews, myReview, product }) => {
                     <div className="flex gap-2 overflow-x-auto">
                       {myReview.images.map((img, i) => (
                         <img
-                        key={i}
-                        src={img}
-                        onClick={() => {
-                          setLightboxImages(myReview.images);
-                          setLightboxIndex(i);
-                          setOpenLightbox(true);
-                        }}
-                        className="w-24 h-24 rounded-xl object-cover cursor-pointer"
-                      />
+                          key={i}
+                          src={img}
+                          onClick={() => {
+                            setLightboxImages(myReview.images);
+                            setLightboxIndex(i);
+                            setOpenLightbox(true);
+                          }}
+                          className="w-24 h-24 rounded-xl object-cover cursor-pointer"
+                        />
                       ))}
                     </div>
                   )}
@@ -273,12 +292,12 @@ const ProductReviewsSheet = ({ onClose, reviews, myReview, product }) => {
         </div>
 
         {openLightbox && (
-                <ImageLightbox
-                  images={lightboxImages}
-                  startIndex={lightboxIndex}
-                  onClose={() => setOpenLightbox(false)}
-                />
-              )}
+          <ImageLightbox
+            images={lightboxImages}
+            startIndex={lightboxIndex}
+            onClose={() => setOpenLightbox(false)}
+          />
+        )}
       </div>
     </div>
   );

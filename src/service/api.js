@@ -57,6 +57,7 @@ export const ratingAndReviews = {
   GET_ALL_REVIEW: BASE_URL + "/rating/allReview",
   GET_RATING_SUMMARY: BASE_URL + "/rating/ratingSummary",
   GET_USER_REVIEW: BASE_URL + "/rating/has-reviewed",
+  GET_SHOP_RATING_AND_REVIEW_SUMMARY: BASE_URL + "/rating/getShopReviewSummary",
 };
 
 export const orderEndPoints = {
@@ -69,4 +70,15 @@ export const orderEndPoints = {
   GET_KITCHEN_ORDERS: BASE_URL + "/orders/kitchen",
 
   UPDATE_ORDER_STATUS: BASE_URL + "/orders/updateOrderStatus",
+};
+
+export const offerEndPoints = {
+  // Shopkeeper
+  CREATE_OFFER_API: BASE_URL + "/offer/create",
+  GET_ALL_OFFERS_API: BASE_URL + "/offer/all",
+  UPDATE_OFFER_API: BASE_URL + "/offer/update", // + /:offerId
+  TOGGLE_OFFER_API: BASE_URL + "/offer/toggle", // + /:offerId
+
+  // Customer / For You
+  GET_ACTIVE_OFFERS_API: BASE_URL + "/offer/active", // + /:shopId
 };

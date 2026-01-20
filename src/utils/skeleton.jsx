@@ -84,3 +84,44 @@ export const ForYouSkeleton = () => {
     </div>
   );
 };
+
+export const ProductCardSkeleton = () => {
+  return (
+    <div className="bg-white rounded-xl p-5 shadow-sm animate-pulse">
+      <div className="flex justify-between items-start">
+        <div>
+          <div className="h-4 w-40 bg-gray-200 rounded mb-2" />
+          <div className="h-3 w-24 bg-gray-200 rounded mb-1" />
+          <div className="h-3 w-16 bg-gray-200 rounded" />
+        </div>
+        <div className="h-6 w-20 bg-gray-200 rounded-full" />
+      </div>
+
+      <div className="mt-4 h-3 w-40 bg-gray-200 rounded" />
+    </div>
+  );
+};
+
+export const SummarySkeleton = () => {
+  return (
+    <div className="bg-white rounded-xl p-5 shadow mb-6 animate-pulse">
+      {/* Top */}
+      <div className="flex items-center gap-4">
+        <div className="h-10 w-20 bg-gray-200 rounded" />
+        <div className="h-4 w-40 bg-gray-200 rounded" />
+      </div>
+
+      {/* Breakdown */}
+      <div className="mt-4 space-y-3">
+        {[1, 2, 3, 4, 5].map((i) => (
+          <div key={i} className="flex items-center gap-3">
+            <div className="h-4 w-10 bg-gray-200 rounded" />
+            <div className="flex-1 h-2 bg-gray-200 rounded-full" />
+            <div className="h-4 w-8 bg-gray-200 rounded" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+

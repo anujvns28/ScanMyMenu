@@ -4,13 +4,13 @@ import  {ratingAndReviews}  from "../api"
 
 
 const {
-    ADD_RATING_AND_REVIEW,
-    EDIT_RATING_AND_REVIEW,
-    GET_ALL_REVIEW,
-    GET_RATING_SUMMARY,
-    GET_USER_REVIEW
-} = ratingAndReviews
-
+  ADD_RATING_AND_REVIEW,
+  EDIT_RATING_AND_REVIEW,
+  GET_ALL_REVIEW,
+  GET_RATING_SUMMARY,
+  GET_USER_REVIEW,
+  GET_SHOP_RATING_AND_REVIEW_SUMMARY,
+} = ratingAndReviews;
 
 export const addRatingAndReview = async (data, token, dispatch) => {
   dispatch(setUserLoading(true));
@@ -140,6 +140,30 @@ export const getUserReviewOfProduct = async (data, token, dispatch) => {
   }
 
   // dispatch(setUserLoading(false));
+  return result;
+};
+
+export const getShopRatingSummary = async (token) => {
+  let result;
+
+  try {
+    const response = await axios({
+      method: "GET",
+      url: GET_SHOP_RATING_AND_REVIEW_SUMMARY,
+      withCredentials: true,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (response) {
+      console.log(" get shop all  rating summary api response", response);
+      result = response.data;
+    }
+  } catch (err) {
+    console.log("get shop all rating summary api error", err);
+  }
+
   return result;
 };
 

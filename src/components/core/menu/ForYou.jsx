@@ -5,6 +5,7 @@ import { getForYouProducts } from "../../../service/operations/product";
 import { ForYouSkeleton } from "../../../utils/skeleton";
 import ProductBottomSheet from "./ProductBottomSheet";
 import { useCart } from "../../../context/CartContext";
+import { getActiveOffers } from "../../../service/operations/offers";
 
 /* ------------------ Dummy Offers (KEEP AS IS) ------------------ */
 const offers = [
@@ -35,6 +36,7 @@ const ForYou = ({ setCurrCategory }) => {
   const [todaysSpecial, setTodaysSpecial] = useState([]);
   const [selectedProductId, setSelectedProductId] = useState(null);
   const [openReviewForm, setOpenReviewForm] = useState(false);
+  const [offers, setOffers] = useState([]);
   const { addToCart } = useCart();
 
   const fetchForYou = async () => {
@@ -50,9 +52,34 @@ const ForYou = ({ setCurrCategory }) => {
     setLoading(false);
   };
 
+  const daysLeft = (endDate) => {
+    const diff = new Date(endDate).getTime() - new Date().getTime();
+    return Math.ceil(diff / (1000 * 60 * 60 * 24));
+  };
+
+  const isExpired = (endDate) => {
+    return new Date(endDate) < new Date();
+  };
+
+  const calculateActualPrice = (items = []) => {
+    return items.reduce((sum, i) => sum + i.product.price * i.quantity, 0);
+  };
+
   useEffect(() => {
     fetchForYou();
   }, [shopId]);
+
+  useEffect(() => {
+    const fetchShopOffers = async () => {
+      const result = await getActiveOffers(shopId);
+
+      if (result) {
+        setOffers(result.offers);
+      }
+    };
+
+    fetchShopOffers();
+  }, []);
 
   if (loading) return <ForYouSkeleton />;
 
@@ -318,34 +345,130 @@ const ForYou = ({ setCurrCategory }) => {
       </section>
 
       {/* 🎁 Offers & Combos (DUMMY) */}
-      <section>
-        <h3 className="text-base font-semibold">🎁 Offers & Combos</h3>
+      <section className="mt-6">
+        <h3 className="text-base font-semibold mb-3">🎁 Offers & Combos</h3>
 
-        <div className="flex gap-4 overflow-x-auto pb-2">
-          {offers.map((offer) => (
-            <div
-              key={offer._id}
-              className="min-w-[260px] rounded-2xl overflow-hidden shadow-lg relative"
-            >
-              <img
-                src={offer.image}
-                alt={offer.title}
-                className="w-full h-40 object-cover"
-              />
-              <div className="absolute inset-0 bg-black/50" />
-              <div className="absolute inset-0 p-4 flex flex-col justify-between text-white">
-                <div>
-                  <p className="text-xs uppercase tracking-wide text-yellow-300">
-                    Limited Time Offer
-                  </p>
-                  <h4 className="text-lg font-bold mt-1">{offer.title}</h4>
-                  <p className="text-xs mt-1 text-gray-200">{offer.subtitle}</p>
+        <div className="flex gap-4 overflow-x-auto pb-3 scrollbar-hide">
+          {offers.map((offer) => {
+            const actualPrice = calculateActualPrice(offer.items);
+            const saveAmount = actualPrice - offer.offerPrice;
+
+            const daysLeft = Math.ceil(
+              (new Date(offer.endDate) - new Date()) / (1000 * 60 * 60 * 24),
+            );
+            const totalQty = offer.items.reduce(
+              (sum, i) => sum + i.quantity,
+              0,
+            );
+
+            const expired = new Date(offer.endDate) < new Date();
+
+            return (
+              <div
+                key={offer._id}
+                className={`min-w-[260px] h-[360px] rounded-2xl overflow-hidden relative shadow-xl
+            ${expired ? "opacity-60" : "active:scale-[0.97]"}`}
+              >
+                {/* IMAGE */}
+                <img
+                  src={offer.image}
+                  alt={offer.title}
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+
+                {/* DARK GRADIENT OVERLAY */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+
+                {/* BADGE */}
+                <span
+                  className={`absolute top-3 left-3 px-3 py-1 text-xs rounded-full font-semibold
+              ${
+                expired
+                  ? "bg-gray-600 text-white"
+                  : daysLeft <= 2
+                    ? "bg-red-500 text-white"
+                    : "bg-green-500 text-white"
+              }`}
+                >
+                  {expired
+                    ? "Expired"
+                    : daysLeft <= 2
+                      ? "Ending Soon"
+                      : "Special Offer"}
+                </span>
+
+                {/* CONTENT OVER IMAGE */}
+                <div className="absolute inset-0 p-4 flex flex-col justify-end text-white">
+                  {/* PRODUCTS HINT */}
+                  <div className="mb-2 flex flex-wrap gap-1">
+                    {/* TOTAL ITEMS */}
+                    <span className="bg-white/20 backdrop-blur px-2 py-0.5 rounded-full text-[10px] font-semibold">
+                      {totalQty} items combo
+                    </span>
+
+                    {/* PRODUCT NAMES */}
+                    {offer.items.slice(0, 2).map((i, idx) => (
+                      <span
+                        key={idx}
+                        className="bg-white/20 backdrop-blur px-2 py-0.5 rounded-full text-[10px]"
+                      >
+                        {i.product.name} × {i.quantity}
+                      </span>
+                    ))}
+
+                    {/* MORE ITEMS */}
+                    {offer.items.length > 2 && (
+                      <span className="text-[10px] text-gray-200">
+                        +{offer.items.length - 2} more
+                      </span>
+                    )}
+                  </div>
+
+                  {/* TITLE */}
+                  <h4 className="text-lg font-bold leading-tight mb-1 line-clamp-2">
+                    {offer.title}
+                  </h4>
+
+                  {/* PRICE ROW */}
+                  <div className="flex items-end justify-between mb-2">
+                    <div>
+                      <p className="text-xs text-gray-300 line-through">
+                        ₹{actualPrice}
+                      </p>
+                      <p className="text-2xl font-extrabold">
+                        ₹{offer.offerPrice}
+                      </p>
+                    </div>
+
+                    {saveAmount > 0 && (
+                      <span className="bg-green-500 text-black text-xs font-semibold px-2 py-1 rounded-full">
+                        Save ₹{saveAmount}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* EXPIRY */}
+                  {!expired && (
+                    <p className="text-[11px] text-gray-300 mb-3">
+                      Expires in {daysLeft} day{daysLeft > 1 ? "s" : ""}
+                    </p>
+                  )}
+
+                  {/* BUY NOW BUTTON */}
+                  {!expired && (
+                    <button className="w-full bg-white text-black text-sm font-semibold py-2 rounded-xl">
+                      Buy Now
+                    </button>
+                  )}
+
+                  <span className="absolute top-3 right-3 flex items-center gap-1 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                    <span className="fire-bounce">🔥</span>
+                    Hot Deal
+                  </span>
                 </div>
-
-                <p className="text-lg font-bold">{offer.priceText}</p>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
 

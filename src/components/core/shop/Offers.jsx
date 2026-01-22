@@ -1,41 +1,10 @@
 import { useEffect, useState } from "react";
 import { Plus, Pencil, Trash2 } from "lucide-react";
-import OfferBottomSheet from "../../common/OfferBottomSheet";
+import OfferBottomSheet from "./offer/OfferBottomSheet";
+import { getAllOffers } from "../../../service/operations/offers";
+import { useDispatch, useSelector } from "react-redux";
 
-/* ---------------- DUMMY DATA ---------------- */
-
-const dummyOffers = [
-  {
-    id: 1,
-    title: "Burger Blast",
-    discountText: "20% OFF",
-    image: "https://images.unsplash.com/photo-1550547660-d9450f859349",
-    products: ["Paneer Burger", "Veg Burger"],
-    startDate: "2026-01-18",
-    endDate: "2026-01-25",
-    isActive: true,
-    description: "Flat 20% off on all burgers",
-    discountType: "PERCENT",
-    discountValue: 20,
-  },
-  {
-    id: 2,
-    title: "Coffee @ ₹99",
-    discountText: "@ ₹99",
-    image: "https://images.unsplash.com/photo-1509042239860-f550ce710b93",
-    products: ["Cold Coffee"],
-    startDate: "2026-01-10",
-    endDate: "2026-01-15",
-    isActive: false,
-    description: "Special price for coffee lovers",
-    discountType: "FLAT",
-    discountValue: 99,
-  },
-];
-
-/* ---------------- MAIN PAGE ---------------- */
-
-export default function MobileOffers() {
+export default function Offers() {
   const [loading, setLoading] = useState(true);
   const [offers, setOffers] = useState([]);
 
@@ -43,15 +12,8 @@ export default function MobileOffers() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [sheetMode, setSheetMode] = useState("create"); // create | view | edit
   const [selectedOffer, setSelectedOffer] = useState(null);
-
-  useEffect(() => {
-    setTimeout(() => {
-      setOffers(dummyOffers);
-      setLoading(false);
-    }, 1200);
-  }, []);
-
-  /* ---------- OPEN SHEET HANDLERS ---------- */
+  const { token } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
 
   const openCreateSheet = () => {
     setSelectedOffer(null);
@@ -70,6 +32,19 @@ export default function MobileOffers() {
     setSheetMode("edit");
     setSheetOpen(true);
   };
+
+  useEffect(() => {
+    const fetchAllOffers = async () => {
+      setLoading(true);
+      const result = await getAllOffers(token, dispatch);
+      setLoading(false);
+      if (result) {
+        setOffers(result.offers);
+      }
+    };
+
+    fetchAllOffers();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50 p-3 pb-20">
@@ -132,88 +107,136 @@ export default function MobileOffers() {
         onClose={() => setSheetOpen(false)}
         mode={sheetMode}
         offer={selectedOffer}
+        setOffers={setOffers}
+        setLoading={setLoading}
       />
     </div>
   );
 }
 
-/* ---------------- OFFER CARD ---------------- */
+function OfferCard({ offer, onView }) {
+  const formatDate = (date) =>
+    new Date(date).toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "short",
+    });
 
-function OfferCard({ offer, onView, onEdit }) {
+  const getDaysLeft = (endDate) => {
+    if (!endDate) return null;
+
+    const today = new Date();
+    const end = new Date(endDate);
+
+    const diffTime = end.setHours(0, 0, 0, 0) - today.setHours(0, 0, 0, 0);
+
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  };
+
+  const items = offer.items || [];
+
+  const originalPrice = items.reduce(
+    (total, item) => total + (item.product?.price || 0) * (item.quantity || 1),
+    0,
+  );
+
+  const savedAmount = originalPrice - (offer.offerPrice || 0);
+  const daysLeft = getDaysLeft(offer.endDate);
+
   return (
     <div
       onClick={onView}
-      className="bg-white rounded-2xl shadow-sm overflow-hidden cursor-pointer"
+      className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition cursor-pointer"
     >
       {/* IMAGE */}
-      <div className="relative">
+      <div className="relative h-48">
         <img
           src={offer.image}
           alt={offer.title}
-          className="h-40 w-full object-cover"
+          className="absolute inset-0 w-full h-full object-cover"
         />
 
-        <span className="absolute top-3 left-3 bg-yellow-400 text-black text-xs font-bold px-3 py-1 rounded-full">
-          {offer.discountText}
-        </span>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/35 to-transparent" />
 
+        {/* STATUS */}
         <span
-          className={`absolute top-3 right-3 text-xs px-3 py-1 rounded-full
-          ${
-            offer.isActive
-              ? "bg-green-100 text-green-700"
-              : "bg-gray-100 text-gray-500"
-          }`}
+          className={`absolute top-3 right-3 text-xs font-semibold px-3 py-1 rounded-full
+            ${
+              offer.isActive
+                ? "bg-green-500 text-white"
+                : "bg-gray-300 text-gray-700"
+            }`}
         >
           {offer.isActive ? "Active" : "Inactive"}
         </span>
+
+        {/* TITLE + PRICE */}
+        <div className="absolute bottom-3 left-3 right-3 text-white">
+          <h3 className="font-semibold text-lg">{offer.title}</h3>
+
+          <div className="flex items-end gap-2 mt-1">
+            <span className="text-2xl font-bold">₹{offer.offerPrice}</span>
+
+            {originalPrice > offer.offerPrice && (
+              <span className="text-sm text-gray-300 line-through">
+                ₹{originalPrice}
+              </span>
+            )}
+          </div>
+
+          {/* BADGES */}
+          <div className="flex gap-2 mt-1 flex-wrap">
+            {/* SAVE */}
+            {savedAmount > 0 && (
+              <span className="text-[11px] bg-green-500/90 px-2 py-0.5 rounded-full">
+                Save ₹{savedAmount}
+              </span>
+            )}
+
+            {/* EXPIRY */}
+            {daysLeft !== null && (
+              <span
+                className={`text-[11px] px-2 py-0.5 rounded-full
+                  ${
+                    daysLeft <= 1
+                      ? "bg-red-500/90"
+                      : daysLeft <= 3
+                        ? "bg-orange-500/90"
+                        : "bg-black/70"
+                  }`}
+              >
+                {daysLeft > 0
+                  ? `Expires in ${daysLeft} day${daysLeft > 1 ? "s" : ""}`
+                  : "Expired"}
+              </span>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* CONTENT */}
-      <div className="p-4">
-        <h3 className="font-semibold text-base">{offer.title}</h3>
-
-        <p className="text-xs text-gray-500 mt-1">
-          Applies to: {offer.products.join(", ")}
+      <div className="p-4 space-y-2">
+        <p className="text-xs text-gray-500 line-clamp-2">
+          {items.length > 0
+            ? items
+                .map(
+                  (item) =>
+                    `${item.product?.name || "Item"} × ${item.quantity || 1}`,
+                )
+                .join(", ")
+            : "No products"}
         </p>
 
-        <p className="text-xs text-gray-400 mt-2">
-          {offer.startDate} → {offer.endDate}
+        <p className="text-[11px] text-gray-400">
+          {formatDate(offer.startDate)} →{" "}
+          {offer.endDate ? formatDate(offer.endDate) : "No expiry"}
         </p>
-      </div>
-
-      {/* ACTION BAR */}
-      <div
-        className="border-t px-4 py-3 flex justify-between items-center"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <ToggleButton active={offer.isActive} />
-
-        <div className="flex gap-4">
-          <button onClick={onEdit} className="text-gray-600">
-            <Pencil size={16} />
-          </button>
-          <button className="text-red-600">
-            <Trash2 size={16} />
-          </button>
-        </div>
       </div>
     </div>
   );
 }
 
-/* ---------------- TOGGLE BUTTON ---------------- */
 
-function ToggleButton({ active }) {
-  return (
-    <button
-      className={`px-4 py-1 rounded-full text-xs font-semibold
-      ${active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}
-    >
-      {active ? "ON" : "OFF"}
-    </button>
-  );
-}
+
 
 /* ---------------- STATUS PILL ---------------- */
 

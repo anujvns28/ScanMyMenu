@@ -49,6 +49,7 @@ export const productEndPoints = {
   GET_TOP_RATED_PRODUCT: BASE_URL + "/product/topRatedProducts",
   GET_PRODUCT_DETAILS: BASE_URL + "/product/getProductDetails",
   GET_FOR_YOU_PRODUCTS: BASE_URL + "/product/for-you",
+  GET_ALL_PRODUCT: BASE_URL + "/product/getAllProducts",
 };
 
 export const ratingAndReviews = {
@@ -74,11 +75,12 @@ export const orderEndPoints = {
 
 export const offerEndPoints = {
   // Shopkeeper
-  CREATE_OFFER_API: BASE_URL + "/offer/create",
-  GET_ALL_OFFERS_API: BASE_URL + "/offer/all",
-  UPDATE_OFFER_API: BASE_URL + "/offer/update", // + /:offerId
-  TOGGLE_OFFER_API: BASE_URL + "/offer/toggle", // + /:offerId
+  CREATE_OFFER_API: BASE_URL + "/offers/create",
+  GET_ALL_OFFERS_API: BASE_URL + "/offers/all",
+  UPDATE_OFFER_API: BASE_URL + "/offers/update",
+  TOGGLE_OFFER_API: BASE_URL + "/offers/toggle", // + /:offerId
 
   // Customer / For You
-  GET_ACTIVE_OFFERS_API: BASE_URL + "/offer/active", // + /:shopId
+  GET_ACTIVE_OFFERS_API: BASE_URL + "/offers/active",
+  DELETE_OFFER_API: BASE_URL + "/offers/delete",
 };

@@ -8,6 +8,7 @@ import { useParams } from "react-router-dom";
 import { SkeletonCard } from "../../../utils/skeleton";
 import ProductBottomSheet from "./ProductBottomSheet";
 import { useCart } from "../../../context/CartContext";
+import { getActiveOffers } from "../../../service/operations/offers";
 
 const tabs = [
   { label: "All", value: "ALL" },
@@ -75,10 +76,6 @@ const TopRated = () => {
     if (!selectedProductId) {
       fetchProducts();
     }
-  }, [selectedProductId]);
-
-  useEffect(() => {
-    console.log("Selected product:", selectedProductId);
   }, [selectedProductId]);
 
   return (

@@ -10,6 +10,7 @@ const {
   GET_TOP_RATED_PRODUCT,
   GET_PRODUCT_DETAILS,
   GET_FOR_YOU_PRODUCTS,
+  GET_ALL_PRODUCT,
 } = productEndPoints;
 
 export const addProduct = async (data, token, dispatch) => {
@@ -156,6 +157,30 @@ export const getForYouProducts = async (shopId) => {
     }
   } catch (err) {
     console.log("get for you products detaisl api error", err);
+  }
+
+  return result;
+};
+
+export const getAllProducts = async (token) => {
+  let result;
+
+  try {
+    const response = await axios({
+      method: "GET",
+      url: GET_ALL_PRODUCT,
+      withCredentials: true,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (response) {
+      console.log("get all products api response", response);
+      result = response.data;
+    }
+  } catch (err) {
+    console.log("get all products api error", err);
   }
 
   return result;

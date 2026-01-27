@@ -8,6 +8,7 @@ import {
 } from "../../../../service/operations/rating&review";
 import LoaderComponent from "../../../common/LoaderComponent";
 import { clearOrder, setActiveOrder } from "../../../../redux/slices/order";
+import { deleteOrder } from "../../../../service/operations/payment";
 
 export default function OrderRatingFlow({ onClose }) {
   const [step, setStep] = useState(0);
@@ -68,9 +69,9 @@ export default function OrderRatingFlow({ onClose }) {
     if (!token || !currentProduct) return;
 
     const res = await getUserReviewOfProduct(
-      { productId: currentProduct.productId },
+      { productId: currentProduct.product._id },
       token,
-      dispatch
+      dispatch,
     );
 
     if (res?.hasReviewed) {
@@ -82,7 +83,7 @@ export default function OrderRatingFlow({ onClose }) {
         res.review.images.map((url) => ({
           type: "existing",
           url,
-        }))
+        })),
       );
     } else {
       setReviewId(null);
@@ -157,10 +158,11 @@ export default function OrderRatingFlow({ onClose }) {
             Your feedback helps the chef and other customers.
           </p>
           <button
-            onClick={() => {
+            onClick={async () => {
               onClose();
               dispatch(clearOrder());
               dispatch(setActiveOrder(null));
+              await deleteOrder(activeOrder._id);
             }}
             className="bg-black text-white px-8 py-3 rounded-xl"
           >

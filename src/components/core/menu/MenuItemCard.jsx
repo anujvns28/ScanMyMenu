@@ -4,7 +4,7 @@ import { colorClasses } from "../../../utils/data";
 import { useCart } from "../../../context/CartContext";
 
 const MenuItemCard = ({ item }) => {
-  const { addToCart } = useCart();
+  const { addProductToCart } = useCart();
 
   return (
     <div className="relative bg-white rounded-xl shadow-sm hover:shadow-md transition overflow-hidden">
@@ -87,7 +87,7 @@ const MenuItemCard = ({ item }) => {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  addToCart(item);
+                  addProductToCart(item);
                 }}
                 className="px-4 py-1.5 border border-green-600 text-green-700 text-xs font-semibold rounded-lg bg-green-50 hover:bg-green-100"
               >

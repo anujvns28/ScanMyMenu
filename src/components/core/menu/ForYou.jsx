@@ -6,24 +6,7 @@ import { ForYouSkeleton } from "../../../utils/skeleton";
 import ProductBottomSheet from "./ProductBottomSheet";
 import { useCart } from "../../../context/CartContext";
 import { getActiveOffers } from "../../../service/operations/offers";
-
-/* ------------------ Dummy Offers (KEEP AS IS) ------------------ */
-const offers = [
-  {
-    _id: "1",
-    title: "Family Combo",
-    subtitle: "2 Biryani + 2 Cold Drink",
-    priceText: "Only ₹499",
-    image: "https://images.pexels.com/photos/461198/pexels-photo-461198.jpeg",
-  },
-  {
-    _id: "2",
-    title: "Paneer Feast",
-    subtitle: "Paneer Tikka + Butter Naan",
-    priceText: "Save ₹80",
-    image: "https://images.pexels.com/photos/461377/pexels-photo-461377.jpeg",
-  },
-];
+import OfferDetailsBottomSheet from "./forYou/OfferDetailsBottomSheet";
 
 /* ------------------ Skeleton ------------------ */
 
@@ -36,8 +19,9 @@ const ForYou = ({ setCurrCategory }) => {
   const [todaysSpecial, setTodaysSpecial] = useState([]);
   const [selectedProductId, setSelectedProductId] = useState(null);
   const [openReviewForm, setOpenReviewForm] = useState(false);
+  const [openOfferDetails, setOpenOfferDetails] = useState(false);
   const [offers, setOffers] = useState([]);
-  const { addToCart } = useCart();
+  const { addProductToCart, addOfferToCart } = useCart();
 
   const fetchForYou = async () => {
     setLoading(true);
@@ -50,15 +34,6 @@ const ForYou = ({ setCurrCategory }) => {
     }
 
     setLoading(false);
-  };
-
-  const daysLeft = (endDate) => {
-    const diff = new Date(endDate).getTime() - new Date().getTime();
-    return Math.ceil(diff / (1000 * 60 * 60 * 24));
-  };
-
-  const isExpired = (endDate) => {
-    return new Date(endDate) < new Date();
   };
 
   const calculateActualPrice = (items = []) => {
@@ -150,7 +125,7 @@ const ForYou = ({ setCurrCategory }) => {
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    addToCart(mustTry);
+                    addProductToCart(mustTry);
                   }}
                   className="bg-white text-black px-4 py-1.5 rounded-full text-sm font-semibold shadow-md active:scale-95 transition"
                 >
@@ -214,7 +189,7 @@ const ForYou = ({ setCurrCategory }) => {
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    addToCart(item);
+                    addProductToCart(item);
                   }}
                   className="absolute bottom-2 right-2 bg-white/95 backdrop-blur text-black text-xs font-semibold px-3 py-1 rounded-full shadow-md active:scale-95 transition"
                 >
@@ -302,7 +277,7 @@ const ForYou = ({ setCurrCategory }) => {
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    addToCart(item);
+                    addProductToCart(item);
                   }}
                   className="absolute bottom-2 right-2 bg-white/95 backdrop-blur text-black text-xs font-semibold px-3 py-1 rounded-full shadow-md active:scale-95 transition"
                 >
@@ -365,6 +340,7 @@ const ForYou = ({ setCurrCategory }) => {
 
             return (
               <div
+                onClick={() => setOpenOfferDetails(true)}
                 key={offer._id}
                 className={`min-w-[260px] h-[360px] rounded-2xl overflow-hidden relative shadow-xl
             ${expired ? "opacity-60" : "active:scale-[0.97]"}`}
@@ -402,9 +378,6 @@ const ForYou = ({ setCurrCategory }) => {
                   {/* PRODUCTS HINT */}
                   <div className="mb-2 flex flex-wrap gap-1">
                     {/* TOTAL ITEMS */}
-                    <span className="bg-white/20 backdrop-blur px-2 py-0.5 rounded-full text-[10px] font-semibold">
-                      {totalQty} items combo
-                    </span>
 
                     {/* PRODUCT NAMES */}
                     {offer.items.slice(0, 2).map((i, idx) => (
@@ -456,14 +429,20 @@ const ForYou = ({ setCurrCategory }) => {
 
                   {/* BUY NOW BUTTON */}
                   {!expired && (
-                    <button className="w-full bg-white text-black text-sm font-semibold py-2 rounded-xl">
-                      Buy Now
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        addOfferToCart(offer);
+                      }}
+                      className="w-full bg-white text-black text-sm font-semibold py-2 rounded-xl"
+                    >
+                      Add +
                     </button>
                   )}
 
                   <span className="absolute top-3 right-3 flex items-center gap-1 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">
                     <span className="fire-bounce">🔥</span>
-                    Hot Deal
+                    {totalQty} items
                   </span>
                 </div>
               </div>
@@ -480,6 +459,14 @@ const ForYou = ({ setCurrCategory }) => {
           setOpenReviewForm={setOpenReviewForm}
           fetchProducts={fetchForYou}
           currCategory="for-you"
+        />
+      )}
+
+      {openOfferDetails && (
+        <OfferDetailsBottomSheet
+          isOpen={openOfferDetails}
+          offer={offers[0]}
+          onClose={() => setOpenOfferDetails(false)}
         />
       )}
     </div>

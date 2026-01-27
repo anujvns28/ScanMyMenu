@@ -71,6 +71,7 @@ export const orderEndPoints = {
   GET_KITCHEN_ORDERS: BASE_URL + "/orders/kitchen",
 
   UPDATE_ORDER_STATUS: BASE_URL + "/orders/updateOrderStatus",
+  DELETE_ORDER: BASE_URL + "/orders/delete",
 };
 
 export const offerEndPoints = {

@@ -61,7 +61,7 @@ const ProductBottomSheet = ({
   const dispatch = useDispatch();
   const { shopDetails } = useSelector((state) => state.shop);
   const { token } = useSelector((state) => state.auth);
-  const { addToCart, isCartOpen } = useCart();
+  const { addProductToCart, isCartOpen } = useCart();
 
   const hasReviews = allReview && allReview.length > 0;
 
@@ -468,7 +468,7 @@ const ProductBottomSheet = ({
           <p className="text-xl font-bold">₹{product.price}</p>
 
           <button
-            onClick={() => addToCart(product)}
+            onClick={() => addProductToCart(product)}
             className="px-6 py-3 rounded-xl bg-green-600 text-white font-semibold shadow-md"
           >
             Add to plate

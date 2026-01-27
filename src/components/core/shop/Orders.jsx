@@ -23,43 +23,41 @@ const Orders = () => {
     const fetchShopOrders = async () => {
       setLoading(true);
 
-      const result = await getShopOrders(
-        shopDetails?._id,
-        token,
-        dispatch
-      );
+      const result = await getShopOrders(shopDetails?._id, token, dispatch);
 
       if (result) {
         const mappedOrders = result.orders.map((o) => ({
-  _id: o._id,
-  orderId: o.orderNumber,
-  customerName: o.user?.name || "Customer",
-  orderType: o.orderType,
-  tableNo: o.tableNo,
-  phone: o.phone,
-  notes: o.instructions,
-  items: o.items.map((i) => ({
-    name: i.name,
-    qty: i.qty,
-  })),
-  totalAmount: o.total,
+          _id: o._id,
+          orderId: o.orderNumber,
+          customerName: o.user?.name || "Customer",
+          orderType: o.orderType,
+          tableNo: o.tableNo,
+          phone: o.phone,
+          notes: o.instructions,
+          items: o.items.map((i) => ({
+            type: i.type,
+            name: i.name,
+            qty: i.qty,
+            items: i.items || [],
+          })),
 
-  // ✅ FIXED STATUS MAPPING
-  status:
-    o.status === "PLACED"
-      ? "new"
-      : o.status === "PREPARING"
-      ? "preparing"
-      : o.status === "READY"
-      ? "ready"
-      : "completed",
+          totalAmount: o.total,
 
-  createdAt: o.createdAt,
-  completedAt:
-    o.status === "SERVED" ? new Date(o.updatedAt).getTime() : null,
-  isNew: o.status === "PLACED",
-}));
+          // ✅ FIXED STATUS MAPPING
+          status:
+            o.status === "PLACED"
+              ? "new"
+              : o.status === "PREPARING"
+                ? "preparing"
+                : o.status === "READY"
+                  ? "ready"
+                  : "completed",
 
+          createdAt: o.createdAt,
+          completedAt:
+            o.status === "SERVED" ? new Date(o.updatedAt).getTime() : null,
+          isNew: o.status === "PLACED",
+        }));
 
         setOrders(mappedOrders);
       }
@@ -84,10 +82,13 @@ const Orders = () => {
       ? visibleOrders
       : visibleOrders.filter((o) => o.status === activeFilter);
 
-
-  const updateOrderStatusHandler = async(orderId,status) =>{
-    const result = await updateOrderStatus({orderId,status},token,dispatch);
-  }
+  const updateOrderStatusHandler = async (orderId, status) => {
+    const result = await updateOrderStatus(
+      { orderId, status },
+      token,
+      dispatch,
+    );
+  };
 
   return (
     <div className="pb-20 px-4 pt-4 bg-gray-50 min-h-screen space-y-4">
@@ -135,163 +136,160 @@ const Orders = () => {
       )}
 
       {/* ORDER LIST */}
-      {!loading && filteredOrders.length > 0 ? (
-        filteredOrders.map((order) => {
-          const statusUI = statusConfig[order.status];
-          const totalQty = order.items.reduce(
-            (sum, i) => sum + i.qty,
-            0
-          );
+      {!loading && filteredOrders.length > 0
+        ? filteredOrders.map((order) => {
+            const statusUI = statusConfig[order.status];
+            const totalQty = order.items.reduce((sum, i) => sum + i.qty, 0);
 
-          return (
-            <div
-              key={order._id}
-              className={`relative bg-white rounded-2xl shadow-sm p-4 space-y-3 ${statusUI.card}`}
-            >
-              {order.isNew && (
-                <span className="absolute top-3 right-3 h-2.5 w-2.5 rounded-full bg-red-500 animate-pulse" />
-              )}
+            return (
+              <div
+                key={order._id}
+                className={`relative bg-white rounded-2xl shadow-sm p-4 space-y-3 ${statusUI.card}`}
+              >
+                {order.isNew && (
+                  <span className="absolute top-3 right-3 h-2.5 w-2.5 rounded-full bg-red-500 animate-pulse" />
+                )}
 
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="font-semibold text-sm">
-                    Order #{order.orderId}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {timeAgo(order.createdAt)}
-                  </p>
-                </div>
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="font-semibold text-sm">
+                      Order #{order.orderId}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {timeAgo(order.createdAt)}
+                    </p>
+                  </div>
 
-                <span
-                  className={`text-xs px-3 py-1 rounded-full font-medium ${statusUI.badge}`}
-                >
-                  {statusUI.label}
-                </span>
-              </div>
-
-              <div className="flex flex-wrap gap-2 text-xs font-medium">
-                <span className="px-3 py-1 rounded-full bg-gray-100">
-                  {order.orderType === "DINE_IN"
-                    ? `🍽️ Dine In • Table ${order.tableNo}`
-                    : `🥡 Takeaway • ${order.phone}`}
-                </span>
-              </div>
-
-              <p className="text-sm font-medium">
-                👤 {order.customerName}
-              </p>
-
-              <div className="bg-gray-50 rounded-xl p-3">
-                <p className="text-xs font-semibold text-gray-700 mb-1">
-                  Items ({totalQty})
-                </p>
-                {order.items.map((item, idx) => (
-                  <p
-                    key={idx}
-                    className="text-xs text-gray-600 flex justify-between"
+                  <span
+                    className={`text-xs px-3 py-1 rounded-full font-medium ${statusUI.badge}`}
                   >
-                    <span>{item.name}</span>
-                    <span className="font-medium">
-                      × {item.qty}
-                    </span>
-                  </p>
-                ))}
-              </div>
-
-              {order.notes && (
-                <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3">
-                  <p className="text-xs font-semibold text-yellow-700 mb-0.5">
-                    📝 Cooking Notes
-                  </p>
-                  <p className="text-xs text-yellow-700">
-                    {order.notes}
-                  </p>
+                    {statusUI.label}
+                  </span>
                 </div>
-              )}
 
-             <div className="flex items-center justify-between pt-2">
-  {/* LEFT: TOTAL + STATUS TEXT */}
-  <div>
-    <p className="text-[11px] text-gray-500">
-      Total Amount
-    </p>
-    <p className="font-bold text-base">
-      ₹{order.totalAmount}
-    </p>
+                <div className="flex flex-wrap gap-2 text-xs font-medium">
+                  <span className="px-3 py-1 rounded-full bg-gray-100">
+                    {order.orderType === "DINE_IN"
+                      ? `🍽️ Dine In • Table ${order.tableNo}`
+                      : `🥡 Takeaway • ${order.phone}`}
+                  </span>
+                </div>
 
-    {/* STATUS TEXT (VERY IMPORTANT) */}
-    <p className="mt-1 text-xs font-medium">
-      {order.status === "new" && (
-        <span className="text-blue-600">
-          🔵 Waiting for acceptance
-        </span>
-      )}
+                <p className="text-sm font-medium">👤 {order.customerName}</p>
 
-      {order.status === "preparing" && (
-        <span className="text-yellow-600">
-          🟡 Preparing
-        </span>
-      )}
+                <div className="bg-gray-50 rounded-xl p-3">
+                  <p className="text-xs font-semibold text-gray-700 mb-1">
+                    Items ({totalQty})
+                  </p>
+                  {order.items.map((item, idx) => (
+                    <div key={idx} className="text-xs text-gray-700 mb-1.5">
+                      {/* MAIN LINE */}
+                      <div className="flex justify-between font-medium">
+                        <span>
+                          {item.type === "offer" ? "🔥 " : ""}
+                          {item.name}
+                        </span>
+                        <span>× {item.qty}</span>
+                      </div>
 
-      {order.status === "completed" && (
-        <span className="text-green-600">
-          🟢 Completed
-        </span>
-      )}
-    </p>
-  </div>
+                      {/* OFFER BREAKDOWN */}
+                      {item.type === "offer" && item.items?.length > 0 && (
+                        <div className="ml-3 mt-0.5 space-y-0.5 text-gray-500">
+                          {item.items.map((sub, sidx) => (
+                            <p key={sidx}>
+                              • {sub.name} × {sub.qty}
+                            </p>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
 
-  {/* RIGHT: ACTION BUTTONS */}
-  <div className="flex gap-2">
-  {/* NEW → PREPARING */}
-  {order.status === "new" && (
-    <button
-      onClick={() => updateOrderStatusHandler(order._id, "PREPARING")}
-      className="bg-blue-600 text-white text-xs px-5 py-2 rounded-full font-semibold shadow active:scale-95 transition"
-    >
-      Accept
-    </button>
-  )}
+                {order.notes && (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3">
+                    <p className="text-xs font-semibold text-yellow-700 mb-0.5">
+                      📝 Cooking Notes
+                    </p>
+                    <p className="text-xs text-yellow-700">{order.notes}</p>
+                  </div>
+                )}
 
-  {/* PREPARING → READY */}
-  {order.status === "preparing" && (
-    <button
-      onClick={() => updateOrderStatusHandler(order._id, "READY")}
-      className="bg-green-600 text-white text-xs px-5 py-2 rounded-full font-semibold shadow active:scale-95 transition"
-    >
-      Ready
-    </button>
-  )}
+                <div className="flex items-center justify-between pt-2">
+                  {/* LEFT: TOTAL + STATUS TEXT */}
+                  <div>
+                    <p className="text-[11px] text-gray-500">Total Amount</p>
+                    <p className="font-bold text-base">₹{order.totalAmount}</p>
 
-  {/* READY → SERVED ✅ */}
-  {order.status === "ready" && (
-    <button
-      onClick={() => updateOrderStatusHandler(order._id, "SERVED")}
-      className="bg-purple-600 text-white text-xs px-5 py-2 rounded-full font-semibold shadow active:scale-95 transition"
-    >
-      Served
-    </button>
-  )}
-</div>
+                    {/* STATUS TEXT (VERY IMPORTANT) */}
+                    <p className="mt-1 text-xs font-medium">
+                      {order.status === "new" && (
+                        <span className="text-blue-600">
+                          🔵 Waiting for acceptance
+                        </span>
+                      )}
 
-</div>
+                      {order.status === "preparing" && (
+                        <span className="text-yellow-600">🟡 Preparing</span>
+                      )}
 
+                      {order.status === "completed" && (
+                        <span className="text-green-600">🟢 Completed</span>
+                      )}
+                    </p>
+                  </div>
+
+                  {/* RIGHT: ACTION BUTTONS */}
+                  <div className="flex gap-2">
+                    {/* NEW → PREPARING */}
+                    {order.status === "new" && (
+                      <button
+                        onClick={() =>
+                          updateOrderStatusHandler(order._id, "PREPARING")
+                        }
+                        className="bg-blue-600 text-white text-xs px-5 py-2 rounded-full font-semibold shadow active:scale-95 transition"
+                      >
+                        Accept
+                      </button>
+                    )}
+
+                    {/* PREPARING → READY */}
+                    {order.status === "preparing" && (
+                      <button
+                        onClick={() =>
+                          updateOrderStatusHandler(order._id, "READY")
+                        }
+                        className="bg-green-600 text-white text-xs px-5 py-2 rounded-full font-semibold shadow active:scale-95 transition"
+                      >
+                        Ready
+                      </button>
+                    )}
+
+                    {/* READY → SERVED ✅ */}
+                    {order.status === "ready" && (
+                      <button
+                        onClick={() =>
+                          updateOrderStatusHandler(order._id, "SERVED")
+                        }
+                        className="bg-purple-600 text-white text-xs px-5 py-2 rounded-full font-semibold shadow active:scale-95 transition"
+                      >
+                        Served
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        : !loading && (
+            <div className="flex flex-col items-center justify-center mt-20 text-center">
+              <div className="text-4xl mb-3">🧾</div>
+              <p className="font-semibold text-sm">No orders found</p>
+              <p className="text-xs text-gray-500 mt-1">
+                Orders will appear here when customers place them
+              </p>
             </div>
-          );
-        })
-      ) : (
-        !loading && (
-          <div className="flex flex-col items-center justify-center mt-20 text-center">
-            <div className="text-4xl mb-3">🧾</div>
-            <p className="font-semibold text-sm">
-              No orders found
-            </p>
-            <p className="text-xs text-gray-500 mt-1">
-              Orders will appear here when customers place them
-            </p>
-          </div>
-        )
-      )}
+          )}
     </div>
   );
 };

@@ -7,12 +7,9 @@ import {
   openRazorpayCheckout,
   verifyRazorpayPayment,
 } from "../../../../service/operations/payment";
+import { useParams } from "react-router-dom";
 
-
-export default function OrderDetailsBottomSheet({
-  onClose,
-  onEditCart,
-}) {
+export default function OrderDetailsBottomSheet({ onClose, onEditCart }) {
   const { cart, totalPrice, totalItems, setCart } = useCart();
 
   const gst = Math.round(totalPrice * 0.05);
@@ -26,6 +23,7 @@ export default function OrderDetailsBottomSheet({
   const { user, token } = useSelector((state) => state.auth);
 
   const { shopDetails } = useSelector((state) => state.shop);
+  const { shopId } = useParams();
 
   const isValid =
     (orderType === "DINE_IN" && tableNo.trim()) ||
@@ -34,18 +32,32 @@ export default function OrderDetailsBottomSheet({
   const handlePay = async () => {
     if (!isValid) return;
 
-    const formattedCart = cart.map((item) => ({
-      productId: item._id,
-      name: item.name,
-      price: item.price,
-      qty: item.qty,
-      image: item.image,
-    }));
+    const formattedCart = cart.map((item) => {
+      if (item.type === "offer") {
+        return {
+          offerId: item._id,
+          title: item.title,
+          price: item.offerPrice,
+          qty: item.qty,
+          type: "offer",
+          items: item.items, // combo breakdown
+        };
+      }
+
+      return {
+        productId: item._id,
+        name: item.name,
+        price: item.price,
+        qty: item.qty,
+        image: item.image,
+        type: "product",
+      };
+    });
 
     const orderPayload = {
       amount: grandTotal * 100,
       cartItems: formattedCart,
-      shopId: shopDetails._id,
+      shopId: shopId,
       orderType,
       tableNo,
       phone,
@@ -73,7 +85,7 @@ export default function OrderDetailsBottomSheet({
             razorpay_signature: payment.razorpay_signature,
 
             cartItems: formattedCart,
-            shopId: shopDetails._id,
+            shopId: shopId,
             orderType,
             tableNo,
             phone,
@@ -81,7 +93,7 @@ export default function OrderDetailsBottomSheet({
             amount: orderData.amount,
           },
           token,
-          dispatch
+          dispatch,
         );
 
         if (verifyData?.success) {
@@ -90,15 +102,13 @@ export default function OrderDetailsBottomSheet({
         } else {
           alert("Payment failed ❌");
         }
-      }
+      },
     );
   };
-
 
   return (
     <div className="fixed inset-0 bg-black/40 z-50 flex items-end">
       <div className="bg-white w-full rounded-t-3xl max-h-[92vh] flex flex-col animate-slideUp">
-
         {/* Handle */}
         <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto my-3" />
 
@@ -111,7 +121,6 @@ export default function OrderDetailsBottomSheet({
         </div>
 
         <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
-
           {/* Order Type */}
           <div>
             <p className="text-sm font-semibold mb-2">Order Type</p>
@@ -131,7 +140,6 @@ export default function OrderDetailsBottomSheet({
                 <p className="text-xs text-gray-500">
                   We’ll serve this order at your table
                 </p>
-
 
                 {orderType === "DINE_IN" && (
                   <input
@@ -173,36 +181,37 @@ export default function OrderDetailsBottomSheet({
           </div>
 
           {/* Order Summary */}
-          <div className="bg-gray-50 rounded-2xl p-4">
-            <div className="flex justify-between items-center mb-3">
-              <p className="font-semibold">Your Order</p>
-              <button
-                onClick={onEditCart}
-                className="text-sm text-blue-600 flex items-center gap-1"
-              >
-                <Edit3 size={14} />
-                Edit
-              </button>
-            </div>
-
-            {cart.map((item) => (
-              <div
-                key={item._id}
-                className="flex justify-between text-sm mb-2"
-              >
+          {cart.map((item) => (
+            <div key={item._id} className="mb-3 text-sm">
+              <div className="flex justify-between font-medium">
                 <span>
-                  {item.name} × {item.qty}
+                  {item.type === "offer" ? "🔥 " : ""}
+                  {item.title || item.name} × {item.qty}
                 </span>
-                <span>₹{item.price * item.qty}</span>
+
+                <span>
+                  ₹
+                  {(item.type === "offer" ? item.offerPrice : item.price) *
+                    item.qty}
+                </span>
               </div>
-            ))}
-          </div>
+
+              {/* OFFER ITEMS BREAKDOWN */}
+              {item.type === "offer" && (
+                <div className="ml-3 mt-1 text-xs text-gray-500 space-y-0.5">
+                  {item.items.map((i, idx) => (
+                    <p key={idx}>
+                      • {i.name} × {i.qty}
+                    </p>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
 
           {/* Cooking Instructions */}
           <div>
-            <p className="text-sm font-semibold mb-2">
-              Cooking Instructions
-            </p>
+            <p className="text-sm font-semibold mb-2">Cooking Instructions</p>
             <textarea
               value={instructions}
               onChange={(e) => setInstructions(e.target.value)}

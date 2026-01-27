@@ -9,6 +9,7 @@ const {
   VERIFY_PAYMENT_API,
   GET_KITCHEN_ORDERS,
   UPDATE_ORDER_STATUS,
+  DELETE_ORDER,
 } = orderEndPoints;
 
 export const createRazorpayOrder = async (data, token, dispatch) => {
@@ -163,7 +164,7 @@ export const getMyActiveOrder = async (token, dispatch) => {
       console.log("my active Orders response", response);
       result = response.data;
       dispatch(setActiveOrder(result.order));
-      localStorage.setItem("order", JSON.stringify(result.order));
+      // localStorage.setItem("order", JSON.stringify(result.order));
     }
   } catch (err) {
     console.log("my active  orders api error", err);
@@ -171,4 +172,20 @@ export const getMyActiveOrder = async (token, dispatch) => {
 
   dispatch(setUserLoading(false));
   return result;
+};
+
+export const deleteOrder = async (orderId) => {
+  try {
+    const response = await axios({
+      method: "DELETE",
+      url: `${DELETE_ORDER}/${orderId}`,
+      withCredentials: true,
+    });
+
+    if (response) {
+      console.log("delete order  response", response);
+    }
+  } catch (err) {
+    console.log("delete order  error", err);
+  }
 };

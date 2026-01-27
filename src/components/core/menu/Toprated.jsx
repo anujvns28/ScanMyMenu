@@ -26,7 +26,7 @@ const TopRated = () => {
   const [loading, setLoading] = useState(true);
   const [openReviewForm, setOpenReviewForm] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState(null);
-  const { addToCart } = useCart();
+  const { addProductToCart } = useCart();
 
   const getRankByTab = (product) => {
     if (activeTab === "VEG") return product.vegRank;
@@ -172,7 +172,7 @@ const TopRated = () => {
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    addToCart(item);
+                    addProductToCart(item);
                   }}
                   className="text-xs px-4 py-1.5 rounded-full border border-black/80 font-medium hover:bg-black hover:text-white transition"
                 >

@@ -25,16 +25,27 @@ export default function CartBottomSheet({ onClose, currCategory }) {
         shopId: shopDetails._id,
         categoryId: currCategory,
         payload: {
-          cart: cart.map((item) => ({
-            productId: item._id,
-            name: item.name,
-            price: item.price,
-            qty: item.qty,
-            image: item.image,
-          })),
-          subtotal: totalPrice,
-          gst,
-          total: grandTotal,
+          cart: cart.map((item) => {
+            if (item.type === "offer") {
+              return {
+                offerId: item._id,
+                title: item.title,
+                price: item.offerPrice,
+                qty: item.qty,
+                items: item.items,
+                type: "offer",
+              };
+            }
+
+            return {
+              productId: item._id,
+              name: item.name,
+              price: item.price,
+              qty: item.qty,
+              image: item.image,
+              type: "product",
+            };
+          }),
         },
       };
 
@@ -77,24 +88,50 @@ export default function CartBottomSheet({ onClose, currCategory }) {
         {/* Items */}
         <div className="flex-1 overflow-y-auto px-4 py-3 space-y-4">
           {cart.map((item) => (
-            <div key={item._id} className="flex gap-3 items-center">
+            <div
+              key={item._id}
+              className="flex gap-3 items-start bg-gray-50 rounded-2xl p-3"
+            >
+              {/* IMAGE */}
               <img
                 src={item.image}
                 className="w-16 h-16 rounded-xl object-cover"
               />
 
+              {/* INFO */}
               <div className="flex-1">
-                <p className="font-semibold">{item.name}</p>
-                <p className="text-sm text-gray-500">₹{item.price}</p>
+                <p className="font-semibold">
+                  {item.type === "offer" ? "🔥 " : ""}
+                  {item.title || item.name}
+                </p>
+
+                {/* OFFER ITEMS */}
+                {item.type === "offer" && (
+                  <div className="mt-1 text-xs text-gray-500 space-y-0.5">
+                    {item.items.map((i, idx) => (
+                      <p key={idx}>
+                        • {i.name} × {i.qty}
+                      </p>
+                    ))}
+                  </div>
+                )}
+
+                {/* PRICE */}
+                <p className="text-sm text-gray-600 mt-1">
+                  ₹{item.type === "offer" ? item.offerPrice : item.price}
+                </p>
               </div>
 
-              <div className="flex items-center gap-2 bg-gray-100 rounded-xl px-2 py-1">
+              {/* QTY CONTROLS */}
+              <div className="flex items-center gap-2 bg-white rounded-xl px-2 py-1 border">
                 <button onClick={() => decreaseQty(item._id)}>
                   <Minus size={16} />
                 </button>
+
                 <span className="font-semibold w-6 text-center">
                   {item.qty}
                 </span>
+
                 <button onClick={() => increaseQty(item._id)}>
                   <Plus size={16} />
                 </button>

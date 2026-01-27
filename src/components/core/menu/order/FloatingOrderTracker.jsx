@@ -10,24 +10,7 @@ export default function ExpandableOrderTracker({ onRateClick }) {
 
   const dispatch = useDispatch();
 
-  // 🔥 Dummy Order Data
-  // const order = {
-  //   orderNumber: "SM-2391",
-  //   status: "SERVED",
-  //   total: 544,
-  //   items: [
-  //     {
-  //       name: "Butter Chicken",
-  //       qty: 2,
-  //       price: 199,
-  //     },
-  //     {
-  //       name: "Garlic Naan",
-  //       qty: 4,
-  //       price: 40,
-  //     },
-  //   ],
-  // };
+  
 
   useEffect(() => {
     setOrder(activeOrder);
@@ -173,11 +156,26 @@ export default function ExpandableOrderTracker({ onRateClick }) {
         {/* Items */}
         <div className="px-4 py-4 space-y-3 border-t">
           {order.items.map((item, idx) => (
-            <div key={idx} className="flex justify-between text-sm">
-              <span>
-                {item.name} × {item.qty}
-              </span>
-              <span>₹{item.price * item.qty}</span>
+            <div key={idx} className="text-sm mb-3">
+              {/* MAIN LINE */}
+              <div className="flex justify-between font-medium">
+                <span>
+                  {item.type === "offer" ? "🔥 " : ""}
+                  {item.name} × {item.qty}
+                </span>
+                <span>₹{item.price * item.qty}</span>
+              </div>
+
+              {/* OFFER BREAKDOWN */}
+              {item.type === "offer" && item.items?.length > 0 && (
+                <div className="ml-3 mt-1 space-y-0.5 text-xs text-gray-500">
+                  {item.items.map((i, iidx) => (
+                    <p key={iidx}>
+                      • {i.name} × {i.qty}
+                    </p>
+                  ))}
+                </div>
+              )}
             </div>
           ))}
 

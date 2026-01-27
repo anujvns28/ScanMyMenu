@@ -24,7 +24,8 @@ const Signup = () => {
   };
 
   const googleSignup = () => {
-    window.location.href = "http://localhost:4000/auth/shop/google";
+    window.location.href =
+      "https://scanmymenu-server.onrender.com/auth/shop/google";
   };
 
   if (authLoading) {

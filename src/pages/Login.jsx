@@ -18,7 +18,8 @@ const Login = () => {
   };
 
   const googleLogin = () => {
-    window.location.href = "http://10.54.219.153:4000/auth/shop/google";
+    window.location.href =
+      "https://scanmymenu-server.onrender.com/auth/shop/google";
   };
 
   if (authLoading) {

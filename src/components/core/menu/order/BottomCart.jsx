@@ -58,7 +58,7 @@ export default function CartBottomSheet({ onClose, currCategory }) {
   };
 
   const googleLogin = () => {
-    window.location.href = `http://localhost:4000/auth/user/google?shopId=${shopDetails._id}`;
+    window.location.href = `https://scanmymenu-server.onrender.com/auth/user/google?shopId=${shopDetails._id}`;
   };
 
   return (

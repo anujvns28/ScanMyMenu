@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 const Navbar = () => {
   const [open, setOpen] = useState(false);
   const { token } = useSelector((state) => state.auth);
+  const { shopDetails } = useSelector((state) => state.shop);
 
   return (
     <>
@@ -28,7 +29,7 @@ const Navbar = () => {
             </a>
 
             {/* If NOT logged in */}
-            {!token ? (
+            {!token && (
               <>
                 <a href="/login" className="hover:text-orange-600">
                   Login
@@ -40,10 +41,12 @@ const Navbar = () => {
                   Sign Up
                 </a>
               </>
-            ) : (
+            )}
+
+            {shopDetails && (
               <>
-                <a href="/dashboard" className="hover:text-orange-600">
-                  Dashboard
+                <a href="/shop" className="hover:text-orange-600">
+                  Shop
                 </a>
               </>
             )}
@@ -106,7 +109,7 @@ const Navbar = () => {
               </a>
             </li>
 
-            {!token ? (
+            {token ? (
               <>
                 <li>
                   <a href="/login" className="block hover:text-orange-600">
@@ -124,11 +127,13 @@ const Navbar = () => {
               </>
             ) : (
               <>
-                <li>
-                  <a href="/dashboard" className="block hover:text-orange-600">
-                    Dashboard
-                  </a>
-                </li>
+                {shopDetails && (
+                  <li>
+                    <a href="/shop" className="block hover:text-orange-600">
+                      Shop
+                    </a>
+                  </li>
+                )}
                 <li>
                   <button className="block w-full text-left text-red-500 hover:text-red-600">
                     Logout

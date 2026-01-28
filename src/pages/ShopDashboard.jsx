@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import BottomNav from "../components/core/shop/BottomNav";
 import TopNav from "../components/core/shop/TopNav";
 import { fetchMyShop } from "../service/operations/shop";
 import { useDispatch, useSelector } from "react-redux";
+import { loginWithToken } from "../service/operations/auth";
 
 export const ProgressBar = ({ progress }) => {
   return (
@@ -37,6 +38,20 @@ export const ProgressBar = ({ progress }) => {
 
 const ShopDashboard = () => {
   const { shopDetails } = useSelector((state) => state.shop);
+  const { search } = useLocation();
+  const dispatch = useDispatch();
+  const query = new URLSearchParams(search);
+  const token = query.get("token");
+
+  const loginWithTokeHealper = async () => {
+    await loginWithToken(token, dispatch);
+  };
+
+  useEffect(() => {
+    if (token) {
+      loginWithTokeHealper();
+    }
+  }, []);
 
   return (
     <div className="min-h-screen w-full bg-gray-100 pb-16">

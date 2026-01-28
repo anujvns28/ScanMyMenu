@@ -1,7 +1,17 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Gift, LifeBuoy, Star, Settings, LogOut, BarChart } from "lucide-react";
+import { useDispatch } from "react-redux";
+import { logout } from "../../../redux/slices/auth";
 
 const More = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const logoutHandler = () => {
+    dispatch(logout());
+    navigate("/login");
+  };
+
   return (
     <div className="p-4 space-y-4">
       {/* Page Title */}
@@ -52,7 +62,10 @@ const More = () => {
           <span className="font-medium text-gray-700">Settings</span>
         </Link>
 
-        <button className="w-full flex items-center gap-3 p-4 text-left hover:bg-red-50 transition">
+        <button
+          onClick={logoutHandler}
+          className="w-full flex items-center gap-3 p-4 text-left hover:bg-red-50 transition"
+        >
           <LogOut size={18} className="text-red-500" />
           <span className="font-medium text-red-600">Logout</span>
         </button>

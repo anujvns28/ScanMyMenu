@@ -19,9 +19,7 @@ export const login = async (data, navigate, dispatch) => {
       localStorage.setItem("user", JSON.stringify(response.data.user));
       dispatch(setToken(response.data.token));
       dispatch(setUser(response.data.user));
-      navigate("/dashbord");
-
-      console.log(response, "this is login data");
+      navigate("/shop");
     }
   } catch (err) {
     console.log("login API ERROR............", err);
@@ -44,9 +42,7 @@ export const signup = async (data, dispatch, navigate) => {
       localStorage.setItem("user", JSON.stringify(response.data.user));
       dispatch(setToken(response.data.token));
       dispatch(setUser(response.data.user));
-      navigate("/dashbord");
-
-      console.log(data, "this is signup response");
+      navigate("/shop");
     }
   } catch (err) {
     console.log("Signup APi Error", err);
@@ -71,7 +67,6 @@ export const loginWithToken = async (token, dispatch) => {
       dispatch(setToken(token));
       dispatch(setUser(response.data.user));
 
-      console.log(response, "this is login with token");
     }
   } catch (err) {
     console.log(err, "this is login with token error");

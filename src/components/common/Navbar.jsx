@@ -1,34 +1,49 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import logo from "../../assets/scanMenuLogo.png";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { logout } from "../../redux/slices/auth";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
-  const { token } = useSelector((state) => state.auth);
-  const { shopDetails } = useSelector((state) => state.shop);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const { token, user } = useSelector((state) => state.auth);
+
+  const logoutHandler = () => {
+    dispatch(logout());
+    setOpen(false);
+    navigate("/login");
+  };
 
   return (
     <>
-      {/* TOP NAV */}
+      {/* ================= TOP NAV ================= */}
       <nav className="w-full bg-white shadow-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-3">
           {/* Logo */}
-          <a href="/">
-            <div className="flex items-center gap-2 cursor-pointer">
-              <img src={logo} alt="ScanMyMenu Logo" width={44} />
-              <h1 className="text-xl font-bold text-orange-600 tracking-tight">
-                Scan<span className="text-gray-800">MyMenu</span>
-              </h1>
-            </div>
+          <a href="/" className="flex items-center gap-2">
+            <img src={logo} alt="ScanMyMenu Logo" width={44} />
+            <h1 className="text-xl font-bold text-orange-600 tracking-tight">
+              Scan<span className="text-gray-800">MyMenu</span>
+            </h1>
           </a>
 
-          {/* Desktop Links */}
+          {/* ===== Desktop Menu ===== */}
           <div className="hidden md:flex items-center gap-8 text-gray-700 font-medium">
             <a href="/about" className="hover:text-orange-600">
               About
             </a>
 
-            {/* If NOT logged in */}
+            {/* Owner Only */}
+            {token && user?.role === "owner" && (
+              <a href="/shop" className="hover:text-orange-600">
+                Shop
+              </a>
+            )}
+
+            {/* Logged Out */}
             {!token && (
               <>
                 <a href="/login" className="hover:text-orange-600">
@@ -43,19 +58,21 @@ const Navbar = () => {
               </>
             )}
 
-            {shopDetails && (
-              <>
-                <a href="/shop" className="hover:text-orange-600">
-                  Shop
-                </a>
-              </>
+            {/* Logged In */}
+            {token && (
+              <button
+                onClick={logoutHandler}
+                className="text-red-500 hover:text-red-600"
+              >
+                Logout
+              </button>
             )}
           </div>
 
           {/* Mobile Icon */}
           <button
             onClick={() => setOpen(true)}
-            className="md:hidden text-gray-700 hover:text-orange-600"
+            className="md:hidden text-gray-700 text-2xl"
           >
             ☰
           </button>
@@ -67,14 +84,14 @@ const Navbar = () => {
       {/* Overlay */}
       {open && (
         <div
-          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50"
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
           onClick={() => setOpen(false)}
-        ></div>
+        />
       )}
 
       {/* Drawer */}
       <div
-        className={`fixed top-0 left-0 h-full w-72 bg-white shadow-2xl z-[60] px-6 py-6 flex flex-col justify-between transform transition-transform duration-300 ${
+        className={`fixed top-0 left-0 h-full w-72 bg-white shadow-2xl z-50 px-6 py-6 flex flex-col justify-between transform transition-transform duration-300 ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -83,63 +100,72 @@ const Navbar = () => {
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-2">
               <img src={logo} alt="ScanMyMenu Logo" width={40} />
-              <h1 className="text-xl font-bold text-orange-600 tracking-tight">
+              <h1 className="text-xl font-bold text-orange-600">
                 Scan<span className="text-gray-800">MyMenu</span>
               </h1>
             </div>
 
             <button
               onClick={() => setOpen(false)}
-              className="text-gray-700 hover:text-orange-600"
+              className="text-gray-700 text-xl"
             >
               ✕
             </button>
           </div>
 
           {/* Links */}
-          <ul className="space-y-4 text-gray-800 text-[15px] font-medium">
+          <ul className="space-y-4 text-gray-800 font-medium">
             <li>
-              <a href="/" className="block hover:text-orange-600">
+              <a href="/" onClick={() => setOpen(false)}>
                 Home
               </a>
             </li>
+
             <li>
-              <a href="/about" className="block hover:text-orange-600">
+              <a href="/about" onClick={() => setOpen(false)}>
                 About
               </a>
             </li>
 
-            {token ? (
+            {/* Owner Only */}
+            {token && user?.role === "owner" && (
+              <li>
+                <a href="/shop" onClick={() => setOpen(false)}>
+                  Shop
+                </a>
+              </li>
+            )}
+
+            {/* Logged Out */}
+            {!token && (
               <>
                 <li>
-                  <a href="/login" className="block hover:text-orange-600">
+                  <a href="/login" onClick={() => setOpen(false)}>
                     Login
                   </a>
                 </li>
                 <li>
                   <a
                     href="/signup"
-                    className="block bg-orange-600 text-white text-center py-2 rounded-xl hover:bg-orange-700"
+                    onClick={() => setOpen(false)}
+                    className="block bg-orange-600 text-white text-center py-2 rounded-xl"
                   >
                     Sign Up
                   </a>
                 </li>
               </>
-            ) : (
-              <>
-                {shopDetails && (
-                  <li>
-                    <a href="/shop" className="block hover:text-orange-600">
-                      Shop
-                    </a>
-                  </li>
-                )}
-                <li>
-                  <button className="block w-full text-left text-red-500 hover:text-red-600">
-                    Logout
-                  </button>
-                </li>
-              </>
+            )}
+
+            {/* Logged In */}
+            {token && (
+              <li>
+                <button
+                  onClick={logoutHandler}
+                  className="text-red-500 w-full text-left"
+                >
+                  Logout
+                </button>
+              </li>
             )}
           </ul>
         </div>

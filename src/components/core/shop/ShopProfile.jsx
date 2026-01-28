@@ -1,5 +1,13 @@
 import { useEffect, useState } from "react";
-import { Store, User, MapPin, Clock, Pencil, Loader } from "lucide-react";
+import {
+  Store,
+  User,
+  MapPin,
+  Clock,
+  Pencil,
+  Loader,
+  QrCode,
+} from "lucide-react";
 import LoaderComponent from "../../common/LoaderComponent";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -10,6 +18,7 @@ import {
   updateShopTiming,
 } from "../../../service/operations/shop";
 import { useNavigate } from "react-router-dom";
+import { useDownloadShopQR } from "../../../hooks/useDownloadShopQR";
 
 const ShopProfile = () => {
   const [editSection, setEditSection] = useState(null);
@@ -44,6 +53,7 @@ const ShopProfile = () => {
   const { token, userLoading } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { generateAndDownloadQR } = useDownloadShopQR();
 
   const handleCTAbutton = () => {
     setCurrentStep(1);
@@ -115,7 +125,6 @@ const ShopProfile = () => {
     const result = await fetchMyShop(token, dispatch);
 
     if (result?.data) {
-      console.log(result.data);
       setShop(result.data);
       if (result?.data?.shopProfile) {
         setShopForm(result.data.shopProfile);
@@ -135,8 +144,6 @@ const ShopProfile = () => {
       setCurrentStep(0);
     }
   };
-
-  console.log(shop);
 
   useEffect(() => {
     fetchShopHandler();
@@ -608,8 +615,9 @@ const ShopProfile = () => {
         <div className="bg-white rounded-xl shadow p-4 text-center">
           <h2 className="font-semibold mb-2">Menu QR Code</h2>
 
-          <div className="w-40 h-40 mx-auto my-4 bg-gray-100 flex items-center justify-center rounded-lg">
-            QR
+          <div className="w-40 h-40 mx-auto my-4 bg-gray-100 flex flex-col items-center justify-center rounded-xl border border-dashed">
+            <QrCode size={48} className="text-gray-400" />
+            <p className="text-xs text-gray-400 mt-2">QR</p>
           </div>
 
           <p className="text-sm text-gray-500 mb-3">
@@ -624,7 +632,16 @@ const ShopProfile = () => {
               👀 View Menu
             </button>
 
-            <button className="w-full bg-green-600 text-white py-2 rounded-lg">
+            <button
+              onClick={() =>
+                generateAndDownloadQR({
+                  shopId: shop._id,
+                  shopName: shop.shopProfile.name,
+                  shopImage: shop.shopProfile.image,
+                })
+              }
+              className="w-full bg-green-600 text-white py-2 rounded-lg"
+            >
               ⬇ Download QR
             </button>
           </div>

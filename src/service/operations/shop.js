@@ -30,6 +30,7 @@ export const fetchMyShop = async (token, dispatch) => {
       console.log("fetch my shop api response", response);
       result = response.data;
       dispatch(setShopSlice(response.data.data));
+      localStorage.setItem("shopDetails", JSON.stringify(response.data.data));
     }
   } catch (err) {
     console.log("fetch my shop api error", err);

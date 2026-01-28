@@ -29,6 +29,8 @@ import { useEffect } from "react";
 import { setToken } from "./redux/slices/auth";
 import MenuPage from "./pages/MenuPage";
 import Orders from "./components/core/shop/Orders";
+import ChangePassword from "./components/core/shop/Setting";
+
 
 
 function App() {
@@ -86,6 +88,7 @@ function App() {
             <Route path="dashboard" element={<ShopDashboard />} />
             <Route path="more" element={<More />} />
             <Route path="orders" element={<Orders />} />
+            <Route path="settings" element={<ChangePassword />} />
           </Route>
         </Routes>
       </div>

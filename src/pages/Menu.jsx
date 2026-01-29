@@ -258,60 +258,88 @@ const menu = () => {
           ) : (
             <div
               ref={scrollRef}
-              className="flex gap-6 px-4 py-3 overflow-x-auto scroll-smooth scrollbar-thin scrollbar-thumb-gray-300"
+              className="flex items-start px-4 py-3 overflow-x-auto scroll-smooth scrollbar-thin scrollbar-thumb-gray-300"
             >
-              {finalCategories.map((cat) => {
-                const isActive = currCategory === cat._id;
-                return (
-                  <div
-                    key={cat._id}
-                    ref={(el) => (itemRefs.current[cat._id] = el)}
-                    onClick={() => setCurrCategory(cat._id)}
-                    className="flex flex-col items-center min-w-[72px] cursor-pointer"
-                  >
-                    {/* SMART TAB */}
-                    {cat.isSmart ? (
+              {/* 🔹 SMART CATEGORIES GROUP */}
+              <div className="flex gap-2">
+                {finalCategories
+                  .filter((cat) => cat.isSmart)
+                  .map((cat) => {
+                    const isActive = currCategory === cat._id;
+
+                    return (
                       <div
-                        className={`w-20 h-20 rounded-full flex items-center justify-center text-white text-2xl shadow transition
-        ${
-          isActive
-            ? `bg-linear-to-tr ${cat.bg} scale-105 shadow-lg`
-            : "bg-gray-200 text-gray-600"
-        }`}
+                        key={cat._id}
+                        ref={(el) => (itemRefs.current[cat._id] = el)}
+                        onClick={() => setCurrCategory(cat._id)}
+                        className="flex flex-col items-center min-w-[88px] cursor-pointer"
                       >
-                        {cat.icon}
+                        <div
+                          className={`w-20 h-20 rounded-full flex items-center justify-center
+                  text-white text-2xl shadow transition-all
+                  ${
+                    isActive
+                      ? `bg-linear-to-tr ${cat.bg} scale-105`
+                      : "bg-gray-200 text-gray-600"
+                  }`}
+                        >
+                          {cat.icon}
+                        </div>
+
+                        <p
+                          className={`text-[11px] mt-1 font-semibold text-center truncate w-full
+                  ${isActive ? "text-orange-600" : "text-gray-700"}`}
+                        >
+                          {cat.name}
+                        </p>
                       </div>
-                    ) : (
-                      /* NORMAL CATEGORY */
+                    );
+                  })}
+              </div>
+
+              <div className="w-2 shrink-0" />
+
+              {/* 🔹 MAIN CATEGORIES GROUP */}
+              <div className="flex ">
+                {finalCategories
+                  .filter((cat) => !cat.isSmart)
+                  .map((cat) => {
+                    const isActive = currCategory === cat._id;
+
+                    return (
                       <div
-                        className={`relative p-[3px] rounded-full transition-all duration-300
-        ${
-          isActive
-            ? "bg-linear-to-tr from-orange-500 via-red-500 to-pink-500 scale-105 shadow-md"
-            : cat.isBest
-              ? "bg-linear-to-tr from-yellow-400 to-orange-500"
-              : ""
-        }`}
+                        key={cat._id}
+                        ref={(el) => (itemRefs.current[cat._id] = el)}
+                        onClick={() => setCurrCategory(cat._id)}
+                        className="flex flex-col items-center min-w-[88px] cursor-pointer"
                       >
-                        <div className="w-20 h-20 rounded-full overflow-hidden bg-white shadow-inner">
+                        <div
+                          className={`w-32 h-20 bg-white 
+                  flex items-center justify-center
+                  transition-transform duration-300
+                  ${isActive ? "scale-110" : "scale-100"}`}
+                        >
                           <img
                             src={cat.image}
                             alt={cat.name}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-contain rounded-full"
                           />
                         </div>
-                      </div>
-                    )}
 
-                    <p
-                      className={`text-[11px] mt-2 font-semibold truncate w-full text-center
-      ${isActive ? "text-orange-600" : "text-gray-700"}`}
-                    >
-                      {cat.name}
-                    </p>
-                  </div>
-                );
-              })}
+                        <p
+                          className={`relative text-[11px] mt-1 font-semibold text-center truncate w-full
+                  ${isActive ? "text-orange-600" : "text-gray-700"}`}
+                        >
+                          {cat.name}
+
+                          {isActive && (
+                            <span className="absolute left-1/2 -bottom-1 -translate-x-1/2 w-5 h-[2px] bg-orange-500 rounded-full" />
+                          )}
+                        </p>
+                      </div>
+                    );
+                  })}
+              </div>
             </div>
           )}
         </div>

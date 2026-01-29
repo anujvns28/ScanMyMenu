@@ -106,38 +106,42 @@ const Menu = () => {
         </div>
 
         {shopCategories?.length > 0 ? (
-          <div className="flex gap-4 overflow-x-auto p-2  scrollbar-hide">
+          <div className="flex gap-2 overflow-x-auto p-2 scrollbar-hide">
             {shopCategories.map((cat, i) => {
               const id = cat._id;
-              const isSelected = currSelectedCategory._id === id;
+              const isSelected = currSelectedCategory?._id === id;
 
               return (
                 <div
                   key={i}
-                  className="flex flex-col items-center min-w-[90px]"
+                  className="flex flex-col items-center min-w-[100px]"
                 >
-                  {/* Category Click = SELECT */}
                   <button
                     onClick={() => setCurrSelectedCategory(cat)}
                     className="focus:outline-none"
                   >
+                    {/* IMAGE (NO BORDER / NO RING) */}
                     <div
-                      className={`w-24 h-24 rounded-full overflow-hidden shadow transition
-            ${isSelected ? "ring-2 ring-blue-500 scale-105" : ""}`}
+                      className={`w-28 h-16 bg-white flex items-center justify-center
+            transition-transform duration-300
+            ${isSelected ? "scale-115" : "scale-100"}`}
                     >
                       <img
                         src={cat.image || cat?.category?.image}
                         alt={cat.name}
-                        className="w-full h-full object-cover  transition-transform duration-300"
+                        className="w-full h-full object-contain rounded-full"
                       />
                     </div>
                   </button>
 
-                  <p className="mt-2 text-xs font-medium text-gray-700 text-center line-clamp-2">
+                  {/* NAME (COLOR CHANGE ON SELECT) */}
+                  <p
+                    className={`mt-2 text-xs font-medium text-center line-clamp-2
+          ${isSelected ? "text-orange-600" : "text-gray-700"}`}
+                  >
                     {cat.name || cat?.category?.name}
                   </p>
 
-                  {/* ⚙️ Manage Button */}
                   <button
                     onClick={() => setOpenCategory(cat)}
                     className="mt-1 text-[10px] text-blue-600 hover:underline"
@@ -180,9 +184,8 @@ const Menu = () => {
         </div>
 
         {/* Right Side: Add Item */}
-        {
-          currSelectedCategory &&
-            <button
+        {currSelectedCategory && (
+          <button
             onClick={() => {
               if (!shopDetails) setShowCreateShop(true);
               else setShowAddProductSheet(true);
@@ -192,7 +195,7 @@ const Menu = () => {
             <span className="text-lg leading-none">＋</span>
             Add Item
           </button>
-        }
+        )}
       </div>
 
       {/* ===== PRODUCT SECTION ===== */}

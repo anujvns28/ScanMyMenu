@@ -106,7 +106,7 @@ const ViewCategory = ({ openCategory, setOpenCategory,setShopCategories }) => {
         <img
           src={openCategory.image || openCategory.category?.image}
           alt={openCategory.name}
-          className="w-full h-40 object-cover rounded-xl"
+          className="w-full h-48 object-cover rounded-xl"
         />
 
         {/* Name & description */}
@@ -132,12 +132,12 @@ const ViewCategory = ({ openCategory, setOpenCategory,setShopCategories }) => {
                   key={i}
                   onClick={() => {
                     setCnfModal({
-                        text : `Aru you sure want to remove ${tag.name} tag`,
-                        btn1 : "Cancel",
-                        btn2 : "Remove",
-                        handler1 : () => setCnfModal(null),
-                        handler2 : () => handleRemoveTag(tag._id)
-                    })
+                      text: `Aru you sure want to remove ${tag.name} tag`,
+                      btn1: "Cancel",
+                      btn2: "Remove",
+                      handler1: () => setCnfModal(null),
+                      handler2: () => handleRemoveTag(tag._id),
+                    });
                   }}
                   className={`flex ${
                     colorClasses[tag.color]
@@ -163,14 +163,16 @@ const ViewCategory = ({ openCategory, setOpenCategory,setShopCategories }) => {
           <div className="mt-6 pt-2 space-y-3 border-t">
             <div className="grid grid-cols-2 gap-3">
               <button
-                onClick={()=>setCnfModal({
-                text : `Disable ${openCategory?.category?.name}?
+                onClick={() =>
+                  setCnfModal({
+                    text: `Disable ${openCategory?.category?.name}?
 This category will be hidden from customers, but you can enable it again anytime.`,
-                btn1 : "Cancel",
-                btn2 : openCategory?.isEnabled ? "Disable" : "Enable",
-                handler1 : () => setCnfModal(null),
-                handler2 : () => handleToggleShopCategory(openCategory)
-              })}
+                    btn1: "Cancel",
+                    btn2: openCategory?.isEnabled ? "Disable" : "Enable",
+                    handler1: () => setCnfModal(null),
+                    handler2: () => handleToggleShopCategory(openCategory),
+                  })
+                }
                 className={`py-2.5 rounded-xl text-sm font-medium
                   ${
                     openCategory?.isEnabled
@@ -182,26 +184,28 @@ This category will be hidden from customers, but you can enable it again anytime
                 {openCategory?.isEnabled ? "Disable" : "Enable"}
               </button>
 
-              <button 
-              onClick={()=>setCnfModal({
-                text : `Are you sure you want to remove ${openCategory?.category?.name}?
+              <button
+                onClick={() =>
+                  setCnfModal({
+                    text: `Are you sure you want to remove ${openCategory?.category?.name}?
 This category and all its products will be permanently deleted and cannot be recovered.
 `,
-                btn1 : "Cancel",
-                btn2 : "Remove",
-                handler1 : () => setCnfModal(null),
-                handler2 : () => handleRemoveShopCategory(openCategory._id)
-              })}
-              className="py-2.5 rounded-xl text-sm font-medium bg-red-50 text-red-600 border border-red-200">
+                    btn1: "Cancel",
+                    btn2: "Remove",
+                    handler1: () => setCnfModal(null),
+                    handler2: () => handleRemoveShopCategory(openCategory._id),
+                  })
+                }
+                className="py-2.5 rounded-xl text-sm font-medium bg-red-50 text-red-600 border border-red-200"
+              >
                 Remove
               </button>
             </div>
-             <button className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white py-3 rounded-xl text-sm font-semibold">
+            <button className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white py-3 rounded-xl text-sm font-semibold">
               ➕ Add Product
             </button>
           </div>
         )}
-        
 
         {/* Close */}
         <div className="mt-2">
@@ -283,9 +287,9 @@ This category and all its products will be permanently deleted and cannot be rec
 
               <button
                 className="w-full text-sm text-gray-500"
-                onClick={() =>{
-                    setShowAddTagSheet(false)
-                    setSelectTags([]);
+                onClick={() => {
+                  setShowAddTagSheet(false);
+                  setSelectTags([]);
                 }}
               >
                 Cancel
@@ -296,7 +300,7 @@ This category and all its products will be permanently deleted and cannot be rec
       )}
 
       {userLoading && <LoaderComponent />}
-      {cnfModal && <ConfirmationModal modalData={cnfModal}/>}
+      {cnfModal && <ConfirmationModal modalData={cnfModal} />}
     </div>
   );
 };

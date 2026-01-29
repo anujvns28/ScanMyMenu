@@ -147,7 +147,7 @@ const ShopProfile = () => {
 
   useEffect(() => {
     fetchShopHandler();
-  }, []);
+  }, [token]);
 
   if (currentStep === 0) {
     return (

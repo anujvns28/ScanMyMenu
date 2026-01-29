@@ -7,6 +7,7 @@ import {
 } from "../../../service/operations/tag";
 import { useDispatch, useSelector } from "react-redux";
 import ConfirmationModal from "../../common/ConfirmationModal";
+import { colorClasses } from "../../../utils/data";
 
 const AdminTags = () => {
   const [name, setName] = useState("");
@@ -21,14 +22,6 @@ const AdminTags = () => {
 
   const { token, userLoading } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
-
-  const colorClasses = {
-    red: "bg-red-200 text-red-700",
-    green: "bg-green-200 text-green-700",
-    yellow: "bg-yellow-200 text-yellow-700",
-    blue: "bg-blue-200 text-blue-700",
-    purple: "bg-purple-200 text-purple-700",
-  };
 
   const validateForm = () => {
     const data = {};
@@ -290,7 +283,17 @@ const AdminTags = () => {
                       Select color
                     </p>
                     <div className="flex gap-2">
-                      {["red", "green", "yellow", "blue", "purple"].map((c) => (
+                      {[
+                        "red",
+                        "green",
+                        "yellow",
+                        "blue",
+                        "purple",
+                        "orange",
+                        "pink",
+                        "teal",
+                        "lime",
+                      ].map((c) => (
                         <div
                           key={c}
                           className={`w-7 h-7 rounded-full ${
@@ -305,6 +308,7 @@ const AdminTags = () => {
                         />
                       ))}
                     </div>
+
                     {errors.color && (
                       <p className="text-red-500 text-xs mt-1 ">
                         {errors.color}
@@ -313,7 +317,7 @@ const AdminTags = () => {
                   </div>
 
                   {/* Preview */}
-                  <div className="text-xs text-gray-500">
+                  <div className="text-xs text-gray-500 flex items-center ">
                     Preview:
                     <span
                       className={`ml-2 inline-block px-3 py-1 rounded-full ${
@@ -322,6 +326,7 @@ const AdminTags = () => {
                     >
                       {name || "Spicy"}
                     </span>
+                    <span>{color}</span>
                   </div>
 
                   <div className="flex justify-end gap-3 pt-4">

@@ -782,7 +782,7 @@ const ViewProduct = ({
                       key={i}
                       onClick={() =>
                         setIngredients((prev) =>
-                          prev.filter((_, index) => index !== i)
+                          prev.filter((_, index) => index !== i),
                         )
                       }
                       className="px-3 py-1 bg-green-100 text-green-700 text-xs rounded-full cursor-pointer"
@@ -797,15 +797,34 @@ const ViewProduct = ({
                   <input
                     value={newIngredient}
                     onChange={(e) => setNewIngredient(e.target.value)}
-                    placeholder="Add ingredient"
-                    className="flex-1 border rounded-lg p-2"
-                  />
-                  <button
-                    onClick={() => {
-                      if (newIngredient.trim() !== "") {
-                        setIngredients([...ingredients, newIngredient]);
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+
+                        const items = newIngredient
+                          .split(",")
+                          .map((item) => item.trim())
+                          .filter((item) => item);
+
+                        setIngredients((prev) => [...prev, ...items]);
                         setNewIngredient("");
                       }
+                    }}
+                    placeholder="Add ingredient (comma separated)"
+                    className="flex-1 border rounded-lg p-2"
+                  />
+
+                  <button
+                    onClick={() => {
+                      if (newIngredient.trim() === "") return;
+
+                      const items = newIngredient
+                        .split(",")
+                        .map((item) => item.trim())
+                        .filter((item) => item);
+
+                      setIngredients((prev) => [...prev, ...items]);
+                      setNewIngredient("");
                     }}
                     className="px-4 bg-green-600 text-white rounded-lg"
                   >

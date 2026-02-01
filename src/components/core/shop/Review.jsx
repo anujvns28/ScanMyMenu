@@ -59,6 +59,10 @@ export default function ShopkeeperRatingsReviews() {
   const [summaryLoading, setSummaryLoading] = useState(true);
   const { token } = useSelector((state) => state.auth);
   const { shopDetails } = useSelector((state) => state.shop);
+
+  const ITEMS_PER_PAGE = 10;
+  const [currentPage, setCurrentPage] = useState(1);
+
   const dispatch = useDispatch();
 
   const isAnyFilterActive =
@@ -83,6 +87,13 @@ export default function ShopkeeperRatingsReviews() {
 
     return true;
   });
+
+  const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
+
+  const paginatedProducts = filteredProducts.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE,
+  );
 
   const clearAllFilters = () => {
     setSearch("");
@@ -114,6 +125,10 @@ export default function ShopkeeperRatingsReviews() {
     fetchProducts();
     fetchShopRatingSummary();
   }, []);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, starFilter, healthFilter, reviewCount, recent]);
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
@@ -268,7 +283,7 @@ export default function ShopkeeperRatingsReviews() {
         </div>
       ) : (
         <div className="space-y-4">
-          {filteredProducts.map((p) => {
+          {paginatedProducts.map((p) => {
             const status =
               p.rating >= 4 ? "best" : p.rating >= 3 ? "improve" : "critical";
 
@@ -334,6 +349,57 @@ export default function ShopkeeperRatingsReviews() {
               </div>
             );
           })}
+
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center gap-2 mt-6">
+              {/* Prev */}
+              <button
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((p) => p - 1)}
+                className={`px-3 py-1 text-sm rounded-lg border
+        ${
+          currentPage === 1
+            ? "text-gray-400 border-gray-200"
+            : "hover:bg-gray-100"
+        }`}
+              >
+                Prev
+              </button>
+
+              {/* Page numbers */}
+              {[...Array(totalPages)].map((_, i) => {
+                const page = i + 1;
+                return (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`px-3 py-1 text-sm rounded-lg border
+            ${
+              currentPage === page
+                ? "bg-gray-900 text-white border-gray-900"
+                : "hover:bg-gray-100"
+            }`}
+                  >
+                    {page}
+                  </button>
+                );
+              })}
+
+              {/* Next */}
+              <button
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage((p) => p + 1)}
+                className={`px-3 py-1 text-sm rounded-lg border
+        ${
+          currentPage === totalPages
+            ? "text-gray-400 border-gray-200"
+            : "hover:bg-gray-100"
+        }`}
+              >
+                Next
+              </button>
+            </div>
+          )}
         </div>
       )}
 

@@ -26,20 +26,7 @@ export const smartFilters = [
     field: "orderCount",
     min: 50,
   },
-  {
-    id: "quick",
-    label: "⏱ Under 15 min",
-    type: "field",
-    field: "preparationTime",
-    max: 15,
-  },
-  {
-    id: "cheap",
-    label: "₹ Under 200",
-    type: "field",
-    field: "finalPrice",
-    max: 200,
-  },
+
 ];
 
 export const colorClasses = {

@@ -3,11 +3,14 @@ import { updateProduct } from "../../../../service/operations/product";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchAllActiveTag } from "../../../../service/operations/tag";
 import { colorClasses } from "../../../../utils/data";
+import { getAllReview } from "../../../../service/operations/rating&review";
+import ProductReviewsSheet from "../../menu/rating&review/ProductReviewsSheet";
 
 const ViewProduct = ({
   viewProduct,
   setViewProduct,
   setCurrCategoryProduct,
+  categoryName,
 }) => {
   const [editField, setEditField] = useState(null);
   const [editValue, setEditValue] = useState(null);
@@ -23,6 +26,8 @@ const ViewProduct = ({
 
   const [ingredients, setIngredients] = useState([]);
   const [newIngredient, setNewIngredient] = useState("");
+  const [rating, setRating] = useState([]);
+  const [showProductRatingSheet, setShowProductRatingSheet] = useState(false);
 
   const { token, userLoading } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
@@ -49,7 +54,7 @@ const ViewProduct = ({
     setEditField(null);
     setEditValue(null);
     setCurrCategoryProduct((prev) =>
-      prev.map((item) => (item._id == viewProduct._id ? result.data : item))
+      prev.map((item) => (item._id == viewProduct._id ? result.data : item)),
     );
   };
 
@@ -75,7 +80,7 @@ const ViewProduct = ({
     setEditValue(null);
 
     setCurrCategoryProduct((prev) =>
-      prev.map((item) => (item._id == viewProduct._id ? result.data : item))
+      prev.map((item) => (item._id == viewProduct._id ? result.data : item)),
     );
   };
 
@@ -97,11 +102,20 @@ const ViewProduct = ({
     }
   };
 
+  const fetchProductRatingAndReview = async () => {
+    const result = await getAllReview({ productId: viewProduct._id });
+
+    if (result) {
+      setRating(result?.data);
+    }
+  };
+
   useEffect(() => {
     setSelectedTags(viewProduct.tags);
     setSelectedTagsIds(viewProduct.tags.map((temp) => temp._id));
     fetchTagsHandler();
     setIngredients(viewProduct.ingredients || []);
+    fetchProductRatingAndReview();
   }, []);
 
   return (
@@ -113,13 +127,18 @@ const ViewProduct = ({
         <div className="flex justify-between items-center px-5 pb-3">
           <div>
             <p className="text-xs text-gray-500">Category</p>
-            <p className="text-sm font-semibold text-gray-800">Biryani</p>
+            <p className="text-sm font-semibold text-gray-800">
+              {categoryName}
+            </p>
           </div>
 
           <div className="flex items-center gap-4">
             {/* Rating */}
             <div className="flex items-center gap-1 text-yellow-500 text-sm">
-              ⭐ <span className="text-gray-700 font-medium">4.6</span>
+              ⭐{" "}
+              <span className="text-gray-700 font-medium">
+                {viewProduct?.rating}
+              </span>
             </div>
 
             {/* Close Button */}
@@ -888,19 +907,21 @@ const ViewProduct = ({
               <>
                 {/* Chips */}
                 <div className="flex flex-wrap gap-2">
-                  {["mild", "medium", "spicy", "extra-spicy"].map((level) => (
-                    <button
-                      key={level}
-                      onClick={() => setEditValue(level)}
-                      className={`px-3 py-2 rounded-full text-xs sm:text-sm transition ${
-                        editValue === level
-                          ? "bg-red-600 text-white"
-                          : "bg-gray-100 text-gray-700"
-                      }`}
-                    >
-                      🌶 {level}
-                    </button>
-                  ))}
+                  {["none", "mild", "medium", "spicy", "extra-spicy"].map(
+                    (level) => (
+                      <button
+                        key={level}
+                        onClick={() => setEditValue(level)}
+                        className={`px-3 py-2 rounded-full text-xs sm:text-sm transition ${
+                          editValue === level
+                            ? "bg-red-600 text-white"
+                            : "bg-gray-100 text-gray-700"
+                        }`}
+                      >
+                        🌶 {level}
+                      </button>
+                    ),
+                  )}
                 </div>
 
                 {/* Buttons */}
@@ -940,35 +961,41 @@ const ViewProduct = ({
           </div>
 
           {/* Reviews */}
-          <div className="bg-gray-50 rounded-xl p-4">
-            <div className="flex justify-between items-center mb-2">
-              <p className="text-sm font-medium">Customer Reviews</p>
-              <span className="text-xs text-blue-600">View all</span>
-            </div>
-
-            {/* Average */}
-            <div className="flex items-center gap-2 mb-3">
-              <div className="text-2xl font-bold text-yellow-500">4.6</div>
-              <div className="text-sm text-gray-500">based on 128 reviews</div>
-            </div>
-
-            {/* Last 2 reviews */}
-            <div className="space-y-3">
-              <div>
-                <p className="text-sm font-medium">Rahul</p>
-                <p className="text-xs text-gray-600">
-                  “Very tasty and spicy 🔥”
-                </p>
+          {rating.length > 0 && (
+            <div className="bg-gray-50 rounded-xl p-4">
+              <div className="flex justify-between items-center mb-2">
+                <p className="text-sm font-medium">Customer Reviews</p>
+                <span
+                  onClick={() => setShowProductRatingSheet(true)}
+                  className="text-xs text-blue-600"
+                >
+                  View all
+                </span>
               </div>
 
-              <div>
-                <p className="text-sm font-medium">Ankit</p>
-                <p className="text-xs text-gray-600">
-                  “Quantity was good, loved it.”
-                </p>
+              {/* Average */}
+              <div className="flex items-center gap-2 mb-3">
+                <div className="text-2xl font-bold text-yellow-500">
+                  {viewProduct.rating}
+                </div>
+                <div className="text-sm text-gray-500">
+                  based on {rating.length} reviews
+                </div>
+              </div>
+
+              {/* Last 2 reviews */}
+              <div className="space-y-3">
+                {rating.slice(0, 3).map((rat) => {
+                  return (
+                    <div>
+                      <p className="text-sm font-medium">{rat.user?.name}</p>
+                      <p className="text-xs text-gray-600">{rat.reviewText}</p>
+                    </div>
+                  );
+                })}
               </div>
             </div>
-          </div>
+          )}
 
           <div className=" bg-white border-t p-3 mb-14">
             <div className="flex gap-2">
@@ -983,6 +1010,20 @@ const ViewProduct = ({
           </div>
         </div>
       </div>
+
+      {showProductRatingSheet && (
+        <ProductReviewsSheet
+          onClose={() => setShowProductRatingSheet(false)}
+          product={{
+            image: viewProduct?.image,
+            _id: viewProduct?._id,
+            name: viewProduct?.name,
+          }}
+          productId={viewProduct._id}
+          reviews={rating}
+          setReview={setRating}
+        />
+      )}
     </div>
   );
 };

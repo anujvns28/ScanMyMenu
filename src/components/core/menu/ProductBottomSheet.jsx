@@ -218,7 +218,7 @@ const ProductBottomSheet = ({
                   <span
                     key={i}
                     className={`px-2 py-0.5 text-[9px] rounded-full font-medium
-${colorClasses[tag.color || "blue"]}`}
+                      ${colorClasses[tag.color || "blue"]}`}
                   >
                     {tag.name}
                   </span>
@@ -244,23 +244,24 @@ ${colorClasses[tag.color || "blue"]}`}
               <Clock size={14} />
               {product.preparationTime} mins
             </div>
-            <div
-              className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium shadow-sm
-  ${
-    product?.spiceLevel === "mild"
-      ? "bg-green-100 text-green-700"
-      : product?.spiceLevel === "medium"
-        ? "bg-yellow-100 text-yellow-700"
-        : product?.spiceLevel === "spicy"
-          ? "bg-orange-100 text-orange-700"
-          : "bg-red-100 text-red-700"
-  }`}
-            >
-              <Flame size={14} />
-              <span className="capitalize">
-                {product?.spiceLevel || "medium"} spicy
-              </span>
-            </div>
+
+            {product?.spiceLevel !== "none" && (
+              <div
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium shadow-sm
+      ${
+        product?.spiceLevel === "mild"
+          ? "bg-green-100 text-green-700"
+          : product?.spiceLevel === "medium"
+            ? "bg-yellow-100 text-yellow-700"
+            : product?.spiceLevel === "spicy"
+              ? "bg-orange-100 text-orange-700"
+              : "bg-red-100 text-red-700"
+      }`}
+              >
+                <Flame size={14} />
+                <span className="capitalize">{product.spiceLevel} spicy</span>
+              </div>
+            )}
           </div>
 
           {/* Ingredients */}

@@ -81,6 +81,7 @@ const Menu = () => {
     }
   }, [currSelectedCategory]);
 
+
   return (
     <div className="min-h-screen bg-gray-100 p-4 space-y-2">
       {/* ===== HEADER ===== */}
@@ -120,7 +121,6 @@ const Menu = () => {
                     onClick={() => setCurrSelectedCategory(cat)}
                     className="focus:outline-none"
                   >
-                    {/* IMAGE (NO BORDER / NO RING) */}
                     <div
                       className={`w-28 h-16 bg-white flex items-center justify-center
             transition-transform duration-300
@@ -166,7 +166,6 @@ const Menu = () => {
           </div>
         )}
       </div>
-
       {/* add product button */}
       <div className="flex items-center justify-between px-4 py-2">
         {/* Left Side: Category Info */}
@@ -197,7 +196,6 @@ const Menu = () => {
           </button>
         )}
       </div>
-
       {/* ===== PRODUCT SECTION ===== */}
       {!shopDetails || currCategoryProduct.length === 0 ? (
         <div className="space-y-4">
@@ -226,17 +224,17 @@ const Menu = () => {
           ))}
         </div>
       ) : (
-        <>
+        <div className="flex flex-col gap-5">
           {currCategoryProduct.map((item, i) => {
             return (
               <div
                 key={i}
-                className={`rounded-2xl border overflow-hidden transition 
-    ${!item.isAvailable ? "opacity-60" : "hover:shadow-md"}`}
+                className={`rounded-2xl overflow-hidden transition cursor-pointer bg-white
+  ${!item.isAvailable ? "opacity-60" : "hover:shadow-xl"}`}
                 onClick={() => setViewProduct(item)}
               >
                 {/* IMAGE */}
-                <div className="relative w-full h-36">
+                <div className="relative w-full h-52">
                   <img
                     src={item.image}
                     alt={item.name}
@@ -245,70 +243,62 @@ const Menu = () => {
                     }`}
                   />
 
+                  {/* Dark gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+
                   {/* Availability */}
                   <span
-                    className={`absolute top-2 left-2 text-xs px-2 py-0.5 rounded-full text-white
-        ${item.isAvailable ? "bg-green-600" : "bg-gray-700"}
-      `}
+                    className={`absolute top-3 left-3 text-xs px-2 py-0.5 rounded-full text-white
+      ${item.isAvailable ? "bg-green-600" : "bg-gray-700"}`}
                   >
                     {item.isAvailable ? "Available" : "Out of Stock"}
                   </span>
 
                   {/* Today Special */}
                   {item.isTodaySpecial && (
-                    <span className="absolute bottom-2 left-2 bg-yellow-400 text-black text-xs px-2 py-0.5 rounded-full">
-                      Today’s Special
+                    <span className="absolute top-3 right-3 bg-yellow-400 text-black text-xs px-2 py-0.5 rounded-full font-semibold">
+                      ⭐ Today’s Special
                     </span>
                   )}
 
-                  {/* Rating */}
-                  <div className="absolute top-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded-lg">
+                  {/* Rating + Reviews (FOCUS) */}
+                  <div className="absolute bottom-3 right-3 bg-black/70 text-white px-2 py-1 rounded-lg text-xs font-semibold flex items-center gap-1">
                     ⭐ {item.rating || 0}
-                  </div>
-                </div>
-
-                {/* CONTENT */}
-                <div className="p-3 space-y-2">
-                  {/* Name */}
-                  <h3 className="font-semibold text-gray-800 leading-tight">
-                    {item.name}
-                  </h3>
-
-                  {/* Description */}
-                  <p className="text-xs text-gray-500 line-clamp-2">
-                    {item.description}
-                  </p>
-
-                  {/* Price & Time */}
-                  <div className="flex justify-between items-center text-sm">
-                    <div className="flex gap-1">
-                      <span
-                        className={`font-semibold ${
-                          item.isAvailable ? "text-green-600" : "text-gray-400"
-                        }`}
-                      >
-                        ₹{item.price}
-                      </span>
-
-                      <span className="line-through text-gray-400">
-                        ₹{item.discountPrice}
-                      </span>
-                    </div>
-
-                    <span className="text-gray-500 text-xs">
-                      ⏱ {item.preparationTime} min
+                    <span className="text-gray-300">
+                      ({item.reviewsCount || 0})
                     </span>
                   </div>
 
-                  {/* Reviews */}
-                  <div className="text-xs text-gray-500">
-                    {item.reviewsCount > 0
-                      ? `${item.reviewsCount} reviews`
-                      : "No reviews yet"}
+                  {/* Name + Price + Time */}
+                  <div className="absolute bottom-3 left-3 right-16 text-white space-y-1">
+                    <h3 className="font-semibold text-sm leading-tight">
+                      {item.name}
+                    </h3>
+
+                    <div className="flex items-center justify-between text-xs">
+                      <div className="flex gap-2 items-center">
+                        <span className="font-semibold text-green-400">
+                          ₹{item.price}
+                        </span>
+                        {item.discountPrice > 0 && (
+                          <span className="line-through text-gray-300">
+                            ₹{item.discountPrice}
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </div>
+                </div>
+
+                {/* CONTENT (MINIMAL) */}
+                <div className="p-3 space-y-2">
+                  {/* Description */}
+                  <p className="text-xs text-gray-600 line-clamp-2">
+                    {item.description}
+                  </p>
 
                   {/* Tags */}
-                  {item.tags.length > 0 && (
+                  {item.tags?.length > 0 && (
                     <div className="flex gap-2 flex-wrap">
                       {item.tags.map((tag) => (
                         <span
@@ -326,9 +316,8 @@ const Menu = () => {
               </div>
             );
           })}
-        </>
+        </div>
       )}
-
       {/* ===== CATEGORY DETAILS ===== */}
       {openCategory && (
         <ViewCategory
@@ -337,7 +326,6 @@ const Menu = () => {
           setShopCategories={setShopCategories}
         />
       )}
-
       {/* ===== CREATE SHOP CTA ===== */}
       {showCreateShop && (
         <div className="fixed inset-0 z-50 flex items-end bg-black/40 mb-14">
@@ -368,7 +356,6 @@ const Menu = () => {
           </div>
         </div>
       )}
-
       {showAddCategorySheet && (
         <AddCategorySheet
           open={showAddCategorySheet}
@@ -382,12 +369,12 @@ const Menu = () => {
           setSelected={setSelected}
         />
       )}
-
       {viewProduct && (
         <ViewProduct
           viewProduct={viewProduct}
           setViewProduct={setViewProduct}
           setCurrCategoryProduct={setCurrCategoryProduct}
+          categoryName={currSelectedCategory.displayName}
         />
       )}
       {showAddProductSheet && (

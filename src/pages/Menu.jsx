@@ -34,7 +34,8 @@ const menu = () => {
   const [scrolled, setScrolled] = useState(false);
   const [search, setSearch] = useState("");
   const [productId, setProductId] = useState(null);
-  const [activeFilters, setActiveFilters] = useState([]);
+  const [activeSmartFilters, setActiveSmartFilters] = useState([]);
+  const [activeTagFilters, setActiveTagFilters] = useState([]);
   const [openReviewForm, setOpenReviewForm] = useState(false);
   const [filteredItems, setFilteredItems] = useState([]);
   const [showCartheet, setShowCartSheet] = useState(false);
@@ -178,31 +179,74 @@ const menu = () => {
 
   useEffect(() => {
     if (!currCategoryItem?.products) return;
+
     let temp = [...currCategoryItem.products];
 
     // 🔍 SEARCH
-    if (search.trim() !== "") {
+    if (search.trim()) {
       temp = temp.filter((item) =>
         item.name.toLowerCase().includes(search.toLowerCase()),
       );
     }
-    console.log(activeFilters);
-    if (activeFilters.length > 0) {
+
+    // 🟢 SMART FILTERS (OR LOGIC)
+    if (activeSmartFilters.length > 0) {
       temp = temp.filter((item) =>
-        activeFilters.every((tagName) =>
-          item.tags.some((t) => t.name === tagName),
+        activeSmartFilters.some((id) => {
+          const filter = smartFilters.find((f) => f.id === id);
+
+          // VEG
+          if (id === "veg") {
+            return item.tags?.some((t) => t.name === "Veg");
+          }
+
+          // NON-VEG
+          if (id === "nonveg") {
+            return item.tags?.some((t) => t.name === "Non-Veg");
+          }
+
+          // TAG BASED
+          if (filter?.type === "tag") {
+            return item.tags?.some((t) => t.name === filter.value);
+          }
+
+          return false;
+        }),
+      );
+    }
+
+    // 🏷 CATEGORY TAG FILTERS
+    if (activeTagFilters.length > 0) {
+      temp = temp.filter((item) =>
+        activeTagFilters.some((tagName) =>
+          item.tags?.some(
+            (t) => t.name.toLowerCase() === tagName.toLowerCase(),
+          ),
         ),
       );
     }
 
     setFilteredItems(temp);
-  }, [search, activeFilters]);
+  }, [search, activeSmartFilters, activeTagFilters, currCategoryItem]);
 
   useEffect(() => {
     if (totalItems === 0) {
       setShowCartSheet(false);
     }
   }, [totalItems]);
+
+  useEffect(() => {
+    setActiveSmartFilters([]);
+    setActiveTagFilters([]);
+    setSearch("");
+  }, [currCategory]);
+
+  console.log(
+    "ACTIVE TAG FILTERS:",
+    activeTagFilters,
+    "ITEM TAG IDS:",
+    currCategoryItem.products?.[0]?.tags?.map((t) => t._id),
+  );
 
   return (
     <div className="min-h-screen w-full bg-gray-100 flex justify-center">
@@ -368,33 +412,34 @@ const menu = () => {
 
                   {/* smart tags */}
                   {visibleSmartFilters.map((filter) => {
-                    const active = activeFilters.includes(filter.value);
+                    const isActive = activeSmartFilters.includes(filter.id);
 
                     return (
                       <button
                         key={filter.id}
                         onClick={() =>
-                          setActiveFilters((prev) =>
+                          setActiveSmartFilters((prev) =>
                             prev.includes(filter.id)
                               ? prev.filter((f) => f !== filter.id)
                               : [...prev, filter.id],
                           )
                         }
-                        className={`snap-start shrink-0 px-5 py-2.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200
-            ${
-              active
-                ? "bg-orange-500 text-white shadow-lg scale-105"
-                : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50"
-            }
-          `}
+                        className={`snap-start shrink-0 px-5 py-2.5 rounded-full 
+      text-xs font-semibold transition-all border
+      ${
+        isActive
+          ? "bg-orange-500 text-white border-orange-500 scale-105"
+          : "bg-white text-gray-700 border-gray-200"
+      }`}
                       >
                         {filter.label}
                       </button>
                     );
                   })}
+
                   {/* category tags */}
                   {currCategoryItem?.tags?.map((tag) => {
-                    const active = activeFilters.includes(tag._id);
+                    const isActive = activeTagFilters.includes(tag.name);
                     const colorClass =
                       colorClasses[tag.color] || "bg-gray-200 text-gray-700";
 
@@ -402,19 +447,18 @@ const menu = () => {
                       <button
                         key={tag._id}
                         onClick={() =>
-                          setActiveFilters((prev) =>
-                            prev.includes(tag._id)
-                              ? prev.filter((f) => f !== tag._id)
-                              : [...prev, tag._id],
+                          setActiveTagFilters((prev) =>
+                            prev.includes(tag.name)
+                              ? prev.filter((n) => n !== tag.name)
+                              : [...prev, tag.name],
                           )
                         }
-                        className={`snap-start shrink-0 px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 border
-        ${
-          active
-            ? "bg-orange-500 text-white border-orange-500 shadow-md scale-105"
-            : `${colorClass}  hover:shadow-sm hover:scale-[1.05]`
-        }
-      `}
+                        className={`px-4 py-2 rounded-full text-xs font-semibold border
+      ${
+        isActive
+          ? "bg-orange-500 text-white border-orange-500 scale-105"
+          : colorClass
+      }`}
                       >
                         {tag.name}
                       </button>

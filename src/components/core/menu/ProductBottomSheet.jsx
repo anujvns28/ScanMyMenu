@@ -201,7 +201,7 @@ const ProductBottomSheet = ({
           <img
             src={product.image}
             alt={product.name}
-            className="w-full h-52 object-cover rounded-2xl"
+            className="w-full h-56 object-cover rounded-2xl"
           />
 
           {/* Name + Rating */}
@@ -217,8 +217,8 @@ const ProductBottomSheet = ({
                 {product.tags?.map((tag, i) => (
                   <span
                     key={i}
-                    className={`px-2 py-0.5 text-[9px] rounded-full flex items-center gap-1 font-medium shadow-sm
-                                    ${colorClasses[tag.color || "blue"]}`}
+                    className={`px-2 py-0.5 text-[9px] rounded-full font-medium
+${colorClasses[tag.color || "blue"]}`}
                   >
                     {tag.name}
                   </span>

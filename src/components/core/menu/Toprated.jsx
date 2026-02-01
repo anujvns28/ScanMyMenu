@@ -26,6 +26,9 @@ const TopRated = () => {
   const [loading, setLoading] = useState(true);
   const [openReviewForm, setOpenReviewForm] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState(null);
+  const ITEMS_PER_PAGE = 15;
+  const [currentPage, setCurrentPage] = useState(1);
+
   const { addProductToCart } = useCart();
 
   const getRankByTab = (product) => {
@@ -72,11 +75,23 @@ const TopRated = () => {
     return list;
   }, [products, activeTab, search]);
 
+  const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
+
+  const paginatedProducts = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    const end = start + ITEMS_PER_PAGE;
+    return filteredProducts.slice(start, end);
+  }, [filteredProducts, currentPage]);
+
   useEffect(() => {
     if (!selectedProductId) {
       fetchProducts();
     }
   }, [selectedProductId]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab, search]);
 
   return (
     <div className="min-h-screen bg-neutral-50 pb-24">
@@ -127,7 +142,7 @@ const TopRated = () => {
 
         {/* 🔹 Real data */}
         {!loading &&
-          filteredProducts.map((item) => (
+          paginatedProducts.map((item) => (
             <div
               key={item._id}
               onClick={() => setSelectedProductId(item._id)}
@@ -181,6 +196,31 @@ const TopRated = () => {
               </div>
             </div>
           ))}
+
+        {/* Pagination – only if products > 15 */}
+        {!loading && filteredProducts.length > ITEMS_PER_PAGE && (
+          <div className="flex justify-center items-center gap-3 mt-6">
+            <button
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage((p) => p - 1)}
+              className="px-4 py-1.5 text-xs rounded-full border disabled:opacity-40"
+            >
+              Prev
+            </button>
+
+            <span className="text-xs text-gray-500">
+              Page {currentPage} of {totalPages}
+            </span>
+
+            <button
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage((p) => p + 1)}
+              className="px-4 py-1.5 text-xs rounded-full border disabled:opacity-40"
+            >
+              Next
+            </button>
+          </div>
+        )}
 
         {/* Empty state */}
         {!loading && filteredProducts.length === 0 && (

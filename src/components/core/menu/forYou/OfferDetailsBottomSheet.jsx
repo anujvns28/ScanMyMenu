@@ -7,31 +7,28 @@ export default function OfferDetailsBottomSheet({
   offer,
 }) {
   if (!isOpen || !offer) return null;
-  const {addOfferToCart} = useCart();
+  const { addOfferToCart, isCartOpen } = useCart();
 
   const actualPrice = offer.items.reduce(
     (sum, i) => sum + i.product.price * i.quantity,
-    0
+    0,
   );
 
   const saveAmount = actualPrice - offer.offerPrice;
 
   const daysLeft = Math.ceil(
-    (new Date(offer.endDate) - new Date()) / (1000 * 60 * 60 * 24)
+    (new Date(offer.endDate) - new Date()) / (1000 * 60 * 60 * 24),
   );
 
   const handleAddOffer = () => {
-  addOfferToCart(offer);
-  onClose();
-};
+    addOfferToCart(offer);
+    onClose();
+  };
 
   return (
     <div className="fixed inset-0 z-50">
       {/* BACKDROP */}
-      <div
-        className="absolute inset-0 bg-black/50"
-        onClick={onClose}
-      />
+      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
 
       {/* BOTTOM SHEET */}
       <div
@@ -55,14 +52,10 @@ export default function OfferDetailsBottomSheet({
 
         <div className="p-4">
           {/* TITLE */}
-          <h4 className="text-xl font-extrabold mb-1">
-            {offer.title}
-          </h4>
+          <h4 className="text-xl font-extrabold mb-1">{offer.title}</h4>
 
           {offer.description && (
-            <p className="text-sm text-gray-600 mb-3">
-              {offer.description}
-            </p>
+            <p className="text-sm text-gray-600 mb-3">{offer.description}</p>
           )}
 
           {/* TRUST + TIME */}
@@ -92,8 +85,10 @@ export default function OfferDetailsBottomSheet({
               </div>
 
               {saveAmount > 0 && (
-                <span className="bg-green-500 text-white text-sm font-bold
-                                 px-3 py-1 rounded-full">
+                <span
+                  className="bg-green-500 text-white text-sm font-bold
+                                 px-3 py-1 rounded-full"
+                >
                   Save ₹{saveAmount}
                 </span>
               )}
@@ -102,9 +97,7 @@ export default function OfferDetailsBottomSheet({
 
           {/* INCLUDED ITEMS */}
           <div className="mb-6">
-            <h5 className="text-sm font-semibold mb-3">
-              🍽 Included Items
-            </h5>
+            <h5 className="text-sm font-semibold mb-3">🍽 Included Items</h5>
 
             <div className="space-y-3">
               {offer.items.map((i, idx) => (
@@ -122,9 +115,7 @@ export default function OfferDetailsBottomSheet({
 
                   {/* ITEM INFO */}
                   <div className="flex-1">
-                    <p className="text-sm font-semibold">
-                      {i.product.name}
-                    </p>
+                    <p className="text-sm font-semibold">{i.product.name}</p>
                     <p className="text-xs text-gray-500">
                       ₹{i.product.price} × {i.quantity}
                     </p>
@@ -140,17 +131,19 @@ export default function OfferDetailsBottomSheet({
           </div>
 
           {/* VALUE MESSAGE */}
-          <div className="bg-green-50 border border-green-200
-                          text-green-700 text-xs rounded-xl p-3 mb-5">
-            You’re getting this combo at a special discounted price.
-            Ordering items separately will cost more.
+          <div
+            className="bg-green-50 border border-green-200
+                          text-green-700 text-xs rounded-xl p-3 mb-5"
+          >
+            You’re getting this combo at a special discounted price. Ordering
+            items separately will cost more.
           </div>
 
           {/* CTA */}
           <button
             onClick={handleAddOffer}
             className="w-full bg-black text-white py-3 rounded-2xl
-                       font-semibold text-sm active:scale-[0.98]"
+                       font-semibold text-sm active:scale-[0.98] mb-20"
           >
             Buy This Combo
           </button>

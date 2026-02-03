@@ -84,6 +84,7 @@ export const verifyRazorpayPayment = async (data, token, dispatch) => {
     if (response) {
       console.log("Payment verify response", response);
       result = response.data;
+      dispatch(setActiveOrder(result.order));
     }
   } catch (err) {
     console.log("Payment verify error", err);

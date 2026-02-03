@@ -13,7 +13,7 @@ const {
 } = ratingAndReviews;
 
 export const addRatingAndReview = async (data, token, dispatch) => {
-  dispatch(setUserLoading(true));
+  // dispatch(setUserLoading(true));
   let result;
 
   try {
@@ -36,7 +36,7 @@ export const addRatingAndReview = async (data, token, dispatch) => {
     console.log("add ratng api error", err);
   }
 
-  dispatch(setUserLoading(false));
+  // dispatch(setUserLoading(false));
   return result;
 };
 
@@ -68,8 +68,7 @@ export const editRatingAndReview = async (data, token, dispatch) => {
   return result;
 };
 
-export const getAllReview = async (data, dispatch) => {
-  // dispatch(setUserLoading(true));
+export const getAllReview = async (data) => {
   let result;
 
   try {

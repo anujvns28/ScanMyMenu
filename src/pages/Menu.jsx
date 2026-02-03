@@ -241,13 +241,6 @@ const menu = () => {
     setSearch("");
   }, [currCategory]);
 
-  console.log(
-    "ACTIVE TAG FILTERS:",
-    activeTagFilters,
-    "ITEM TAG IDS:",
-    currCategoryItem.products?.[0]?.tags?.map((t) => t._id),
-  );
-
   return (
     <div className="min-h-screen w-full bg-gray-100 flex justify-center">
       {/* PHONE CONTAINER */}

@@ -143,7 +143,6 @@ const ProductBottomSheet = ({
       }));
     }
     setRatingLoader(false);
-    fetchProducts();
     setOpenReviewForm(false);
     setImages([]);
   };
@@ -189,7 +188,10 @@ const ProductBottomSheet = ({
 
         {/* Close */}
         <button
-          onClick={() => setProductId(null)}
+          onClick={() => {
+            setProductId(null);
+            fetchProducts();
+          }}
           className="absolute top-4 right-4 p-1 rounded-full bg-gray-100"
         >
           <X size={18} />

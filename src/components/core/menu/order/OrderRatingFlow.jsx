@@ -108,8 +108,8 @@ export default function OrderRatingFlow({ onClose }) {
     if (!productRating) return;
 
     const formData = new FormData();
-    formData.append("productId", currentProduct.productId);
-    formData.append("shopId", activeOrder.shopId);
+    formData.append("productId", currentProduct.product._id);
+    formData.append("shopId", activeOrder.shop._id);
     formData.append("rating", productRating);
     formData.append("reviewText", productComment);
 

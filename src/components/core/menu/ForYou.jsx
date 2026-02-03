@@ -58,6 +58,7 @@ const ForYou = ({ setCurrCategory }) => {
 
   if (loading) return <ForYouSkeleton />;
 
+
   return (
     <div className="space-y-10">
       {/* 🔥 Must Try Hero */}
@@ -322,7 +323,7 @@ const ForYou = ({ setCurrCategory }) => {
       )}
 
       {/* 🎁 Offers & Combos (DUMMY) */}
-      {offers.lenght > 0 && (
+      {offers.length >= 0 && (
         <section className="mt-6">
           <h3 className="text-base font-semibold mb-3">🎁 Offers & Combos</h3>
 

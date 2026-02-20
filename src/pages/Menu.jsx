@@ -20,6 +20,8 @@ import FloatingCartBar from "../components/core/menu/order/FloatingCartBar";
 import { useCart } from "../context/CartContext";
 import OrderOverlay from "../components/core/menu/order/OrderOverlay";
 import { getMyActiveOrder } from "../service/operations/payment";
+import ChefFloatingButton from "../components/core/ai/ChefFloatingButton";
+import ChefAssistantSheet from "../components/core/ai/ChefAssistantSheet";
 
 const menu = () => {
   const { shopId } = useParams();
@@ -42,6 +44,7 @@ const menu = () => {
   const { token, userLoading } = useSelector((state) => state.auth);
   const { activeOrder } = useSelector((state) => state.order);
   const { totalItems, setCart } = useCart();
+  const [openChef, setOpenChef] = useState(false);
 
   const isSmartTab = (id) => ["for-you", "top-rated"].includes(id);
 
@@ -518,6 +521,13 @@ const menu = () => {
             currCategory={currCategory}
           />
         )}
+
+        <ChefFloatingButton onClick={() => setOpenChef(true)} />
+
+        <ChefAssistantSheet
+          open={openChef}
+          onClose={() => setOpenChef(false)}
+        />
 
         <FloatingCartBar onOpen={() => setShowCartSheet(true)} />
         {activeOrder && <OrderOverlay />}

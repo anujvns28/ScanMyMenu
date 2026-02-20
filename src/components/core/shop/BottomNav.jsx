@@ -31,10 +31,7 @@ const BottomNav = () => {
           Orders
         </NavLink>
 
-        {/* <NavLink to="/shop/dashboard" className={linkClass}>
-          <BarChart size={20} />
-          Dashboard
-        </NavLink> */}
+        
 
         <NavLink to="/shop/more" className={linkClass}>
           <MoreHorizontal size={20} />

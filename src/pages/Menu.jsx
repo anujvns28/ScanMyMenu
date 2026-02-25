@@ -1,4 +1,11 @@
-import React, { useState, useRef } from "react";
+import React, {
+  useState,
+  useRef,
+  useMemo,
+  lazy,
+  Suspense,
+  useCallback,
+} from "react";
 import { useParams } from "react-router-dom";
 import { fetchMyShop, fetchShopDetails } from "../service/operations/shop";
 import { useDispatch, useSelector } from "react-redux";
@@ -14,14 +21,24 @@ import {
 import { colorClasses, smartFilters, smartTabs } from "../utils/data";
 import ForYou from "../components/core/menu/ForYou";
 import TopRated from "../components/core/menu/Toprated";
-import ProductBottomSheet from "../components/core/menu/ProductBottomSheet";
-import CartBottomSheet from "../components/core/menu/order/BottomCart";
 import FloatingCartBar from "../components/core/menu/order/FloatingCartBar";
 import { useCart } from "../context/CartContext";
-import OrderOverlay from "../components/core/menu/order/OrderOverlay";
 import { getMyActiveOrder } from "../service/operations/payment";
 import ChefFloatingButton from "../components/core/ai/ChefFloatingButton";
-import ChefAssistantSheet from "../components/core/ai/ChefAssistantSheet";
+import useDebounce from "../hooks/useDebounce";
+
+const ProductBottomSheet = lazy(
+  () => import("../components/core/menu/ProductBottomSheet"),
+);
+const CartBottomSheet = lazy(
+  () => import("../components/core/menu/order/BottomCart"),
+);
+const OrderOverlay = lazy(
+  () => import("../components/core/menu/order/OrderOverlay"),
+);
+const ChefAssistantSheet = lazy(
+  () => import("../components/core/ai/ChefAssistantSheet"),
+);
 
 const menu = () => {
   const { shopId } = useParams();
@@ -32,22 +49,23 @@ const menu = () => {
   const [shopDetails, setShopDetails] = useState(null);
   const [categories, setCategories] = useState([]);
   const [currCategoryItem, setCurrCategoryItem] = useState([]);
-  const [currCategory, setCurrCategory] = useState(null);
+  const [currCategoryId, setCurrCategoryId] = useState(null);
   const [scrolled, setScrolled] = useState(false);
   const [search, setSearch] = useState("");
   const [productId, setProductId] = useState(null);
   const [activeSmartFilters, setActiveSmartFilters] = useState([]);
   const [activeTagFilters, setActiveTagFilters] = useState([]);
   const [openReviewForm, setOpenReviewForm] = useState(false);
-  const [filteredItems, setFilteredItems] = useState([]);
   const [showCartheet, setShowCartSheet] = useState(false);
   const { token, userLoading } = useSelector((state) => state.auth);
   const { activeOrder } = useSelector((state) => state.order);
   const { totalItems, setCart } = useCart();
   const [openChef, setOpenChef] = useState(false);
+  const debouncedSearch = useDebounce(search, 400);
 
   const isSmartTab = (id) => ["for-you", "top-rated"].includes(id);
 
+  // --------fetching shop details and shop categories ---------
   const fetchShopDetailsHandler = async () => {
     const shop = await fetchShopDetails({ shopId }, dispatch);
     const category = await getShopCategories(shopId, dispatch);
@@ -58,23 +76,24 @@ const menu = () => {
       setCategories(category.data);
       const intent = localStorage.getItem("POST_LOGIN_INTENT");
       if (!intent) {
-        setCurrCategory(smartTabs[0]._id);
+        setCurrCategoryId(smartTabs[0]._id);
       }
     }
   };
 
+  // ---------- fetching curr user active order if login
   const fetchMyActiveOrder = async () => {
-    const result = await getMyActiveOrder(token, dispatch);
+    await getMyActiveOrder(token, dispatch);
   };
 
-  const fetchCategoryInfoAndItems = async () => {
+  const fetchCategoryInfoAndItems = async (signal) => {
     const result = await fetchCategoryByProduct(
-      { shopCategoryId: currCategory },
+      { shopCategoryId: currCategoryId },
       dispatch,
+      signal,
     );
     if (result) {
       setCurrCategoryItem(result.data);
-      setFilteredItems(result?.data?.products);
     }
   };
 
@@ -96,7 +115,7 @@ const menu = () => {
     })),
   ];
 
-  const activeCategory = finalCategories.find((c) => c._id === currCategory);
+  const activeCategory = finalCategories.find((c) => c._id === currCategoryId);
 
   const visibleSmartFilters = smartFilters.filter((f) => {
     if (
@@ -106,6 +125,11 @@ const menu = () => {
       return false;
     return true;
   });
+
+  useEffect(() => {
+    fetchShopDetailsHandler();
+    fetchMyActiveOrder();
+  }, []);
 
   const restoreUIForRating = async (intent) => {
     const products = await fetchCategoryByProduct(
@@ -119,14 +143,14 @@ const menu = () => {
       );
       setProductId(c_pro._id);
     }
-    setCurrCategory(intent?.categoryId);
+    setCurrCategoryId(intent?.categoryId);
     setOpenReviewForm(true);
   };
 
   const restoreUIForOder = (intent) => {
     if (!intent || intent.action !== "PLACE_ORDER") return;
 
-    setCurrCategory(intent.categoryId);
+    setCurrCategoryId(intent.categoryId);
 
     if (intent.payload?.cart?.length > 0) {
       setCart(intent.payload.cart);
@@ -137,16 +161,20 @@ const menu = () => {
   };
 
   useEffect(() => {
-    fetchShopDetailsHandler();
-    fetchMyActiveOrder();
-  }, []);
+    if (!currCategoryId || isSmartTab(currCategoryId)) return;
+
+    const controller = new AbortController();
+    fetchCategoryInfoAndItems(controller.signal);
+
+    return () => {
+      controller.abort();
+    };
+  }, [currCategoryId]);
+
+  // ------------- scrolling hint for categories --------------------
 
   useEffect(() => {
-    if (currCategory && !isSmartTab(currCategory)) fetchCategoryInfoAndItems();
-  }, [currCategory]);
-
-  useEffect(() => {
-    const el = itemRefs.current[currCategory];
+    const el = itemRefs.current[currCategoryId];
     if (el && scrollRef.current) {
       const container = scrollRef.current;
       const left =
@@ -157,7 +185,7 @@ const menu = () => {
         behavior: "smooth",
       });
     }
-  }, [currCategory]);
+  }, [currCategoryId]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -167,6 +195,7 @@ const menu = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // ------------------- restoring ui after login ------------
   useEffect(() => {
     if (!token) return;
 
@@ -180,19 +209,20 @@ const menu = () => {
     }
   }, [token]);
 
-  useEffect(() => {
+  // ---------------------filters-------------
+  const filteredItems = useMemo(() => {
     if (!currCategoryItem?.products) return;
 
     let temp = [...currCategoryItem.products];
 
-    // 🔍 SEARCH
-    if (search.trim()) {
+    // SEARCH
+    if (debouncedSearch.trim()) {
       temp = temp.filter((item) =>
-        item.name.toLowerCase().includes(search.toLowerCase()),
+        item.name.toLowerCase().includes(debouncedSearch.toLowerCase()),
       );
     }
 
-    // 🟢 SMART FILTERS (OR LOGIC)
+    // SMART FILTERS (OR LOGIC)
     if (activeSmartFilters.length > 0) {
       temp = temp.filter((item) =>
         activeSmartFilters.some((id) => {
@@ -218,7 +248,7 @@ const menu = () => {
       );
     }
 
-    // 🏷 CATEGORY TAG FILTERS
+    // CATEGORY TAG FILTERS
     if (activeTagFilters.length > 0) {
       temp = temp.filter((item) =>
         activeTagFilters.some((tagName) =>
@@ -229,20 +259,26 @@ const menu = () => {
       );
     }
 
-    setFilteredItems(temp);
-  }, [search, activeSmartFilters, activeTagFilters, currCategoryItem]);
+    return temp;
+  }, [debouncedSearch, activeSmartFilters, activeTagFilters, currCategoryItem]);
 
+  // ------------ if cart empty close -------------------
   useEffect(() => {
     if (totalItems === 0) {
       setShowCartSheet(false);
     }
   }, [totalItems]);
 
+  // ------------- if category changes seting filter emptys ---------------
   useEffect(() => {
     setActiveSmartFilters([]);
     setActiveTagFilters([]);
     setSearch("");
-  }, [currCategory]);
+  }, [currCategoryId]);
+
+  const handleProductClick = useCallback((id) => {
+    setProductId(id);
+  }, []);
 
   return (
     <div className="min-h-screen w-full bg-gray-100 flex justify-center">
@@ -298,20 +334,20 @@ const menu = () => {
           ) : (
             <div
               ref={scrollRef}
-              className="flex items-start px-4 py-3 overflow-x-auto scroll-smooth scrollbar-thin scrollbar-thumb-gray-300"
+              className="flex  items-start px-4 py-3 overflow-x-auto scroll-smooth scrollbar-thin scrollbar-thumb-gray-300"
             >
               {/* 🔹 SMART CATEGORIES GROUP */}
               <div className="flex gap-2">
                 {finalCategories
                   .filter((cat) => cat.isSmart)
                   .map((cat) => {
-                    const isActive = currCategory === cat._id;
+                    const isActive = currCategoryId === cat._id;
 
                     return (
                       <div
                         key={cat._id}
                         ref={(el) => (itemRefs.current[cat._id] = el)}
-                        onClick={() => setCurrCategory(cat._id)}
+                        onClick={() => setCurrCategoryId(cat._id)}
                         className="flex flex-col items-center min-w-[88px] cursor-pointer"
                       >
                         <div
@@ -344,13 +380,13 @@ const menu = () => {
                 {finalCategories
                   .filter((cat) => !cat.isSmart)
                   .map((cat) => {
-                    const isActive = currCategory === cat._id;
+                    const isActive = currCategoryId === cat._id;
 
                     return (
                       <div
                         key={cat._id}
                         ref={(el) => (itemRefs.current[cat._id] = el)}
-                        onClick={() => setCurrCategory(cat._id)}
+                        onClick={() => setCurrCategoryId(cat._id)}
                         className="flex flex-col items-center min-w-[88px] cursor-pointer"
                       >
                         <div
@@ -386,14 +422,13 @@ const menu = () => {
 
         {/* MENU CONTENT */}
         <main className="flex-1 mt-4 overflow-y-auto pb-16 px-4 space-y-6">
-          {/* Selected Category Header */}
-          {!isSmartTab(currCategory) && (
+          {/* -----------filters ----------*/}
+          {!isSmartTab(currCategoryId) && (
             <div className=" bg-white pb-3 flex flex-col gap-3 border-b">
               <div className="sticky top-16 mt-2">
                 {/* Soft fade edges */}
                 <div className="absolute left-0 top-0 h-full w-10 bg-linear-to-r from-white to-transparent z-10 pointer-events-none" />
                 <div className="absolute right-0 top-0 h-full w-10 bg-linear-to-l from-white to-transparent z-10 pointer-events-none" />
-
                 <div className="flex gap-3 overflow-x-auto px-1 pb-2 snap-x snap-mandatory scrollbar-hide scroll-smooth items-center">
                   {/* 🔍 Search pill */}
                   <div className="snap-start shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full bg-gray-100 border border-gray-200">
@@ -465,6 +500,7 @@ const menu = () => {
             </div>
           )}
 
+          {/*----------items----------*/}
           <div className="space-y-5">
             {/* Loading Skeletons */}
             {userLoading &&
@@ -475,19 +511,19 @@ const menu = () => {
               ))}
 
             {/* Smart Tabs */}
-            {!userLoading && isSmartTab(currCategory) ? (
+            {!userLoading && isSmartTab(currCategoryId) ? (
               <>
-                {currCategory === "for-you" && (
-                  <ForYou setCurrCategory={setCurrCategory} />
+                {currCategoryId === "for-you" && (
+                  <ForYou setCurrCategoryId={setCurrCategoryId} />
                 )}
-                {currCategory === "top-rated" && <TopRated />}
+                {currCategoryId === "top-rated" && <TopRated />}
               </>
             ) : (
               filteredItems?.length > 0 &&
               filteredItems?.map((item) => (
                 <div
                   key={item._id}
-                  onClick={() => setProductId(item._id)}
+                  onClick={() => handleProductClick(item._id)}
                   className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300"
                 >
                   <MenuItemCard item={item} />
@@ -506,31 +542,38 @@ const menu = () => {
           </div>
         </main>
 
-        <ProductBottomSheet
-          productId={productId}
-          setProductId={setProductId}
-          currCategory={currCategory}
-          openReviewForm={openReviewForm}
-          setOpenReviewForm={setOpenReviewForm}
-          fetchProducts={fetchCategoryInfoAndItems}
-        />
-
-        {showCartheet && (
-          <CartBottomSheet
-            onClose={() => setShowCartSheet(false)}
-            currCategory={currCategory}
+        <Suspense fallback={null}>
+          <ProductBottomSheet
+            productId={productId}
+            setProductId={setProductId}
+            currCategoryId={currCategoryId}
+            openReviewForm={openReviewForm}
+            setOpenReviewForm={setOpenReviewForm}
+            fetchProducts={fetchCategoryInfoAndItems}
           />
-        )}
+        </Suspense>
+
+        <Suspense fallback={null}>
+          {showCartheet && (
+            <CartBottomSheet
+              onClose={() => setShowCartSheet(false)}
+              currCategoryId={currCategoryId}
+            />
+          )}
+        </Suspense>
 
         <ChefFloatingButton onClick={() => setOpenChef(true)} />
 
-        <ChefAssistantSheet
-          open={openChef}
-          onClose={() => setOpenChef(false)}
-        />
+        <Suspense fallback={null}>
+          <ChefAssistantSheet
+            open={openChef}
+            onClose={() => setOpenChef(false)}
+          />
+        </Suspense>
 
         <FloatingCartBar onOpen={() => setShowCartSheet(true)} />
-        {activeOrder && <OrderOverlay />}
+
+        <Suspense fallback={null}>{activeOrder && <OrderOverlay />}</Suspense>
       </div>
     </div>
   );

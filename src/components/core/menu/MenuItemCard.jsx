@@ -1,5 +1,6 @@
 import { Star, Flame, Heart, Clock } from "lucide-react";
 import { colorClasses } from "../../../utils/data";
+import React from "react";
 import { useCart } from "../../../context/CartContext";
 
 const MenuItemCard = ({ item }) => {
@@ -28,21 +29,19 @@ const MenuItemCard = ({ item }) => {
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
         <div className="absolute top-3 left-3 flex items-center gap-2 z-20">
-  {/* Rating Badge */}
-  <div className="flex items-center gap-1 bg-white text-black px-2.5 py-1 rounded-full shadow-md">
-    <Star size={12} className="text-yellow-500 fill-yellow-500" />
-    <span className="text-xs font-bold">{item.rating}</span>
-  </div>
+          {/* Rating Badge */}
+          <div className="flex items-center gap-1 bg-white text-black px-2.5 py-1 rounded-full shadow-md">
+            <Star size={12} className="text-yellow-500 fill-yellow-500" />
+            <span className="text-xs font-bold">{item.rating}</span>
+          </div>
 
-  {/* Review Count */}
-  {item.reviewsCount > 0 && (
-    <span className="text-[11px] text-white font-medium bg-black/50 px-2 py-1 rounded-full">
-      {item.reviewsCount} reviews
-    </span>
-  )}
-</div>
-
-
+          {/* Review Count */}
+          {item.reviewsCount > 0 && (
+            <span className="text-[11px] text-white font-medium bg-black/50 px-2 py-1 rounded-full">
+              {item.reviewsCount} reviews
+            </span>
+          )}
+        </div>
 
         {/* CONTENT ON IMAGE */}
         <div className="absolute bottom-3 left-3 right-3 space-y-1">
@@ -103,4 +102,4 @@ const MenuItemCard = ({ item }) => {
   );
 };
 
-export default MenuItemCard;
+export default React.memo(MenuItemCard);

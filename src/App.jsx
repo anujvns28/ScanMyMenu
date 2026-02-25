@@ -1,37 +1,39 @@
-import { useState } from 'react'
-import './App.css'
-import Navbar from './components/common/Navbar'
+import { lazy, useState, useEffect, Suspense } from "react";
+import "./App.css";
 import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
+
 import Home from "./pages/Home";
+import Navbar from "./components/common/Navbar";
 import Footer from "./components/common/Footer";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import About from "./pages/About";
-import Menu from "./pages/Menu";
-import AdminDashboardPage from "./pages/AdminDashboard";
-import Shops from "./components/core/Admin/Shops";
-import Categories from "./components/core/Admin/Categories";
-import AdminDashboard from "./components/core/Admin/Dashboard";
-import AdminReviews from "./components/core/Admin/Review";
-import AdminTags from "./components/core/Admin/Tags";
-import AdminSupport from "./components/core/Admin/Issues";
-import Dashboard from "./pages/Dashboard";
-import ShopDashboardPage from "./pages/ShopDashboard";
-import ShopDashboard from "./components/core/shop/Dashboard";
-import More from "./components/core/shop/More";
-import MenuManagement from "./components/core/shop/MenuManagement";
-import Review from "./components/core/shop/Review";
-import Offers from "./components/core/shop/Offers";
-import Support from "./components/core/shop/Support";
-import ShopProfile from "./components/core/shop/ShopProfile";
-import { useDispatch } from "react-redux";
-import { useEffect } from "react";
-import { setToken } from "./redux/slices/auth";
 import MenuPage from "./pages/MenuPage";
-import Orders from "./components/core/shop/Orders";
-import ChangePassword from "./components/core/shop/Setting";
+import { useDispatch } from "react-redux";
+import LoaderComponent from "./components/common/LoaderComponent";
 
+const Login = lazy(() => import("./pages/Login"));
+const Signup = lazy(() => import("./pages/Signup"));
+const About = lazy(() => import("./pages/About"));
+const Menu = lazy(() => import("./pages/Menu"));
+const AdminDashboardPage = lazy(() => import("./pages/AdminDashboard"));
+const Shops = lazy(() => import("./components/core/Admin/Shops"));
+const Categories = lazy(() => import("./components/core/Admin/Categories"));
+const AdminDashboard = lazy(() => import("./components/core/Admin/Dashboard"));
+const AdminReviews = lazy(() => import("./components/core/Admin/Review"));
+const AdminTags = lazy(() => import("./components/core/Admin/Tags"));
+const AdminSupport = lazy(() => import("./components/core/Admin/Issues"));
 
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const ShopDashboardPage = lazy(() => import("./pages/ShopDashboard"));
+const ShopDashboard = lazy(() => import("./components/core/shop/Dashboard"));
+const More = lazy(() => import("./components/core/shop/More"));
+const MenuManagement = lazy(
+  () => import("./components/core/shop/MenuManagement"),
+);
+const Review = lazy(() => import("./components/core/shop/Review"));
+const Offers = lazy(() => import("./components/core/shop/Offers"));
+const Support = lazy(() => import("./components/core/shop/Support"));
+const ShopProfile = lazy(() => import("./components/core/shop/ShopProfile"));
+const Orders = lazy(() => import("./components/core/shop/Orders"));
+const ChangePassword = lazy(() => import("./components/core/shop/Setting"));
 
 function App() {
   const dispatch = useDispatch();
@@ -61,36 +63,38 @@ function App() {
       <Navbar />
 
       <div className="max-w-7xl mx-auto flex">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/dashbord" element={<Dashboard />} />
+        <Suspense fallback={<LoaderComponent />}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/dashbord" element={<Dashboard />} />
 
-          <Route path="/menu/:shopId" element={<MenuPage />} />
+            <Route path="/menu/:shopId" element={<MenuPage />} />
 
-          <Route path="/admin" element={<AdminDashboardPage />}>
-            <Route index element={<AdminDashboard />} />
-            <Route path="shops" element={<Shops />} />
-            <Route path="categories" element={<Categories />} />
-            <Route path="reviews" element={<AdminReviews />} />
-            <Route path="tags" element={<AdminTags />} />
-            <Route path="issues" element={<AdminSupport />} />
-          </Route>
+            <Route path="/admin" element={<AdminDashboardPage />}>
+              <Route index element={<AdminDashboard />} />
+              <Route path="shops" element={<Shops />} />
+              <Route path="categories" element={<Categories />} />
+              <Route path="reviews" element={<AdminReviews />} />
+              <Route path="tags" element={<AdminTags />} />
+              <Route path="issues" element={<AdminSupport />} />
+            </Route>
 
-          <Route path="/shop" element={<ShopDashboardPage />}>
-            <Route index element={<ShopProfile />} />
-            <Route path="menu" element={<MenuManagement />} />
-            <Route path="reviews" element={<Review />} />
-            <Route path="offers" element={<Offers />} />
-            <Route path="support" element={<Support />} />
-            <Route path="dashboard" element={<ShopDashboard />} />
-            <Route path="more" element={<More />} />
-            <Route path="orders" element={<Orders />} />
-            <Route path="settings" element={<ChangePassword />} />
-          </Route>
-        </Routes>
+            <Route path="/shop" element={<ShopDashboardPage />}>
+              <Route index element={<ShopProfile />} />
+              <Route path="menu" element={<MenuManagement />} />
+              <Route path="reviews" element={<Review />} />
+              <Route path="offers" element={<Offers />} />
+              <Route path="support" element={<Support />} />
+              <Route path="dashboard" element={<ShopDashboard />} />
+              <Route path="more" element={<More />} />
+              <Route path="orders" element={<Orders />} />
+              <Route path="settings" element={<ChangePassword />} />
+            </Route>
+          </Routes>
+        </Suspense>
       </div>
 
       <Footer />
@@ -98,4 +102,4 @@ function App() {
   );
 }
 
-export default App
+export default App;

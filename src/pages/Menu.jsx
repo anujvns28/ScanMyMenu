@@ -7,7 +7,7 @@ import React, {
   useCallback,
 } from "react";
 import { useParams } from "react-router-dom";
-import { fetchMyShop, fetchShopDetails } from "../service/operations/shop";
+import { fetchShopDetails } from "../service/operations/shop";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { getShopCategories } from "../service/operations/category";
@@ -26,7 +26,6 @@ import { useCart } from "../context/CartContext";
 import { getMyActiveOrder } from "../service/operations/payment";
 import ChefFloatingButton from "../components/core/ai/ChefFloatingButton";
 import useDebounce from "../hooks/useDebounce";
-
 const ProductBottomSheet = lazy(
   () => import("../components/core/menu/ProductBottomSheet"),
 );
@@ -40,7 +39,7 @@ const ChefAssistantSheet = lazy(
   () => import("../components/core/ai/ChefAssistantSheet"),
 );
 
-const menu = () => {
+const Menu = () => {
   const { shopId } = useParams();
   const dispatch = useDispatch();
   const scrollRef = useRef(null);
@@ -126,10 +125,6 @@ const menu = () => {
     return true;
   });
 
-  useEffect(() => {
-    fetchShopDetailsHandler();
-    fetchMyActiveOrder();
-  }, []);
 
   const restoreUIForRating = async (intent) => {
     const products = await fetchCategoryByProduct(
@@ -159,55 +154,6 @@ const menu = () => {
     setShowCartSheet(true);
     localStorage.removeItem("POST_LOGIN_INTENT");
   };
-
-  useEffect(() => {
-    if (!currCategoryId || isSmartTab(currCategoryId)) return;
-
-    const controller = new AbortController();
-    fetchCategoryInfoAndItems(controller.signal);
-
-    return () => {
-      controller.abort();
-    };
-  }, [currCategoryId]);
-
-  // ------------- scrolling hint for categories --------------------
-
-  useEffect(() => {
-    const el = itemRefs.current[currCategoryId];
-    if (el && scrollRef.current) {
-      const container = scrollRef.current;
-      const left =
-        el.offsetLeft - container.clientWidth / 2 + el.clientWidth / 2;
-
-      container.scrollTo({
-        left,
-        behavior: "smooth",
-      });
-    }
-  }, [currCategoryId]);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 10);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  // ------------------- restoring ui after login ------------
-  useEffect(() => {
-    if (!token) return;
-
-    const intent = JSON.parse(localStorage.getItem("POST_LOGIN_INTENT"));
-
-    if (intent?.action === "SUBMIT_REVIEW") {
-      restoreUIForRating(intent);
-    }
-    if (intent?.action === "PLACE_ORDER") {
-      restoreUIForOder(intent);
-    }
-  }, [token]);
 
   // ---------------------filters-------------
   const filteredItems = useMemo(() => {
@@ -262,6 +208,65 @@ const menu = () => {
     return temp;
   }, [debouncedSearch, activeSmartFilters, activeTagFilters, currCategoryItem]);
 
+  const handleProductClick = useCallback((id) => {
+    setProductId(id);
+  }, []);
+
+  
+  useEffect(() => {
+    fetchShopDetailsHandler();
+    fetchMyActiveOrder();
+  }, []);
+
+  // ------calling fetch products based on categoryId----------
+  useEffect(() => {
+    if (!currCategoryId || isSmartTab(currCategoryId)) return;
+
+    const controller = new AbortController();
+    fetchCategoryInfoAndItems(controller.signal);
+
+    return () => {
+      controller.abort();
+    };
+  }, [currCategoryId]);
+
+  // ------------- scrolling hint for categories -------------------
+  useEffect(() => {
+    const el = itemRefs.current[currCategoryId];
+    if (el && scrollRef.current) {
+      const container = scrollRef.current;
+      const left =
+        el.offsetLeft - container.clientWidth / 2 + el.clientWidth / 2;
+
+      container.scrollTo({
+        left,
+        behavior: "smooth",
+      });
+    }
+  }, [currCategoryId]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // ------------------- restoring ui after login ------------
+  useEffect(() => {
+    if (!token) return;
+
+    const intent = JSON.parse(localStorage.getItem("POST_LOGIN_INTENT"));
+
+    if (intent?.action === "SUBMIT_REVIEW") {
+      restoreUIForRating(intent);
+    }
+    if (intent?.action === "PLACE_ORDER") {
+      restoreUIForOder(intent);
+    }
+  }, [token]);
+
   // ------------ if cart empty close -------------------
   useEffect(() => {
     if (totalItems === 0) {
@@ -276,9 +281,6 @@ const menu = () => {
     setSearch("");
   }, [currCategoryId]);
 
-  const handleProductClick = useCallback((id) => {
-    setProductId(id);
-  }, []);
 
   return (
     <div className="min-h-screen w-full bg-gray-100 flex justify-center">
@@ -320,7 +322,7 @@ const menu = () => {
           )}
         </header>
 
-        {/* CATEGORY ICONS START */}
+        {/*----------------------------- CATEGORY ----------------------------------- */}
         <div
           className={`sticky top-12 z-20 bg-white/90 backdrop-blur border-b
   ${scrolled ? "shadow-lg" : "shadow-sm"}`}
@@ -336,7 +338,7 @@ const menu = () => {
               ref={scrollRef}
               className="flex  items-start px-4 py-3 overflow-x-auto scroll-smooth scrollbar-thin scrollbar-thumb-gray-300"
             >
-              {/* 🔹 SMART CATEGORIES GROUP */}
+              {/* SMART CATEGORIES GROUP */}
               <div className="flex gap-2">
                 {finalCategories
                   .filter((cat) => cat.isSmart)
@@ -375,7 +377,7 @@ const menu = () => {
 
               <div className="w-2 shrink-0" />
 
-              {/* 🔹 MAIN CATEGORIES GROUP */}
+              {/* MAIN CATEGORIES GROUP */}
               <div className="flex ">
                 {finalCategories
                   .filter((cat) => !cat.isSmart)
@@ -420,9 +422,9 @@ const menu = () => {
           )}
         </div>
 
-        {/* MENU CONTENT */}
+        {/* Menu CONTENT */}
         <main className="flex-1 mt-4 overflow-y-auto pb-16 px-4 space-y-6">
-          {/* -----------filters ----------*/}
+          {/*------------------ -----------filters---------------- ----------*/}
           {!isSmartTab(currCategoryId) && (
             <div className=" bg-white pb-3 flex flex-col gap-3 border-b">
               <div className="sticky top-16 mt-2">
@@ -430,7 +432,7 @@ const menu = () => {
                 <div className="absolute left-0 top-0 h-full w-10 bg-linear-to-r from-white to-transparent z-10 pointer-events-none" />
                 <div className="absolute right-0 top-0 h-full w-10 bg-linear-to-l from-white to-transparent z-10 pointer-events-none" />
                 <div className="flex gap-3 overflow-x-auto px-1 pb-2 snap-x snap-mandatory scrollbar-hide scroll-smooth items-center">
-                  {/* 🔍 Search pill */}
+                  {/* Search pill */}
                   <div className="snap-start shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full bg-gray-100 border border-gray-200">
                     <span className="text-gray-400">🔍</span>
                     <input
@@ -500,7 +502,7 @@ const menu = () => {
             </div>
           )}
 
-          {/*----------items----------*/}
+          {/*---------------------------------items-------------------------------*/}
           <div className="space-y-5">
             {/* Loading Skeletons */}
             {userLoading &&
@@ -579,4 +581,4 @@ const menu = () => {
   );
 };
 
-export default menu;
+export default Menu;

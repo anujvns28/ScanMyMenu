@@ -1,22 +1,17 @@
 import { useEffect, useState } from "react";
 import { ChevronUp, X, Download } from "lucide-react";
-import { useDispatch, useSelector } from "react-redux";
-import { updateOrderStatus } from "../../../../redux/slices/order";
+import { useSelector } from "react-redux";
 
 export default function ExpandableOrderTracker({ onRateClick }) {
   const [expanded, setExpanded] = useState(false);
   const [order, setOrder] = useState({});
   const { activeOrder } = useSelector((state) => state.order);
 
-  const dispatch = useDispatch();
-
-  
-
   useEffect(() => {
     setOrder(activeOrder);
   }, [activeOrder]);
 
-  /* 🟢 MINI FLOATING BAR */
+  /* MINI FLOATING BAR */
   if (!expanded) {
     return (
       <div
@@ -39,7 +34,7 @@ export default function ExpandableOrderTracker({ onRateClick }) {
     );
   }
 
-  /* 🟢 EXPANDED PREMIUM BOTTOM SHEET */
+  /* EXPANDED PREMIUM BOTTOM SHEET */
   return (
     <div className="fixed inset-0 bg-black/40 z-50 flex items-end">
       <div className="bg-white w-full rounded-t-3xl max-h-[90vh] animate-slideUp">

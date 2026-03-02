@@ -1,11 +1,10 @@
 import { useState } from "react";
-import ExpandableOrderTracker from "./FloatingOrderTracker";
-import OrderRatingFlow from "./OrderRatingFlow";
-
-
+import { lazy } from "react";
+const ExpandableOrderTracker = lazy(() => import("./FloatingOrderTracker"));
+const OrderRatingFlow = lazy(() => import("./OrderRatingFlow"));
 
 export default function OrderOverlay() {
-  // 🔥 Dummy order
+  // Dummy order
   const [order] = useState({
     orderNumber: "SM-2391",
     status: "SERVED",
@@ -27,9 +26,7 @@ export default function OrderOverlay() {
         />
       )}
 
-      {showRating && (
-        <OrderRatingFlow onClose={() => setShowRating(false)} />
-      )}
+      {showRating && <OrderRatingFlow onClose={() => setShowRating(false)} />}
     </>
   );
 }

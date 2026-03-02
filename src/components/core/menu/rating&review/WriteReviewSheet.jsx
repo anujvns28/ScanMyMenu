@@ -1,9 +1,9 @@
 import { X, Star, Camera } from "lucide-react";
-import { useState } from "react";
-import GoogleLoginSheet from "../../../common/GoogleLoginSheet";
+import { lazy, Suspense, use, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import LoaderComponent from "../../../common/LoaderComponent";
+const GoogleLoginSheet = lazy(() => import("../../../common/GoogleLoginSheet"));
 
 const WriteReviewSheet = ({
   open,
@@ -43,6 +43,13 @@ const WriteReviewSheet = ({
     const newPreviews = newFiles.map((file) => URL.createObjectURL(file));
     setPreviews(newPreviews);
   };
+
+  // cleanup
+  useEffect(() => {
+    () => {
+      previews.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [previews]);
 
   // Remove selected image
   const removeImage = (index) => {
@@ -224,12 +231,14 @@ const WriteReviewSheet = ({
         </div>
       </div>
 
-      <GoogleLoginSheet
-        open={showLogin}
-        onClose={() => setShowLogin(false)}
-        onGoogleLogin={googleLogin}
-        purpose="review"
-      />
+      <Suspense fallback={null}>
+        <GoogleLoginSheet
+          open={showLogin}
+          onClose={() => setShowLogin(false)}
+          onGoogleLogin={googleLogin}
+          purpose="review"
+        />
+      </Suspense>
 
       {ratingLoader && <LoaderComponent />}
     </div>

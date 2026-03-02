@@ -1,5 +1,5 @@
 import { X } from "lucide-react";
-
+import React from "react";
 const GoogleLoginSheet = ({
   open,
   onClose,
@@ -26,14 +26,10 @@ const GoogleLoginSheet = ({
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center">
       {/* Overlay */}
-      <div
-        className="absolute inset-0 bg-black/40"
-        onClick={onClose}
-      />
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
 
       {/* Sheet */}
       <div className="relative w-full max-w-md bg-white rounded-t-3xl shadow-2xl animate-slide-up">
-
         {/* Handle */}
         <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mt-3 mb-2"></div>
 
@@ -47,16 +43,11 @@ const GoogleLoginSheet = ({
 
         {/* Content */}
         <div className="p-6 space-y-6 text-center">
-          
           <div className="text-3xl">{content[purpose].icon}</div>
 
-          <h2 className="text-xl font-bold">
-            {content[purpose].title}
-          </h2>
+          <h2 className="text-xl font-bold">{content[purpose].title}</h2>
 
-          <p className="text-sm text-gray-500">
-            {content[purpose].subtitle}
-          </p>
+          <p className="text-sm text-gray-500">{content[purpose].subtitle}</p>
 
           {/* Google Button */}
           <button
@@ -82,4 +73,4 @@ const GoogleLoginSheet = ({
   );
 };
 
-export default GoogleLoginSheet;
+export default React.memo(GoogleLoginSheet);

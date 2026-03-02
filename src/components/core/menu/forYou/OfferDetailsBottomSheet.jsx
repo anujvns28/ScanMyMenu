@@ -1,13 +1,9 @@
+import React from "react";
 import { X, Clock, ShieldCheck } from "lucide-react";
-import {useCart} from "../../../../context/CartContext"
+import { useCart } from "../../../../context/CartContext";
 
-export default function OfferDetailsBottomSheet({
-  isOpen,
-  onClose,
-  offer,
-}) {
-  if (!isOpen || !offer) return null;
-  const { addOfferToCart, isCartOpen } = useCart();
+const OfferDetailsBottomSheet = ({ isOpen, onClose, offer }) => {
+  const { addOfferToCart } = useCart();
 
   const actualPrice = offer.items.reduce(
     (sum, i) => sum + i.product.price * i.quantity,
@@ -24,6 +20,8 @@ export default function OfferDetailsBottomSheet({
     addOfferToCart(offer);
     onClose();
   };
+
+  if (!isOpen || !offer) return null;
 
   return (
     <div className="fixed inset-0 z-50">
@@ -151,4 +149,6 @@ export default function OfferDetailsBottomSheet({
       </div>
     </div>
   );
-}
+};
+
+export default React.memo(OfferDetailsBottomSheet);

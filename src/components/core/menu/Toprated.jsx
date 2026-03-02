@@ -1,14 +1,18 @@
-import React, { useEffect, useMemo, useState } from "react";
-import {
-  getProductDetails,
-  getTopRatedProducts,
-} from "../../../service/operations/product";
+import React, {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import { getTopRatedProducts } from "../../../service/operations/product";
 import { useDispatch } from "react-redux";
 import { useParams } from "react-router-dom";
 import { SkeletonCard } from "../../../utils/skeleton";
-import ProductBottomSheet from "./ProductBottomSheet";
 import { useCart } from "../../../context/CartContext";
-import { getActiveOffers } from "../../../service/operations/offers";
+import TopratedCard from "./toprated/TopratedCard";
+const ProductBottomSheet = lazy(() => import("./ProductBottomSheet"));
 
 const tabs = [
   { label: "All", value: "ALL" },
@@ -29,15 +33,13 @@ const TopRated = () => {
   const ITEMS_PER_PAGE = 15;
   const [currentPage, setCurrentPage] = useState(1);
 
-  const { addProductToCart } = useCart();
-
   const getRankByTab = (product) => {
     if (activeTab === "VEG") return product.vegRank;
     if (activeTab === "NON_VEG") return product.nonVegRank;
     return product.overallRank;
   };
 
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     setLoading(true);
     const result = await getTopRatedProducts(shopId, dispatch);
     setLoading(false);
@@ -45,16 +47,13 @@ const TopRated = () => {
     if (result?.success) {
       setProducts(result.data);
     }
+  }, []);
+
+  const handleClick = (id) => {
+    setSelectedProductId(id);
   };
 
-  //  Fetch from backend
-  useEffect(() => {
-    if (!shopId) return;
-
-    fetchProducts();
-  }, [shopId]);
-
-  // 🔍 Frontend filtering + ranking display
+  // Frontend filtering + ranking display
   const filteredProducts = useMemo(() => {
     let list = products;
 
@@ -82,6 +81,13 @@ const TopRated = () => {
     const end = start + ITEMS_PER_PAGE;
     return filteredProducts.slice(start, end);
   }, [filteredProducts, currentPage]);
+
+  //  Fetch from backend
+  useEffect(() => {
+    if (!shopId) return;
+
+    fetchProducts();
+  }, [shopId]);
 
   useEffect(() => {
     if (!selectedProductId) {
@@ -143,58 +149,12 @@ const TopRated = () => {
         {/* 🔹 Real data */}
         {!loading &&
           paginatedProducts.map((item) => (
-            <div
+            <TopratedCard
               key={item._id}
-              onClick={() => setSelectedProductId(item._id)}
-              className="bg-white rounded-2xl shadow-sm hover:shadow-md transition flex overflow-hidden"
-            >
-              {/* Image + rank */}
-              <div className="relative w-28 h-28 flex-shrink-0">
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  className="w-full h-full object-cover rounded-l-2xl"
-                />
-
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
-
-                <span
-                  className="absolute left-1 top-1 text-5xl font-extrabold 
-  text-white select-none drop-shadow-lg"
-                >
-                  #{getRankByTab(item)}
-                </span>
-              </div>
-
-              {/* Info */}
-              <div className="flex-1 p-4">
-                <p className="font-medium text-sm">{item.name}</p>
-
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="text-xs font-semibold text-green-700">
-                    ⭐ {item.rating}
-                  </span>
-                  <span className="text-xs text-gray-400">
-                    ({item.reviewsCount})
-                  </span>
-                </div>
-              </div>
-
-              {/* Price */}
-              <div className="p-4 flex flex-col justify-between items-end">
-                <p className="font-semibold text-sm">₹{item.price}</p>
-
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    addProductToCart(item);
-                  }}
-                  className="text-xs px-4 py-1.5 rounded-full border border-black/80 font-medium hover:bg-black hover:text-white transition"
-                >
-                  Add
-                </button>
-              </div>
-            </div>
+              item={item}
+              handleClick={handleClick}
+              getRankByTab={getRankByTab}
+            />
           ))}
 
         {/* Pagination – only if products > 15 */}
@@ -230,16 +190,18 @@ const TopRated = () => {
         )}
       </div>
 
-      {selectedProductId && (
-        <ProductBottomSheet
-          productId={selectedProductId}
-          setProductId={setSelectedProductId}
-          openReviewForm={openReviewForm}
-          setOpenReviewForm={setOpenReviewForm}
-          fetchProducts={fetchProducts}
-          currCategory="top-rated"
-        />
-      )}
+      <Suspense fallback={null}>
+        {selectedProductId && (
+          <ProductBottomSheet
+            productId={selectedProductId}
+            setProductId={setSelectedProductId}
+            openReviewForm={openReviewForm}
+            setOpenReviewForm={setOpenReviewForm}
+            fetchProducts={fetchProducts}
+            currCategory="top-rated"
+          />
+        )}
+      </Suspense>
     </div>
   );
 };

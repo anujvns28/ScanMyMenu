@@ -1,7 +1,6 @@
+import React from "react";
 import { X, Star, Flame, Clock } from "lucide-react";
-import { useState } from "react";
-import WriteReviewSheet from "./rating&review/WriteReviewSheet";
-import ProductReviewsSheet from "./rating&review/ProductReviewsSheet";
+import { lazy, Suspense, useCallback, useMemo, useState } from "react";
 import { colorClasses } from "../../../utils/data";
 import { useEffect } from "react";
 import {
@@ -12,9 +11,13 @@ import {
 } from "../../../service/operations/rating&review";
 import { useDispatch, useSelector } from "react-redux";
 import { timeAgo } from "../../../utils/convertTime";
-import ImageLightbox from "./rating&review/ImageLightbox";
 import { useCart } from "../../../context/CartContext";
 import { getProductDetails } from "../../../service/operations/product";
+const WriteReviewSheet = lazy(() => import("./rating&review/WriteReviewSheet"));
+const ProductReviewsSheet = lazy(
+  () => import("./rating&review/ProductReviewsSheet"),
+);
+const ImageLightbox = lazy(() => import("./rating&review/ImageLightbox"));
 
 const ProductBottomSheet = ({
   productId,
@@ -42,21 +45,32 @@ const ProductBottomSheet = ({
   const [openLightbox, setOpenLightbox] = useState(false);
   const [ratingLoader, setRatingLoader] = useState(false);
 
-  const reviewState = {
-    rating,
-    setRating,
-    comment,
-    setComment,
-    images,
-    setImages,
-    showLogin,
-    setShowLogin,
-    isEditReview,
-    existingImages,
-    setExistingImages,
-    ratingLoader,
-    setRatingLoader,
-  };
+  const reviewState = useMemo(
+    () => ({
+      rating,
+      setRating,
+      comment,
+      setComment,
+      images,
+      setImages,
+      showLogin,
+      setShowLogin,
+      isEditReview,
+      existingImages,
+      setExistingImages,
+      ratingLoader,
+      setRatingLoader,
+    }),
+    [
+      rating,
+      comment,
+      images,
+      showLogin,
+      isEditReview,
+      existingImages,
+      ratingLoader,
+    ],
+  );
 
   const dispatch = useDispatch();
   const { shopDetails } = useSelector((state) => state.shop);
@@ -68,7 +82,7 @@ const ProductBottomSheet = ({
   const fetchRatingAndReviewHandler = async () => {
     let myReview = null;
 
-    // Agar logged in hai → apna review lao
+    // Agar logged in hai to apna review lao
     if (token) {
       const userReview = await getUserReviewOfProduct(
         { productId: productId },
@@ -94,7 +108,7 @@ const ProductBottomSheet = ({
   };
 
   // Submit review
-  const handleSubmitReview = async () => {
+  const handleSubmitReview = useCallback(async () => {
     if (rating === 0) return;
     if (!token) {
       const intent = {
@@ -144,9 +158,21 @@ const ProductBottomSheet = ({
     }
     setRatingLoader(false);
     setOpenReviewForm(false);
-    setImages([]);
-  };
+    setImages([
+      rating,
+      comment,
+      images,
+      existingImages,
+      userRatingAndReview,
+      productId,
+      currCategory,
+      shopDetails,
+      token,
+      dispatch,
+    ]);
+  }, []);
 
+  // ---------- fetching product details ---------------
   useEffect(() => {
     const fetchProductDetails = async () => {
       const result = await getProductDetails(productId, dispatch);
@@ -479,48 +505,54 @@ const ProductBottomSheet = ({
         </div>
       </div>
 
-      {openReviewForm && (
-        <WriteReviewSheet
-          open={openReviewForm}
-          onClose={() => {
-            setOpenReviewForm(false);
-            setImages([]);
-            setRating(userRatingAndReview?.rating || "");
-            setComment(userRatingAndReview?.reviewText || "");
-            setExistingImages(userRatingAndReview?.images || []);
-          }}
-          product={{
-            _id: product._id,
-            name: product.name,
-            image: product.image,
-          }}
-          reviewState={reviewState}
-          onSubmit={handleSubmitReview}
-        />
-      )}
+      <Suspense fallback={null}>
+        {openReviewForm && (
+          <WriteReviewSheet
+            open={openReviewForm}
+            onClose={() => {
+              setOpenReviewForm(false);
+              setImages([]);
+              setRating(userRatingAndReview?.rating || "");
+              setComment(userRatingAndReview?.reviewText || "");
+              setExistingImages(userRatingAndReview?.images || []);
+            }}
+            product={{
+              _id: product._id,
+              name: product.name,
+              image: product.image,
+            }}
+            reviewState={reviewState}
+            onSubmit={handleSubmitReview}
+          />
+        )}
+      </Suspense>
 
-      {openReviewSheet && (
-        <ProductReviewsSheet
-          onClose={() => setOpenReviewSheet(false)}
-          reviews={allReview}
-          myReview={userRatingAndReview}
-          product={{
-            image: product.image,
-            _id: product._id,
-            name: product.name,
-          }}
-        />
-      )}
+      <Suspense fallback={null}>
+        {openReviewSheet && (
+          <ProductReviewsSheet
+            onClose={() => setOpenReviewSheet(false)}
+            reviews={allReview}
+            myReview={userRatingAndReview}
+            product={{
+              image: product.image,
+              _id: product._id,
+              name: product.name,
+            }}
+          />
+        )}
+      </Suspense>
 
-      {openLightbox && (
-        <ImageLightbox
-          images={lightboxImages}
-          startIndex={lightboxIndex}
-          onClose={() => setOpenLightbox(false)}
-        />
-      )}
+      <Suspense fallback={null}>
+        {openLightbox && (
+          <ImageLightbox
+            images={lightboxImages}
+            startIndex={lightboxIndex}
+            onClose={() => setOpenLightbox(false)}
+          />
+        )}
+      </Suspense>
     </div>
   );
 };
 
-export default ProductBottomSheet;
+export default React.memo(ProductBottomSheet);

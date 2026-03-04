@@ -1,4 +1,4 @@
-import { lazy, useState, useEffect, Suspense } from "react";
+import { lazy, useEffect, Suspense } from "react";
 import "./App.css";
 import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 
@@ -8,6 +8,7 @@ import Footer from "./components/common/Footer";
 import MenuPage from "./pages/MenuPage";
 import { useDispatch } from "react-redux";
 import LoaderComponent from "./components/common/LoaderComponent";
+import { setToken } from "./redux/slices/auth";
 
 const Login = lazy(() => import("./pages/Login"));
 const Signup = lazy(() => import("./pages/Signup"));

@@ -15,7 +15,7 @@ export default function OrderRatingFlow({ onClose }) {
   const [products, setProducts] = useState([]);
   const [submitted, setSubmitted] = useState(false);
 
-  // 🔥 single product state
+  // single product state
   const [productRating, setProductRating] = useState(0);
   const [productComment, setProductComment] = useState("");
   const [productImages, setProductImages] = useState([]);
@@ -117,7 +117,7 @@ export default function OrderRatingFlow({ onClose }) {
       formData.append("reviewId", reviewId);
     }
 
-    // 👇 separate keepImages & new uploads
+    //  separate keepImages & new uploads
     const keepImages = [];
 
     productImages.forEach((img) => {

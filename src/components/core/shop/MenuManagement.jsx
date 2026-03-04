@@ -1,17 +1,20 @@
-import { useEffect, useState } from "react";
+import React, { useCallback } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import {
   fetchAllActiveCategory,
   getShopCategories,
   pickCategoriesForShop,
 } from "../../../service/operations/category";
 import { useDispatch, useSelector } from "react-redux";
-import AddCategorySheet from "./menuManagementHelper/AddCategorySheet";
 import { useNavigate } from "react-router-dom";
-import ViewCategory from "./menuManagementHelper/ViewCategory";
-import ViewProduct from "./menuManagementHelper/ViewProduct";
-import AddProduct from "./menuManagementHelper/AddProduct";
 import { fetchCategoryByProduct } from "../../../service/operations/product";
-import { colorClasses } from "../../../utils/data";
+import ProductCard from "./menuManagementHelper/ProductCard";
+const ViewCategory = lazy(() => import("./menuManagementHelper/ViewCategory"));
+const ViewProduct = lazy(() => import("./menuManagementHelper/ViewProduct"));
+const AddProduct = lazy(() => import("./menuManagementHelper/AddProduct"));
+const AddCategorySheet = lazy(
+  () => import("./menuManagementHelper/AddCategorySheet"),
+);
 
 const Menu = () => {
   const [openCategory, setOpenCategory] = useState(null);
@@ -49,7 +52,7 @@ const Menu = () => {
     }
   };
 
-  const picakCategoriesHandler = async () => {
+  const picakCategoriesHandler = useCallback(async () => {
     const categoriesId = selected.map((cat) => cat._id);
     const data = { categories: categoriesId, shopId: shopDetails._id };
     const result = await pickCategoriesForShop(data, dispatch, token);
@@ -58,7 +61,7 @@ const Menu = () => {
     }
     setShowAddCategorySheet(false);
     setSelected([]);
-  };
+  }, [selected, shopDetails, token, dispatch]);
 
   const fetchCategoryWiseProduct = async () => {
     // fetched product of current category if and set
@@ -71,6 +74,10 @@ const Menu = () => {
     }
   };
 
+  const handleViewProduct = useCallback((item) => {
+    setViewProduct(item);
+  }, []);
+
   useEffect(() => {
     fetchCategoriesHandler();
   }, []);
@@ -79,8 +86,7 @@ const Menu = () => {
     if (currSelectedCategory && shopDetails) {
       fetchCategoryWiseProduct();
     }
-  }, [currSelectedCategory]);
-
+  }, [currSelectedCategory, shopDetails]);
 
   return (
     <div className="min-h-screen bg-gray-100 p-4 space-y-2">
@@ -227,105 +233,26 @@ const Menu = () => {
         <div className="flex flex-col gap-5">
           {currCategoryProduct.map((item, i) => {
             return (
-              <div
-                key={i}
-                className={`rounded-2xl overflow-hidden transition cursor-pointer bg-white
-  ${!item.isAvailable ? "opacity-60" : "hover:shadow-xl"}`}
-                onClick={() => setViewProduct(item)}
-              >
-                {/* IMAGE */}
-                <div className="relative w-full h-52">
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className={`w-full h-full object-cover ${
-                      !item.isAvailable ? "grayscale" : ""
-                    }`}
-                  />
-
-                  {/* Dark gradient overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-
-                  {/* Availability */}
-                  <span
-                    className={`absolute top-3 left-3 text-xs px-2 py-0.5 rounded-full text-white
-      ${item.isAvailable ? "bg-green-600" : "bg-gray-700"}`}
-                  >
-                    {item.isAvailable ? "Available" : "Out of Stock"}
-                  </span>
-
-                  {/* Today Special */}
-                  {item.isTodaySpecial && (
-                    <span className="absolute top-3 right-3 bg-yellow-400 text-black text-xs px-2 py-0.5 rounded-full font-semibold">
-                      ⭐ Today’s Special
-                    </span>
-                  )}
-
-                  {/* Rating + Reviews (FOCUS) */}
-                  <div className="absolute bottom-3 right-3 bg-black/70 text-white px-2 py-1 rounded-lg text-xs font-semibold flex items-center gap-1">
-                    ⭐ {item.rating || 0}
-                    <span className="text-gray-300">
-                      ({item.reviewsCount || 0})
-                    </span>
-                  </div>
-
-                  {/* Name + Price + Time */}
-                  <div className="absolute bottom-3 left-3 right-16 text-white space-y-1">
-                    <h3 className="font-semibold text-sm leading-tight">
-                      {item.name}
-                    </h3>
-
-                    <div className="flex items-center justify-between text-xs">
-                      <div className="flex gap-2 items-center">
-                        <span className="font-semibold text-green-400">
-                          ₹{item.price}
-                        </span>
-                        {item.discountPrice > 0 && (
-                          <span className="line-through text-gray-300">
-                            ₹{item.discountPrice}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* CONTENT (MINIMAL) */}
-                <div className="p-3 space-y-2">
-                  {/* Description */}
-                  <p className="text-xs text-gray-600 line-clamp-2">
-                    {item.description}
-                  </p>
-
-                  {/* Tags */}
-                  {item.tags?.length > 0 && (
-                    <div className="flex gap-2 flex-wrap">
-                      {item.tags.map((tag) => (
-                        <span
-                          key={tag._id}
-                          className={`text-xs ${
-                            colorClasses[tag.color]
-                          } px-2 py-0.5 rounded-full`}
-                        >
-                          {tag.name}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
+              <ProductCard
+                key={item._id}
+                i={i}
+                item={item}
+                handleClick={handleViewProduct}
+              />
             );
           })}
         </div>
       )}
       {/* ===== CATEGORY DETAILS ===== */}
-      {openCategory && (
-        <ViewCategory
-          openCategory={openCategory}
-          setOpenCategory={setOpenCategory}
-          setShopCategories={setShopCategories}
-        />
-      )}
+      <Suspense fallback={null}>
+        {openCategory && (
+          <ViewCategory
+            openCategory={openCategory}
+            setOpenCategory={setOpenCategory}
+            setShopCategories={setShopCategories}
+          />
+        )}
+      </Suspense>
       {/* ===== CREATE SHOP CTA ===== */}
       {showCreateShop && (
         <div className="fixed inset-0 z-50 flex items-end bg-black/40 mb-14">
@@ -356,36 +283,44 @@ const Menu = () => {
           </div>
         </div>
       )}
-      {showAddCategorySheet && (
-        <AddCategorySheet
-          open={showAddCategorySheet}
-          onClose={() => {
-            setShowAddCategorySheet(false);
-            setSelected([]);
-          }}
-          shopCategories={shopCategories}
-          onAddCategories={picakCategoriesHandler}
-          selected={selected}
-          setSelected={setSelected}
-        />
-      )}
-      {viewProduct && (
-        <ViewProduct
-          viewProduct={viewProduct}
-          setViewProduct={setViewProduct}
-          setCurrCategoryProduct={setCurrCategoryProduct}
-          categoryName={currSelectedCategory.displayName}
-        />
-      )}
-      {showAddProductSheet && (
-        <AddProduct
-          setShowAddProductSheet={setShowAddProductSheet}
-          setCurrCategoryProduct={setCurrCategoryProduct}
-          currSelectedCategory={currSelectedCategory}
-        />
-      )}
+      <Suspense fallback={null}>
+        {showAddCategorySheet && (
+          <AddCategorySheet
+            open={showAddCategorySheet}
+            onClose={() => {
+              setShowAddCategorySheet(false);
+              setSelected([]);
+            }}
+            shopCategories={shopCategories}
+            onAddCategories={picakCategoriesHandler}
+            selected={selected}
+            setSelected={setSelected}
+          />
+        )}
+      </Suspense>
+
+      <Suspense fallback={null}>
+        {viewProduct && (
+          <ViewProduct
+            viewProduct={viewProduct}
+            setViewProduct={setViewProduct}
+            setCurrCategoryProduct={setCurrCategoryProduct}
+            categoryName={currSelectedCategory.displayName}
+          />
+        )}
+      </Suspense>
+
+      <Suspense fallback={null}>
+        {showAddProductSheet && (
+          <AddProduct
+            setShowAddProductSheet={setShowAddProductSheet}
+            setCurrCategoryProduct={setCurrCategoryProduct}
+            currSelectedCategory={currSelectedCategory}
+          />
+        )}
+      </Suspense>
     </div>
   );
 };
 
-export default Menu;
+export default React.memo(Menu);

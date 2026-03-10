@@ -1,11 +1,24 @@
 import { useEffect, useState } from "react";
 import { ChevronUp, X, Download } from "lucide-react";
 import { useSelector } from "react-redux";
+import { useGenerateBill } from "../../../../hooks/useGenerateBill";
 
 export default function ExpandableOrderTracker({ onRateClick }) {
   const [expanded, setExpanded] = useState(false);
   const [order, setOrder] = useState({});
   const { activeOrder } = useSelector((state) => state.order);
+  const { generateBill } = useGenerateBill();
+  const { shopDetails } = useSelector((state) => state.shop);
+
+  const downloadBill = () => {
+    const items = order.items.map((i) => ({
+      name: i.name,
+      price: i.price,
+      qty: i.qty,
+    }));
+
+    generateBill(items, shopDetails.shopProfile.name);
+  };
 
   useEffect(() => {
     setOrder(activeOrder);
@@ -190,7 +203,10 @@ export default function ExpandableOrderTracker({ onRateClick }) {
               ⭐ Rate & Review Your Order
             </button>
           )}
-          <button className="w-full flex items-center justify-center gap-2 bg-black text-white py-3 rounded-xl">
+          <button
+            onClick={() => downloadBill()}
+            className="w-full flex items-center justify-center gap-2 bg-black text-white py-3 rounded-xl"
+          >
             <Download size={16} />
             Download Bill
           </button>

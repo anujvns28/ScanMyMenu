@@ -564,14 +564,14 @@ const Menu = () => {
           )}
         </Suspense>
 
-        <ChefFloatingButton onClick={() => setOpenChef(true)} />
+        {/* <ChefFloatingButton onClick={() => setOpenChef(true)} />
 
         <Suspense fallback={null}>
           <ChefAssistantSheet
             open={openChef}
             onClose={() => setOpenChef(false)}
           />
-        </Suspense>
+        </Suspense> */}
 
         <FloatingCartBar onOpen={() => setShowCartSheet(true)} />
 

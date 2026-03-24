@@ -9,8 +9,8 @@ import {
 } from "../../../../service/operations/payment";
 import { useParams } from "react-router-dom";
 
-export default function OrderDetailsBottomSheet({ onClose, onEditCart }) {
-  const { cart, totalPrice, totalItems, setCart } = useCart();
+export default function OrderDetailsBottomSheet({ onClose }) {
+  const { cart, totalPrice, setCart } = useCart();
 
   const gst = Math.round(totalPrice * 0.05);
   const grandTotal = totalPrice + gst;
@@ -22,7 +22,7 @@ export default function OrderDetailsBottomSheet({ onClose, onEditCart }) {
   const dispatch = useDispatch();
   const { user, token } = useSelector((state) => state.auth);
 
-  const { shopDetails } = useSelector((state) => state.shop);
+  
   const { shopId } = useParams();
 
   const isValid =
@@ -40,7 +40,7 @@ export default function OrderDetailsBottomSheet({ onClose, onEditCart }) {
           price: item.offerPrice,
           qty: item.qty,
           type: "offer",
-          items: item.items, // combo breakdown
+          items: item.items, 
         };
       }
 
@@ -100,7 +100,7 @@ export default function OrderDetailsBottomSheet({ onClose, onEditCart }) {
           setCart([]);
           onClose();
         } else {
-          alert("Payment failed ❌");
+          alert("Payment failed");
         }
       },
     );

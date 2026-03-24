@@ -10,7 +10,6 @@ import { getTopRatedProducts } from "../../../service/operations/product";
 import { useDispatch } from "react-redux";
 import { useParams } from "react-router-dom";
 import { SkeletonCard } from "../../../utils/skeleton";
-import { useCart } from "../../../context/CartContext";
 import TopratedCard from "./toprated/TopratedCard";
 const ProductBottomSheet = lazy(() => import("./ProductBottomSheet"));
 
@@ -33,11 +32,11 @@ const TopRated = () => {
   const ITEMS_PER_PAGE = 15;
   const [currentPage, setCurrentPage] = useState(1);
 
-  const getRankByTab = (product) => {
+  const getRankByTab = useCallback((product) => {
     if (activeTab === "VEG") return product.vegRank;
     if (activeTab === "NON_VEG") return product.nonVegRank;
     return product.overallRank;
-  };
+  },[])
 
   const fetchProducts = useCallback(async () => {
     setLoading(true);
@@ -49,9 +48,9 @@ const TopRated = () => {
     }
   }, []);
 
-  const handleClick = (id) => {
+  const handleClick = useCallback((id) =>{
     setSelectedProductId(id);
-  };
+  })
 
   // Frontend filtering + ranking display
   const filteredProducts = useMemo(() => {

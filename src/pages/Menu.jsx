@@ -59,7 +59,7 @@ const Menu = () => {
   const { token, userLoading } = useSelector((state) => state.auth);
   const { activeOrder } = useSelector((state) => state.order);
   const { totalItems, setCart } = useCart();
-  const [openChef, setOpenChef] = useState(false);
+  // const [openChef, setOpenChef] = useState(false);
   const debouncedSearch = useDebounce(search, 400);
 
   const isSmartTab = (id) => ["for-you", "top-rated"].includes(id);

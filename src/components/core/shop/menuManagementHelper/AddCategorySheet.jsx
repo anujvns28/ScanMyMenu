@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchAllActiveCategory, pickCategoriesForShop } from "../../../../service/operations/category";
+import { fetchAllActiveCategory} from "../../../../service/operations/category";
 import LoaderComponent from "../../../common/LoaderComponent";
 
 
@@ -14,8 +14,7 @@ const AddCategorySheet = ({
 }) => {
   const [adminCategories, setAdminCategories] = useState();
   const dispatch = useDispatch();
-  const { shopDetails } = useSelector((state) => state.shop);
-  const { token, userLoading } = useSelector((state) => state.auth);
+  const { userLoading } = useSelector((state) => state.auth);
 
   const toggleSelect = (cat) => {
     setSelected((prev) =>
@@ -27,7 +26,6 @@ const AddCategorySheet = ({
 
   const fetchAdminCategoriesHandler = async () => {
     const shopCatId = shopCategories.map((shopCat) => shopCat.category._id);
-    console.log(shopCatId, "this is shop category");
     const result = await fetchAllActiveCategory(dispatch);
     if (result) {
       setAdminCategories(result?.data);
@@ -190,4 +188,4 @@ const AddCategorySheet = ({
   );
 };
 
-export default AddCategorySheet;
+export default React.memo(AddCategorySheet);

@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { lazy, Suspense, useEffect, useState } from "react";
 import { updateProduct } from "../../../../service/operations/product";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchAllActiveTag } from "../../../../service/operations/tag";
 import { colorClasses } from "../../../../utils/data";
 import { getAllReview } from "../../../../service/operations/rating&review";
-import ProductReviewsSheet from "../../menu/rating&review/ProductReviewsSheet";
+const ProductReviewsSheet = lazy(()=> import("../../menu/rating&review/ProductReviewsSheet"))
 
 const ViewProduct = ({
   viewProduct,
@@ -1011,7 +1011,8 @@ const ViewProduct = ({
         </div>
       </div>
 
-      {showProductRatingSheet && (
+      <Suspense fallback={null}>
+        {showProductRatingSheet && (
         <ProductReviewsSheet
           onClose={() => setShowProductRatingSheet(false)}
           product={{
@@ -1024,6 +1025,7 @@ const ViewProduct = ({
           setReview={setRating}
         />
       )}
+      </Suspense>
     </div>
   );
 };

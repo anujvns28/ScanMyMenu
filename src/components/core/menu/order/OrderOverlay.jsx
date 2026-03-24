@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { useState } from "react";
 import { lazy } from "react";
 const ExpandableOrderTracker = lazy(() => import("./FloatingOrderTracker"));
@@ -19,14 +20,18 @@ export default function OrderOverlay() {
 
   return (
     <>
-      {!showRating && (
+      <Suspense fallback={null}>
+        {!showRating && (
         <ExpandableOrderTracker
           order={order}
           onRateClick={() => setShowRating(true)}
         />
       )}
+      </Suspense>
 
-      {showRating && <OrderRatingFlow onClose={() => setShowRating(false)} />}
+      <Suspense fallback={null}>
+        {showRating && <OrderRatingFlow onClose={() => setShowRating(false)} />}
+      </Suspense>
     </>
   );
 }

@@ -1,9 +1,13 @@
+import React from "react";
 import { Minus, Plus, X, ChefHat, Clock } from "lucide-react";
 import { useCart } from "../../../../context/CartContext";
 import { useSelector } from "react-redux";
-import GoogleLoginSheet from "../../../common/GoogleLoginSheet";
 import { useState } from "react";
-import OrderDetailsBottomSheet from "./OrderDetailsBottomSheet";
+import { lazy } from "react";
+import { Suspense } from "react";
+import { useCallback } from "react";
+const OrderDetailsBottomSheet = lazy(()=> import("./OrderDetailsBottomSheet"))
+const GoogleLoginSheet = lazy(() =>import("../../../common/GoogleLoginSheet"))
 
 export default function CartBottomSheet({ onClose, currCategory }) {
   const { cart, increaseQty, decreaseQty, totalPrice, totalItems } = useCart();
@@ -15,8 +19,6 @@ export default function CartBottomSheet({ onClose, currCategory }) {
 
   const gst = Math.round(totalPrice * 0.05);
   const grandTotal = totalPrice + gst;
-
-  if (totalItems === 0) return null;
 
   const handleOder = () => {
     if (!token) {
@@ -57,9 +59,11 @@ export default function CartBottomSheet({ onClose, currCategory }) {
     setShowOderDetailSheet(true);
   };
 
-  const googleLogin = () => {
+  const googleLogin = useCallback(()=>{
     window.location.href = `https://scanmymenu-server.onrender.com/auth/user/google?shopId=${shopDetails._id}`;
-  };
+  },[])
+
+   if (totalItems === 0) return null;
 
   return (
     <div className="fixed inset-0 bg-black/40 z-100 flex items-end">
@@ -177,15 +181,18 @@ export default function CartBottomSheet({ onClose, currCategory }) {
         </div>
 
         {/* Google Login */}
-        <GoogleLoginSheet
+        <Suspense fallback={null}>
+          <GoogleLoginSheet
           open={showGoogleLogin}
           onClose={() => setShowGoogleLogin(false)}
           purpose="order"
           onGoogleLogin={googleLogin}
         />
+        </Suspense>
 
         {/* Order Details */}
-        {showOderDetailSheet && (
+        <Suspense fallback={null}>
+          {showOderDetailSheet && (
           <OrderDetailsBottomSheet
             onEditCart={() => setShowOderDetailSheet(false)}
             onClose={() => {
@@ -194,6 +201,7 @@ export default function CartBottomSheet({ onClose, currCategory }) {
             }}
           />
         )}
+        </Suspense>
       </div>
     </div>
   );

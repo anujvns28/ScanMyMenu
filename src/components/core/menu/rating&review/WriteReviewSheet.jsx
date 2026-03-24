@@ -1,6 +1,6 @@
 import { X, Star, Camera } from "lucide-react";
-import { lazy, Suspense, use, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { lazy, Suspense, useCallback, useState } from "react";
+import {  useSelector } from "react-redux";
 import { useEffect } from "react";
 import LoaderComponent from "../../../common/LoaderComponent";
 const GoogleLoginSheet = lazy(() => import("../../../common/GoogleLoginSheet"));
@@ -27,14 +27,11 @@ const WriteReviewSheet = ({
     existingImages,
     setExistingImages,
     ratingLoader,
-    setRatingLoader,
   } = reviewState;
   const { shopDetails } = useSelector((state) => state.shop);
 
-  if (!open || !product) return null;
-
   // Handle image selection
-  const handleImagePick = (e) => {
+  const handleImagePick = useCallback((e) =>{
     const files = Array.from(e.target.files);
 
     const newFiles = [...images, ...files].slice(0, 5); // max 5
@@ -42,11 +39,11 @@ const WriteReviewSheet = ({
 
     const newPreviews = newFiles.map((file) => URL.createObjectURL(file));
     setPreviews(newPreviews);
-  };
+  },[images])
 
   // cleanup
   useEffect(() => {
-    () => {
+    return () => {
       previews.forEach((url) => URL.revokeObjectURL(url));
     };
   }, [previews]);
@@ -70,6 +67,8 @@ const WriteReviewSheet = ({
       localStorage.removeItem("POST_LOGIN_INTENT");
     }
   }, []);
+
+  if (!open || !product) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center">

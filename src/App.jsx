@@ -1,7 +1,6 @@
 import { lazy, useEffect, Suspense } from "react";
 import "./App.css";
 import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
-
 import Home from "./pages/Home";
 import Navbar from "./components/common/Navbar";
 import Footer from "./components/common/Footer";

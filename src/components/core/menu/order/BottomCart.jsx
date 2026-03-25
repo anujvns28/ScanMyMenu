@@ -60,7 +60,7 @@ export default function CartBottomSheet({ onClose, currCategory }) {
   };
 
   const googleLogin = useCallback(()=>{
-    window.location.href = `https://scanmymenu-server.onrender.com/auth/user/google?shopId=${shopDetails._id}`;
+    window.location.href = `https://scanmymenu-server-57vl.onrender.com/auth/user/google?shopId=${shopDetails._id}`;
   },[])
 
    if (totalItems === 0) return null;

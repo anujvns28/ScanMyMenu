@@ -1,6 +1,11 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import type { ShopDetails } from '../../types/shopDetails';
 
-const initialState = {
+type initialStateType = {
+  shopDetails:ShopDetails |null
+}
+
+const initialState : initialStateType = {
   shopDetails: localStorage.getItem("shopDetails")
     ? JSON.parse(localStorage.getItem("shopDetails"))
     : null,
@@ -10,7 +15,7 @@ export const shopSlice = createSlice({
   name: "shopDetails",
   initialState,
   reducers: {
-    setShopSlice: (state, action) => {
+    setShopSlice: (state, action:PayloadAction<ShopDetails | null>) => {
       state.shopDetails = action.payload;
     },
   },

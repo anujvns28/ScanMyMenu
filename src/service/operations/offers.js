@@ -66,7 +66,7 @@ export const getAllOffers = async (token, dispatch) => {
   return result;
 };
 
-export const getActiveOffers = async (shopId, dispatch) => {
+export const getActiveOffers = async (shopId) => {
   let result;
 
   try {

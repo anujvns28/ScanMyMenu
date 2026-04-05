@@ -10,3 +10,6 @@ export const store = configureStore({
     order: orderSlice,
   },
 });
+
+export type rootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
